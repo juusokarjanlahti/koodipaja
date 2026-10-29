@@ -60,6 +60,9 @@ app/                              Next.js application
   hardcoded answer), not formatting slips and not random garbage. Put realistic formatting
   slips that should be accepted in `accepted/`.
 - Keep required output minimal: do not demand exact prompt texts unless they matter.
+- Follow the pedagogical principles in `docs/product/visio.md`: exercises target algorithms
+  and telling data types apart, not syntax trivia. Student-facing text never shames:
+  say what does not work *yet* ("Ei vielä läpi"), not that the student failed.
 - Assignment text (`README.md`) is in Finnish, plain and concrete, and includes one example
   run. Code identifiers are in English.
 - `id` in exercise.yaml must equal the folder name.
