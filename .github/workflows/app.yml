@@ -39,3 +39,50 @@ jobs:
       - run: npm run db:migrate
       - run: npm run import-exercises
       - run: npm run build
+
+  smoke:
+    # End-to-end: app + queue + worker + fake Judge0 (no sandbox; CI only).
+    runs-on: ubuntu-latest
+    needs: test
+    defaults:
+      run:
+        working-directory: app
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: koodipaja
+          POSTGRES_USER: koodipaja
+          POSTGRES_PASSWORD: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U koodipaja" --health-interval 5s
+          --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    env:
+      DATABASE_URL: postgres://koodipaja:ci@localhost:5432/koodipaja
+      REDIS_URL: redis://localhost:6379
+      JUDGE0_URL: http://127.0.0.1:2358
+      JUDGE0_AUTH_HEADER: X-Auth-Token
+      JUDGE0_AUTH_TOKEN: ci-token
+      SESSION_SECRET: ci-secret-0123456789abcdef0123456789abcdef0123456789abcdef
+      DEV_LOGIN: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npm run db:migrate
+      - run: npm run import-exercises
+      - run: |
+          npm run fake-judge0 &
+          npm run worker &
+          npx next dev -p 3000 &
+          for i in $(seq 1 90); do curl -fs localhost:3000/login >/dev/null && break; sleep 1; done
+      - run: npm run smoke
