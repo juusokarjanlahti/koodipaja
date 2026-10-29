@@ -33,6 +33,26 @@ Tarkemmat kuvaukset: [kayttajat.md](kayttajat.md).
 | **Tietosuoja** | Vaihtelee | Data vain EU:ssa, ei kolmannen osapuolen analytiikkaa, ei tekoälyä ajonaikaisesti |
 | **Integraatio** | Usein oma kirjautuminen | Moodle LTI 1.3: ei erillisiä tunnuksia, arvosanat palautuvat Moodleen |
 
+## Pedagogiset periaatteet
+
+Nämä ohjaavat tehtävien sisältöä, palautteen sävyä ja kaikkia ominaisuuksia.
+
+1. **Epäonnistuminen on osa oppimista, ei hävettävää.** Väärä vastaus, keskeneräinen
+   ratkaisu tai se, ettei ymmärrä miksi tehtävä ei mene läpi, on tavallinen vaihe.
+   Palaute kertoo, mitä ei vielä toimi, eikä tuomitse. Avun pyytäminen on normaali ja
+   näkyvä toiminto, ei viimeinen keino.
+2. **Algoritmit ja tietotyypit ovat ydin, syntaksin yksityiskohdat eivät.** Tehtävät
+   mittaavat, osaako opiskelija jakaa ongelman askeliin ja erottaa tietotyypit toisistaan
+   (esim. merkkijono vs. luku, kokonaisluku vs. liukuluku, lista vs. yksittäinen arvo).
+   Siksi tulosteen muotoilua ei hiota ([ADR 0003](../adr/0003-joustava-tulosteen-vertailu.md)),
+   ja väärät esimerkkiratkaisut kuvaavat käsitteellisiä virheitä.
+3. **Koodi kirjoitetaan myös muille luettavaksi.** Ohjelmointi on yhteistyötä:
+   ratkaisua lukee opettaja, vertainen ja tuleva itse. Alusta tukee koodin näyttämistä ja
+   lukemista, ei vain sen läpäisemistä.
+4. **Ihminen päättää viime kädessä.** Automaattinen arviointi on apuväline. Opettaja voi
+   aina katsoa yrityksiä ja hyväksyä ratkaisun omalla päätöksellään, ja päätös on
+   perusteltu ja jäljitettävä.
+
 ## Tavoitteet
 
 1. Opiskelija pääsee tehtävään Moodlesta yhdellä klikkauksella ja saa palautteen sekunneissa.
