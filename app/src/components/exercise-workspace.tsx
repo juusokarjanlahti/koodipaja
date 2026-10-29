@@ -4,6 +4,7 @@ import { python } from "@codemirror/lang-python";
 import CodeMirror from "@uiw/react-codemirror";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PresentedCase, PresentedSubmission } from "@/lib/grading/present";
+import { FORMATTING_DIFFERENCE } from "@/lib/grading/status";
 
 const POLL_MS = 800;
 const POLL_TIMEOUT_MS = 90_000;
@@ -12,7 +13,7 @@ const LANGUAGE_EXTENSIONS = { python: () => python() } as const;
 
 function statusLabel(c: PresentedCase): string {
   if (c.passed === null) return "Odottaa";
-  if (c.passed) return "Läpi";
+  if (c.passed) return c.judgeStatus === FORMATTING_DIFFERENCE ? "Läpi (pieni muotoiluero)" : "Läpi";
   switch (c.judgeStatus) {
     case "Wrong Answer":
       return "Väärä tuloste";
@@ -114,6 +115,8 @@ export function ExerciseWorkspace({
   };
 
   const allPassed = submission?.status === "done" && submission.passedCount === submission.totalCount;
+  const formattingCount =
+    submission?.status === "done" ? submission.cases.filter((c) => c.judgeStatus === FORMATTING_DIFFERENCE).length : 0;
   // Open only the first failing visible case so the list stays scannable.
   const firstFailing = submission?.cases.find((c) => c.passed === false && !c.hidden)?.position;
 
@@ -169,6 +172,13 @@ export function ExerciseWorkspace({
             {allPassed
               ? `Kaikki ${submission.totalCount} testiä meni läpi!`
               : `${submission.passedCount} / ${submission.totalCount} testiä meni läpi.`}
+          </p>
+        )}
+
+        {formattingCount > 0 && (
+          <p className="rounded-lg border border-border bg-surface p-3 text-sm">
+            {formattingCount === 1 ? "Yhdessä testissä" : `${formattingCount} testissä`} tulosteesi erosi odotetusta
+            vain välimerkeissä, kirjainkoossa tai rivityksessä. Se ei vaikuta tulokseen, eikä sinun tarvitse korjata sitä.
           </p>
         )}
 

@@ -50,7 +50,11 @@ export async function gradeSubmission(submissionId: string, run: Runner): Promis
       cpuTimeLimitSeconds: exercise.timeLimitSeconds,
       memoryLimitMb: exercise.memoryLimitMb,
     });
-    outcomes.push({ testCase, result, outcome: evaluateCase(result, testCase.expectedStdout) });
+    outcomes.push({
+      testCase,
+      result,
+      outcome: evaluateCase(result, testCase.expectedStdout, exercise.outputMatch),
+    });
   }
 
   await db.transaction(async (tx) => {

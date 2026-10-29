@@ -43,6 +43,7 @@ async function main() {
         title: ex.title,
         difficulty: ex.difficulty,
         topics: ex.topics,
+        outputMatch: ex.outputMatch,
         promptMarkdown: ex.promptMarkdown,
         starterCode: ex.starterCode,
         timeLimitSeconds: ex.timeLimitSeconds,

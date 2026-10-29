@@ -21,11 +21,13 @@ exercises/<language>/<NN-slug>/   One exercise per folder (content-as-code)
   exercise.yaml                   Metadata + test cases (stdin -> expected stdout)
   README.md                       Assignment text shown to students (Finnish)
   starter.<ext>                   Code the student starts from
-  solution.<ext>                  Reference solution; MUST pass every case
-  wrong/*.<ext>                   Deliberately wrong solutions; each MUST fail >= 1 case
+  solution.<ext>                  Reference solution; MUST match every case exactly
+  wrong/*.<ext>                   Conceptually wrong solutions; each MUST fail >= 1 case
+  accepted/*.<ext>                (optional) Formatting-only differences; each MUST pass
 scripts/validate.py               Validates every exercise locally (no Judge0 needed)
+scripts/output-match-cases.json   Shared comparison vectors (Python and TypeScript)
 docs/                             Architecture and decisions (ADRs)
-app/                              (planned) Next.js application
+app/                              Next.js application
 ```
 
 ## Planned architecture (do not deviate without an ADR in docs/)
@@ -44,11 +46,20 @@ app/                              (planned) Next.js application
 
 - Test cases are stdin/stdout pairs so they map 1:1 to Judge0 submissions
   (`stdin`, `expected_output`).
-- Output comparison: trailing whitespace on each line and trailing newlines are ignored.
-  Anything else must match exactly.
+- Output comparison follows `docs/adr/0003-joustava-tulosteen-vertailu.md`:
+  - `output_match: lenient` (default): only words (case-insensitive) and numbers are compared,
+    in order. Punctuation, spacing and line breaks are ignored. Students must never have to
+    polish punctuation that has no teaching value.
+  - `output_match: exact`: use ONLY when formatting is the learning goal (f-strings,
+    alignment, a fixed number of decimals). Say so in the assignment text.
+  - The Python (`scripts/validate.py`) and TypeScript (`app/src/lib/grading/normalise.ts`)
+    implementations MUST stay identical; add a vector to `scripts/output-match-cases.json`
+    whenever you change either.
 - Every exercise needs: at least 3 cases, at least 1 edge case, and at least 2 wrong solutions
-  that represent *realistic student mistakes* (off-by-one, wrong type, missing edge case),
-  not random garbage.
+  that represent *conceptual* student mistakes (off-by-one, wrong type, missing edge case,
+  hardcoded answer), not formatting slips and not random garbage. Put realistic formatting
+  slips that should be accepted in `accepted/`.
+- Keep required output minimal: do not demand exact prompt texts unless they matter.
 - Assignment text (`README.md`) is in Finnish, plain and concrete, and includes one example
   run. Code identifiers are in English.
 - `id` in exercise.yaml must equal the folder name.

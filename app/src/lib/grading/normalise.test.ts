@@ -1,34 +1,40 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { normaliseOutput, outputsMatch } from "./normalise";
+import { compareOutput, lenientTokens, normaliseOutput } from "./normalise";
 
-describe("normaliseOutput", () => {
-  it("ignores trailing newlines", () => {
-    expect(normaliseOutput("Summa: 7\n\n")).toBe("Summa: 7");
-  });
+interface Vector {
+  note: string;
+  expected: string;
+  actual: string;
+  result: "exact" | "lenient" | "fail";
+}
 
-  it("ignores trailing spaces on each line", () => {
-    expect(normaliseOutput("a  \nb\t\n")).toBe("a\nb");
-  });
+const vectors: Vector[] = JSON.parse(
+  readFileSync(path.resolve(__dirname, "../../../../scripts/output-match-cases.json"), "utf8"),
+);
 
-  it("treats CRLF like LF", () => {
-    expect(normaliseOutput("a\r\nb\r\n")).toBe("a\nb");
-  });
-
-  it("keeps leading whitespace and inner blank lines", () => {
-    expect(normaliseOutput("  a\n\nb")).toBe("  a\n\nb");
+describe("compareOutput matches the shared vectors (same as validate.py)", () => {
+  it.each(vectors.map((v) => [v.note, v] as const))("%s", (_note, v) => {
+    expect(compareOutput(v.actual, v.expected, "lenient")).toBe(v.result);
+    if (v.result !== "exact") {
+      expect(compareOutput(v.actual, v.expected, "exact")).toBe("fail");
+    }
   });
 });
 
-describe("outputsMatch", () => {
-  it("accepts output that differs only in trailing whitespace", () => {
-    expect(outputsMatch("Hei, Aino!  \n", "Hei, Aino!")).toBe(true);
+describe("normaliseOutput", () => {
+  it("keeps leading whitespace and inner blank lines", () => {
+    expect(normaliseOutput("  a\n\nb\n")).toBe("  a\n\nb");
+  });
+});
+
+describe("lenientTokens", () => {
+  it("treats decomposed and precomposed Finnish letters the same", () => {
+    expect(lenientTokens("Väinö")).toEqual(lenientTokens("Väinö"));
   });
 
-  it("rejects a missing character", () => {
-    expect(outputsMatch("Hei, Aino", "Hei, Aino!")).toBe(false);
-  });
-
-  it("rejects different leading whitespace", () => {
-    expect(outputsMatch(" Summa: 7", "Summa: 7")).toBe(false);
+  it("attaches minus only to standalone numbers", () => {
+    expect(lenientTokens("Summa: -4, 5-3")).toEqual(["summa", "-4", "5", "3"]);
   });
 });
