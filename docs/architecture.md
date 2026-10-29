@@ -1,7 +1,7 @@
 # Architecture
 
 ```
-Student browser (Monaco) ──┐
+Student browser (CodeMirror) ┐
                            ├──> Next.js app ──> PostgreSQL (users, courses, results)
 Moodle (LTI 1.3 launch) ───┘         │
                                      └──> Redis queue ──> Judge0 (isolated execution)
@@ -17,6 +17,7 @@ exercises/ (Git) ──> CI validation (scripts/validate.py) ──> imported in
 | Database | PostgreSQL + Drizzle | Boring, well-known, typed schema in code |
 | Code execution | Self-hosted Judge0 | Proven sandbox, 60+ languages; building our own is the riskiest possible choice |
 | Queue | Redis + BullMQ | Absorbs exam-time submission spikes |
+| Editor | CodeMirror 6 | Mobile support, no CDN; see ADR 0001 |
 | Auth | LTI 1.3 first | Moodle handles identity; HAKA/SAML can wait |
 | Content | Git folders, CC BY 4.0 | Reviewable, versioned, forkable by any teacher |
 | Hosting | EU VPS, Docker Compose | GDPR, low cost, simple operations |
