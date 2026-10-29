@@ -37,6 +37,10 @@ pip install pyyaml
 python3 scripts/validate.py
 ```
 
+## Tuotemäärittely
+
+Visio, käyttäjät, roadmap ja riskit: [docs/product/](docs/product/README.md).
+
 ## Arkkitehtuuri
 
 Suunniteltu pino: Next.js + TypeScript, PostgreSQL, Redis-jono, itse ylläpidetty Judge0
