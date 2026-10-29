@@ -86,3 +86,7 @@ jobs:
           npx next dev -p 3000 &
           for i in $(seq 1 90); do curl -fs localhost:3000/login >/dev/null && break; sleep 1; done
       - run: npm run smoke
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+        env:
+          APP_URL: http://localhost:3000

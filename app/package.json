@@ -14,7 +14,8 @@
     "import-exercises": "tsx scripts/import-exercises.ts",
     "worker": "tsx scripts/worker.ts",
     "fake-judge0": "node scripts/fake-judge0.mjs",
-    "smoke": "tsx scripts/smoke.ts"
+    "smoke": "tsx scripts/smoke.ts",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@codemirror/lang-python": "^6.2.1",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22.20.5",
     "@types/react": "^19",

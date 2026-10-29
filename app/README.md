@@ -35,6 +35,7 @@ For the CLI scripts, export the variables first (`set -a; source .env.local; set
 | `npm run worker` | Grading worker: queue -> Judge0 -> results |
 | `npm run fake-judge0` | Fake Judge0 for tests, **no sandbox**, localhost only |
 | `npm run smoke` | End-to-end check against a running dev stack |
+| `npm run e2e` | Playwright user-flow tests against a running dev stack (`APP_URL`) |
 
 ## Layout
 
