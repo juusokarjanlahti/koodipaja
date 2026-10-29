@@ -1,7 +1,7 @@
 # Architecture
 
 ```
-Student browser (CodeMirror) ┐
+Browser (CodeMirror) ──────┐
                            ├──> Next.js app ──> PostgreSQL (users, courses, results)
 Moodle (LTI 1.3 launch) ───┘         │
                                      └──> Redis queue ──> Judge0 (isolated execution)
@@ -25,7 +25,7 @@ exercises/ (Git) ──> CI validation (scripts/validate.py) ──> imported in
 ## Submission flow
 
 1. Student submits code from the editor.
-2. App stores the submission and enqueues one job per test case.
+2. App stores the submission and enqueues one grading job per submission.
 3. Worker sends each case to Judge0 (`source_code`, `language_id`, `stdin`,
    `expected_output`, CPU/memory limits, network disabled).
 4. Worker normalises output with the same rules as `scripts/validate.py` and stores results.

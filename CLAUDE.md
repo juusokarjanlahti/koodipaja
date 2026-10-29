@@ -34,7 +34,7 @@ app/                              (planned) Next.js application
 - **DB:** PostgreSQL with Drizzle ORM. Migrations are committed; never edit an applied migration.
 - **Code execution:** self-hosted Judge0 behind a Redis-backed queue (BullMQ).
   The app never executes student code itself. Never.
-- **Auth:** LTI 1.3 launch from Moodle first; email magic link for development.
+- **Auth:** LTI 1.3 launch from Moodle first; a development-only email login (DEV_LOGIN, never in production).
   SAML/HAKA later.
 - **Editor:** CodeMirror 6 (see docs/adr/0001-codemirror-instead-of-monaco.md).
 - **Hosting:** EU only (UpCloud or Hetzner), Docker Compose. GDPR: student data never
