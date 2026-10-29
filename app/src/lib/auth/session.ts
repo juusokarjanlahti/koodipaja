@@ -6,7 +6,9 @@ import type { User } from "../db/schema";
 import { requireEnv } from "../env";
 
 export const SESSION_COOKIE = "kp_session";
-const MAX_AGE_SECONDS = 60 * 60 * 24 * 14;
+// 12 hours: long enough for a study session, short enough that the cookie is clearly
+// "strictly necessary" and needs no consent (sähköisen viestinnän palvelulaki 205 §).
+const MAX_AGE_SECONDS = 60 * 60 * 12;
 
 function sign(payload: string, secret: string): string {
   return createHmac("sha256", secret).update(payload).digest("base64url");
