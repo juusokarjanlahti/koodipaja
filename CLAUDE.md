@@ -65,6 +65,10 @@ app/                              Next.js application
   say what does not work *yet* ("Ei vielä läpi"), not that the student failed.
 - Assignment text (`README.md`) is in Finnish, plain and concrete, and includes one example
   run. Code identifiers are in English.
+- Set `level: perus | soveltava | haaste` in exercise.yaml (default `perus`). `perus`
+  exercises must test core skills (variables, conditions, loops, data types); `haaste`
+  exercises are graded on algorithmic correctness, not output formatting.
+  See `docs/product/oppimispolku.md`.
 - `id` in exercise.yaml must equal the folder name.
 - Run `python3 scripts/validate.py` before committing. CI runs the same script.
 

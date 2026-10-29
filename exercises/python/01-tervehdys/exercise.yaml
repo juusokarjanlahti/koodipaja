@@ -2,6 +2,7 @@ id: 01-tervehdys
 title: Tervehdys
 language: python
 difficulty: 1
+level: perus
 topics: [input, output, string]
 time_limit_seconds: 2
 memory_limit_mb: 64

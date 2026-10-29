@@ -2,6 +2,7 @@ id: 02-lukujen-summa
 title: Lukujen summa
 language: python
 difficulty: 2
+level: perus
 topics: [loops, integers, input]
 time_limit_seconds: 2
 memory_limit_mb: 64

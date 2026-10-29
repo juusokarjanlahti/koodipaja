@@ -15,10 +15,25 @@
 - Erillinen tunnus jokaiseen palveluun, kesken jäänyt koodi katoaa.
 - Kehitysympäristön asentaminen omalle koneelle ennen kuin pääsee alkuun.
 
+- Ensimmäinen kosketus ohjelmointiin: käsitteet ohjelma, syöte ja tuloste ovat vieraita, ja
+  työkalun opettelu vie huomion itse asialta.
+- Ei tiedä, riittääkö tehty työ tavoitearvosanaan.
+
 **Keskeiset tehtävät**
 - Avaa tehtävä Moodlesta, lukee tehtävänannon, kirjoittaa koodin editorissa.
-- Palauttaa ja näkee testitapauskohtaisen tuloksen, korjaa ja palauttaa uudelleen.
-- Seuraa omaa edistymistään kurssilla.
+- Kokeilee koodia omalla syötteellä, palauttaa ja näkee testitapauskohtaisen tuloksen,
+  korjaa ja palauttaa uudelleen.
+- Seuraa omaa edistymistään kurssilla suhteessa omaan tavoitteeseen.
+
+**Kolme Ainoa: eri arvosanatavoitteet** (tarkemmin [oppimispolku](oppimispolku.md#eri-arvosanatavoitteet))
+- **Aino 5** haluaa osata kunnolla ja tylsistyy mekaanisiin tehtäviin; hän kaipaa haasteita.
+- **Aino 3** haluaa hoitaa kurssin hyvin muun elämän ohessa; hän kaipaa selkeyttä siitä,
+  mikä riittää.
+- **Aino 1** on kiireinen tai epävarma; yksi käsittämätön virhe voi saada hänet
+  keskeyttämään. Hän kaipaa lyhyintä polkua ja apua, jota ei nolota pyytää.
+
+Aino on todennäköisesti tulevaisuudessa osa ohjelmistokehitystiimiä, joten kurssin aikana
+hänen pitää myös totutella IDE:hen, terminaaliin ja lokeihin.
 
 ## 2. Opettaja: Markku, ohjelmoinnin lehtori
 
