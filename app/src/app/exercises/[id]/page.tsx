@@ -25,13 +25,14 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
         .limit(1)
     : [];
 
-  const caseCount = (
-    await db
-      .select({ id: schema.testCases.id })
-      .from(schema.testCases)
-      .where(eq(schema.testCases.exerciseId, id))
-      .orderBy(asc(schema.testCases.position))
-  ).length;
+  const cases = await db
+    .select({ stdin: schema.testCases.stdin, hidden: schema.testCases.hidden })
+    .from(schema.testCases)
+    .where(eq(schema.testCases.exerciseId, id))
+    .orderBy(asc(schema.testCases.position));
+  const caseCount = cases.length;
+  // Prefill "Aja" with the first visible example so the first run works straight away.
+  const exampleStdin = cases.find((c) => !c.hidden)?.stdin ?? "";
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
@@ -47,6 +48,7 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
             language={exercise.language}
             starterCode={exercise.starterCode}
             initialCode={latest?.sourceCode ?? exercise.starterCode}
+            exampleStdin={exampleStdin}
           />
         ) : (
           <div className="rounded-xl border border-border bg-surface p-5">

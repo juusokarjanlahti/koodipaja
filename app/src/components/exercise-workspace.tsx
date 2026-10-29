@@ -5,6 +5,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PresentedCase, PresentedSubmission } from "@/lib/grading/present";
 import { FORMATTING_DIFFERENCE } from "@/lib/grading/status";
+import type { RunOutput } from "@/lib/runs/output";
 
 const POLL_MS = 800;
 const POLL_TIMEOUT_MS = 90_000;
@@ -26,6 +27,14 @@ function statusLabel(c: PresentedCase): string {
   }
 }
 
+function runStatusLabel(r: RunOutput): string {
+  const time = r.timeMs !== null ? ` (${r.timeMs} ms)` : "";
+  if (r.ok) return `Ajo valmis${time}`;
+  if (r.statusDescription === "Time Limit Exceeded") return "Aikaraja ylittyi: ohjelma ei päättynyt ajoissa.";
+  if (r.statusDescription.startsWith("Runtime Error")) return `Ajonaikainen virhe${time}`;
+  return r.statusDescription;
+}
+
 function Output({ label, text }: { label: string; text: string | null | undefined }) {
   if (text === undefined || text === null) return null;
   return (
@@ -43,13 +52,19 @@ export function ExerciseWorkspace({
   language,
   starterCode,
   initialCode,
+  exampleStdin,
 }: {
   exerciseId: string;
   language: string;
   starterCode: string;
   initialCode: string;
+  exampleStdin: string;
 }) {
   const [code, setCode] = useState(initialCode);
+  const [stdin, setStdin] = useState(exampleStdin);
+  const [runOutput, setRunOutput] = useState<RunOutput | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
   const [submission, setSubmission] = useState<PresentedSubmission | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -108,6 +123,27 @@ export function ExerciseWorkspace({
     }
   }, [busy, code, exerciseId, poll]);
 
+  const run = useCallback(async () => {
+    if (running) return;
+    setRunning(true);
+    setRunError(null);
+    try {
+      const res = await fetch("/api/runs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exerciseId, sourceCode: code, stdin }),
+      });
+      const data = (await res.json()) as RunOutput & { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Ajo epäonnistui.");
+      setRunOutput(data);
+    } catch (err) {
+      setRunOutput(null);
+      setRunError((err as Error).message);
+    } finally {
+      setRunning(false);
+    }
+  }, [running, exerciseId, code, stdin]);
+
   const reset = () => {
     if (code === starterCode || window.confirm("Palautetaanko pohjakoodi? Nykyinen koodi häviää editorista.")) {
       setCode(starterCode);
@@ -127,7 +163,7 @@ export function ExerciseWorkspace({
         onKeyDown={(e) => {
           if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
             e.preventDefault();
-            void submit();
+            void (e.shiftKey ? run() : submit());
           }
         }}
       >
@@ -145,11 +181,55 @@ export function ExerciseWorkspace({
         />
       </div>
 
+      <div className="grid gap-3 rounded-xl border border-border bg-surface p-3 sm:grid-cols-2">
+        <div className="grid content-start gap-1">
+          <label htmlFor="run-stdin" className="text-sm font-medium">
+            Syöte <span className="font-normal text-muted">(mitä käyttäjä kirjoittaa, rivi kerrallaan)</span>
+          </label>
+          <textarea
+            id="run-stdin"
+            value={stdin}
+            onChange={(e) => setStdin(e.target.value)}
+            rows={4}
+            spellCheck={false}
+            className="rounded-md border border-border bg-bg p-2 font-mono text-sm"
+          />
+        </div>
+        <div className="grid content-start gap-1" aria-live="polite">
+          <div className="text-sm font-medium">Tuloste</div>
+          {runError ? (
+            <p className="rounded-md border border-border bg-bg p-2 text-sm">{runError}</p>
+          ) : runOutput ? (
+            <>
+              <pre className="min-h-[5.5rem] overflow-x-auto whitespace-pre-wrap rounded-md border border-border bg-bg p-2 font-mono text-sm">
+                {runOutput.stdout === "" ? <span className="text-muted">(ei tulostetta)</span> : runOutput.stdout}
+              </pre>
+              {runOutput.stderr && <Output label="Virheilmoitus" text={runOutput.stderr} />}
+              <p className="text-xs text-muted">{runStatusLabel(runOutput)}</p>
+            </>
+          ) : (
+            <p className="min-h-[5.5rem] rounded-md border border-dashed border-border p-2 text-sm text-muted">
+              Kokeile koodiasi painamalla Aja. Ajoja ei arvioida eikä tallenneta.
+            </p>
+          )}
+        </div>
+      </div>
+
       <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => void run()}
+          disabled={running}
+          aria-keyshortcuts="Control+Shift+Enter"
+          className="rounded-lg border border-accent px-5 py-2 font-medium text-accent disabled:opacity-60"
+        >
+          {running ? "Ajetaan…" : "Aja"}
+        </button>
         <button
           type="button"
           onClick={() => void submit()}
           disabled={busy}
+          aria-keyshortcuts="Control+Enter"
           className="rounded-lg bg-accent px-5 py-2 font-medium text-accent-text disabled:opacity-60"
         >
           {busy ? "Arvioidaan…" : "Palauta"}
@@ -157,7 +237,7 @@ export function ExerciseWorkspace({
         <button type="button" onClick={reset} disabled={busy} className="rounded-lg border border-border px-4 py-2">
           Pohjakoodi
         </button>
-        <span className="text-sm text-muted">Ctrl + Enter palauttaa</span>
+        <span className="text-sm text-muted">Ctrl + Shift + Enter ajaa, Ctrl + Enter palauttaa</span>
       </div>
 
       <div aria-live="polite" className="grid gap-3">
