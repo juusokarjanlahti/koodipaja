@@ -65,9 +65,9 @@ Epicit: #8
 
 **Laajuus**
 - Tenttitila: aikaraja, tehtävien lukitus, palautusten esto ajan päätyttyä, kuormatestattu.
-- Laajempi kirjasto: peruskurssin tenttitehtävävaranto ja vaihtoehtoiset tehtävät, aihe- ja vaikeustasotunnisteet. Edelleen vain Python.
+- Laajempi kirjasto: peruskurssin tenttitehtävät ja vaihtoehtoiset tehtävät, aihe- ja vaikeustasotunnisteet. Edelleen vain Python. Tenttitehtävätkin ovat julkisia, ja tentin luotettavuus perustuu valvontaan ([ADR 0002](../adr/0002-kaikki-sisalto-julkista.md)).
 - Ylläpito: SLA, valvonta ja hälytykset, runbook, häiriötiedotteet, versiopäivitysprosessi.
-- Myyntiaineisto: hinnoittelu, palvelukuvaus, tietoturvakuvaus.
+- Myyntiaineisto: hinnoittelu, palvelukuvaus, tietoturvakuvaus ja hankinta-aineisto ([vaatimustenmukaisuus](../compliance/README.md)).
 
 **Poistumiskriteerit**
 - Allekirjoitettu sopimus vähintään yhden AMK:n kanssa.

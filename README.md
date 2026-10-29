@@ -41,6 +41,9 @@ python3 scripts/validate.py
 
 Visio, käyttäjät, roadmap ja riskit: [docs/product/](docs/product/README.md).
 
+Lait ja hankintaehdot (tietosuoja, saavutettavuus, tiedonhallinta, hankintalaki):
+[docs/compliance/](docs/compliance/README.md).
+
 ## Arkkitehtuuri
 
 Suunniteltu pino: Next.js + TypeScript, PostgreSQL, Redis-jono, itse ylläpidetty Judge0
