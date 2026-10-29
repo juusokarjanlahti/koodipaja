@@ -81,6 +81,20 @@ async function main() {
         console.log(`ok    ${ex.id} wrong/${file} caught (${result.passedCount}/${result.totalCount})`);
       }
     }
+
+    // ADR 0003: formatting-only differences must be accepted (when the exercise is lenient).
+    const acceptedDir = path.join(folder, "accepted");
+    const acceptedFiles = (await readdir(acceptedDir).catch(() => [] as string[])).filter((f) => f.endsWith(ext)).sort();
+    for (const file of acceptedFiles) {
+      const result = await submitAndWait(cookie, ex.id, await readFile(path.join(acceptedDir, file), "utf8"));
+      const formatting = result.cases.filter((c) => c.judgeStatus === "Formatting Difference").length;
+      if (result.status !== "done" || result.passedCount !== result.totalCount) {
+        console.error(`FAIL  ${ex.id} accepted/${file} was rejected (${result.passedCount}/${result.totalCount})`);
+        failures++;
+      } else {
+        console.log(`ok    ${ex.id} accepted/${file} passes (${formatting} with formatting difference)`);
+      }
+    }
   }
 
   console.log(failures ? `\n${failures} failure(s)` : "\nall smoke checks passed");

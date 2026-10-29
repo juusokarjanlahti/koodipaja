@@ -42,12 +42,23 @@ describe("loadExercise", () => {
     expect(ex.cases[2]).toEqual({ name: "c", stdin: "", expectedStdout: "x\n", hidden: true });
     expect(ex.cases[0].hidden).toBe(false);
     expect(ex.timeLimitSeconds).toBe(2);
+    expect(ex.outputMatch).toBe("lenient");
   });
 
   it("produces a stable content hash", async () => {
     const a = await loadExercise(await makeExercise(validYaml));
     const b = await loadExercise(await makeExercise(validYaml));
     expect(a.contentHash).toBe(b.contentHash);
+  });
+
+  it("reads output_match: exact", async () => {
+    const ex = await loadExercise(await makeExercise(validYaml.replace("difficulty: 1", "difficulty: 1\noutput_match: exact")));
+    expect(ex.outputMatch).toBe("exact");
+  });
+
+  it("rejects an unknown output_match", async () => {
+    const yaml = validYaml.replace("difficulty: 1", "difficulty: 1\noutput_match: fuzzy");
+    await expect(loadExercise(await makeExercise(yaml))).rejects.toThrow(/output_match/);
   });
 
   it("rejects an id that does not match the folder", async () => {

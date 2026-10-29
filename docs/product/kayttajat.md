@@ -5,6 +5,12 @@
 **Tavoitteet:** oppia ohjelmoinnin perusteet, saada tehtävät tehtyä ajoissa, päästä tentistä läpi.
 
 **Kivut**
+- **Painii työkalun kanssa enemmän kuin koodin.** Ratkaisu on oikein ja tehtävän idea on
+  ymmärretty, mutta tarkistin hylkää sen puuttuvan huutomerkin, ylimääräisen välilyönnin tai
+  rivinvaihdon takia. Esimerkiksi `input("Mikä on nimesi? ")` on täysin järkevää Pythonia,
+  mutta tuottaa eri rivityksen kuin tarkistin odottaa. Aino hioo tulostetta merkki kerrallaan,
+  turhautuu ja oppii, että ohjelmointi on arvailua, vaikka opetusarvo on nolla.
+  Ratkaisu: [ADR 0003](../adr/0003-joustava-tulosteen-vertailu.md).
 - Virheilmoitus "väärä vastaus" ilman tietoa siitä, mikä syöte meni pieleen.
 - Erillinen tunnus jokaiseen palveluun, kesken jäänyt koodi katoaa.
 - Kehitysympäristön asentaminen omalle koneelle ennen kuin pääsee alkuun.

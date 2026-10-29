@@ -13,4 +13,5 @@ Aino
 Hei, Aino!
 ```
 
-Vihje: `input()` lukee yhden rivin. Tulosta kysymys erikseen `print()`-funktiolla.
+Vihje: `input()` lukee yhden rivin. Kysymyksen voi tulostaa `print()`-funktiolla tai antaa
+suoraan `input()`-funktiolle, kumpikin tapa hyväksytään.

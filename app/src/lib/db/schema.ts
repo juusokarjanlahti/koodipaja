@@ -12,6 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const userRole = pgEnum("user_role", ["student", "teacher"]);
+export const outputMatchMode = pgEnum("output_match_mode", ["lenient", "exact"]);
 export const submissionStatus = pgEnum("submission_status", [
   "queued",
   "running",
@@ -36,6 +37,8 @@ export const exercises = pgTable("exercises", {
   topics: text("topics").array().notNull().default([]),
   promptMarkdown: text("prompt_markdown").notNull(),
   starterCode: text("starter_code").notNull(),
+  // "lenient" (default) or "exact", see docs/adr/0003-joustava-tulosteen-vertailu.md.
+  outputMatch: outputMatchMode("output_match").notNull().default("lenient"),
   timeLimitSeconds: integer("time_limit_seconds").notNull(),
   memoryLimitMb: integer("memory_limit_mb").notNull(),
   contentHash: text("content_hash").notNull(),
