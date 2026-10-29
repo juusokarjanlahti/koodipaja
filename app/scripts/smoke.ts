@@ -56,6 +56,20 @@ async function main() {
     failures++;
   }
 
+  // "Aja omalla syötteellä": runs return output and are not stored as submissions.
+  const runRes = await fetch(`${APP_URL}/api/runs`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", cookie },
+    body: JSON.stringify({ exerciseId: "01-tervehdys", sourceCode: "print('Hei', input())", stdin: "Aino\n" }),
+  });
+  const runBody = (await runRes.json()) as { ok?: boolean; stdout?: string; error?: string };
+  if (runRes.status !== 200 || !runBody.ok || runBody.stdout?.trim() !== "Hei Aino") {
+    console.error(`FAIL  run returned ${runRes.status} ${JSON.stringify(runBody)}`);
+    failures++;
+  } else {
+    console.log("ok    run with own input returns output");
+  }
+
   for (const folder of await findExerciseFolders(exercisesRoot)) {
     const ex = await loadExercise(folder);
     const ext = LANGUAGE_EXTENSIONS[ex.language];
