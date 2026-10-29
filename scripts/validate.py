@@ -40,6 +40,7 @@ RUNNERS = {
 
 REQUIRED_FIELDS = {"id", "title", "language", "difficulty", "cases"}
 OUTPUT_MATCH_MODES = {"lenient", "exact"}
+LEVELS = {"perus", "soveltava", "haaste"}
 MIN_CASES = 3
 MIN_WRONG = 2
 
@@ -131,6 +132,10 @@ def validate(folder: Path) -> list[str]:
     mode = meta.get("output_match", "lenient")
     if mode not in OUTPUT_MATCH_MODES:
         return errors + [f"{meta_path}: output_match must be one of {sorted(OUTPUT_MATCH_MODES)}"]
+
+    level = meta.get("level", "perus")
+    if level not in LEVELS:
+        errors.append(f"{meta_path}: level must be one of {sorted(LEVELS)}")
 
     runner = RUNNERS.get(meta["language"])
     if runner is None:

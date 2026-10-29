@@ -40,18 +40,31 @@ Nämä ohjaavat tehtävien sisältöä, palautteen sävyä ja kaikkia ominaisuuk
 1. **Epäonnistuminen on osa oppimista, ei hävettävää.** Väärä vastaus, keskeneräinen
    ratkaisu tai se, ettei ymmärrä miksi tehtävä ei mene läpi, on tavallinen vaihe.
    Palaute kertoo, mitä ei vielä toimi, eikä tuomitse. Avun pyytäminen on normaali ja
-   näkyvä toiminto, ei viimeinen keino.
-2. **Algoritmit ja tietotyypit ovat ydin, syntaksin yksityiskohdat eivät.** Tehtävät
+   näkyvä toiminto, ei viimeinen keino. **Häpeän poistaminen ei tarkoita kamppailun
+   poistamista:** sopiva vaikeus kuuluu oppimiseen, joten alusta tukee kamppailua
+   (kokeilu, selitykset, apu) eikä palkitse ajattelematonta uudelleenpalauttamista.
+   Harjoittelussa yritysten määrä ei vaikuta arvosanaan.
+2. **Algoritmit ja tietotyypit ovat ydin, syntaksi on este, jonka yli autetaan.** Tehtävät
    mittaavat, osaako opiskelija jakaa ongelman askeliin ja erottaa tietotyypit toisistaan
    (esim. merkkijono vs. luku, kokonaisluku vs. liukuluku, lista vs. yksittäinen arvo).
-   Siksi tulosteen muotoilua ei hiota ([ADR 0003](../adr/0003-joustava-tulosteen-vertailu.md)),
-   ja väärät esimerkkiratkaisut kuvaavat käsitteellisiä virheitä.
+   Syntaksi ei ole tavoite, mutta aloittelijat jumittuvat siihen eniten, joten
+   virheilmoitukset selitetään eikä niitä sivuuteta. Tulosteen muotoilua ei hiota
+   ([ADR 0003](../adr/0003-joustava-tulosteen-vertailu.md)), ja väärät
+   esimerkkiratkaisut kuvaavat käsitteellisiä virheitä.
 3. **Koodi kirjoitetaan myös muille luettavaksi.** Ohjelmointi on yhteistyötä:
-   ratkaisua lukee opettaja, vertainen ja tuleva itse. Alusta tukee koodin näyttämistä ja
-   lukemista, ei vain sen läpäisemistä.
+   ratkaisua lukee opettaja, vertainen ja tuleva itse. Aloittelijalle tämä tarkoittaa
+   ensin hyvien esimerkkien lukemista, ei tyylivaatimuksia omalle koodille.
 4. **Ihminen päättää viime kädessä.** Automaattinen arviointi on apuväline. Opettaja voi
    aina katsoa yrityksiä ja hyväksyä ratkaisun omalla päätöksellään, ja päätös on
-   perusteltu ja jäljitettävä.
+   perusteltu ja jäljitettävä. Jos opettaja joutuu pelastamaan usein, vika on tehtävässä.
+5. **Lukeminen ennen kirjoittamista.** Koodin lukemisen ja jäljittämisen taito ennustaa
+   kirjoittamisen taitoa. Kirjoita ohjelma -tehtävien rinnalla on ennusta tuloste-,
+   järjestä rivit (Parsons)- ja löydä vika lokista -tehtäviä.
+6. **Tuki puretaan vähitellen kohti oikeita työkaluja.** Ensikertalainen aloittaa
+   yksinkertaisesta näkymästä, ja kurssin edetessä näkymä, vertailun tarkkuus ja
+   palaute lähestyvät ammattilaisen ympäristöä (IDE, terminaali, testiraportit).
+
+Miten periaatteet toteutuvat kurssin aikana: [oppimispolku.md](oppimispolku.md).
 
 ## Tavoitteet
 

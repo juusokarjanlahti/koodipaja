@@ -6,8 +6,9 @@ tekniset speksit kansiossa `docs/specs/`.
 
 | Dokumentti | Sisältö |
 |---|---|
-| [visio.md](visio.md) | Ongelma, arvolupaus, tavoitteet, ei-tavoitteet, mittarit |
+| [visio.md](visio.md) | Ongelma, arvolupaus, pedagogiset periaatteet, tavoitteet, ei-tavoitteet, mittarit |
 | [kayttajat.md](kayttajat.md) | Persoonat: opiskelija, opettaja, AMK:n hankinta/IT, sisällöntuottaja |
+| [oppimispolku.md](oppimispolku.md) | Kurssin vaiheet ensikertalaisesta tiimityöhön, näkymätasot, tehtävätyypit, arvosanatavoitteet |
 | [roadmap.md](roadmap.md) | Milestonet M1–M4, laajuus, poistumiskriteerit ja tila |
 | [riskit.md](riskit.md) | Keskeiset riskit, todennäköisyys, vaikutus ja lievennys |
 
