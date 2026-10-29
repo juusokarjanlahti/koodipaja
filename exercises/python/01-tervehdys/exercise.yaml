@@ -1,0 +1,21 @@
+id: 01-tervehdys
+title: Tervehdys
+language: python
+difficulty: 1
+topics: [input, output, string]
+time_limit_seconds: 2
+memory_limit_mb: 64
+cases:
+  - name: Tavallinen nimi
+    stdin: "Aino\n"
+    expected_stdout: "Mikä on nimesi?\nHei, Aino!\n"
+  - name: Toinen nimi
+    stdin: "Matti\n"
+    expected_stdout: "Mikä on nimesi?\nHei, Matti!\n"
+  - name: Välilyönti nimessä
+    stdin: "Anna Liisa\n"
+    expected_stdout: "Mikä on nimesi?\nHei, Anna Liisa!\n"
+  - name: Ääkköset
+    stdin: "Väinö\n"
+    expected_stdout: "Mikä on nimesi?\nHei, Väinö!\n"
+    hidden: true
