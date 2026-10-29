@@ -92,3 +92,16 @@ body {
   padding: 0;
   background: none;
 }
+
+/* Copyable inline snippets in assignments (components/snippet.tsx) */
+.prose-exercise .snippet-inline {
+  font: inherit;
+  padding: 0;
+  border: 0;
+  background: none;
+  vertical-align: baseline;
+}
+.prose-exercise .snippet-inline:hover code,
+.prose-exercise .snippet-inline:focus-visible code {
+  border-color: var(--accent);
+}

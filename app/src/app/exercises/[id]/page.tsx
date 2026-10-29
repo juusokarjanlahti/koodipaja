@@ -1,7 +1,7 @@
 import { and, asc, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
+import { Assignment } from "@/components/assignment";
 import { ExerciseWorkspace } from "@/components/exercise-workspace";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
@@ -36,7 +36,7 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <article className="prose-exercise self-start rounded-xl border border-border bg-surface p-5">
-        <ReactMarkdown>{exercise.promptMarkdown}</ReactMarkdown>
+        <Assignment markdown={exercise.promptMarkdown} />
         <p className="mt-4 text-sm text-muted">Testitapauksia: {caseCount}</p>
       </article>
 

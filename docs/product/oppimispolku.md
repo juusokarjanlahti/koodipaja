@@ -17,6 +17,21 @@ pikanäppäimet, oikeat virheilmoitukset), mutta piilottaa monimutkaisuuden, kun
 opiskelija on valmis. Omia käsitteitä ei keksitä asioille, joilla on alalla vakiintunut
 nimi (Nielsenin heuristiikka 4: johdonmukaisuus ja standardit), vaan ne selitetään.
 
+## Kitka pois kaikesta, mikä ei ole ajattelua
+
+Opiskelijan huomio on rajallinen. Kaikki, mikä ei tue ajattelua tai päätöksentekoa,
+tehdään niin vaivattomaksi kuin mahdollista:
+
+- **Tehtävänannon tekstit kopioi yhdellä napautuksella tai vetämällä editoriin.**
+  Merkkijonon kirjoittaminen tehtävänannosta käsin on puhdasta kitkaa. Toimii myös
+  näppäimistöllä (Enter) ja kosketusnäytöllä.
+- **Tulosteen muotoilua ei hiota** ([ADR 0003](../adr/0003-joustava-tulosteen-vertailu.md)).
+- **Ei asennuksia eikä erillisiä tunnuksia:** selain ja Moodle-kirjautuminen riittävät.
+- **Kokeilu ilman palautusta** (#55) ja **selitetyt virheilmoitukset** (#52).
+
+Kitkaa ei poisteta sieltä, missä se on oppimista: algoritmin keksiminen, tietotyyppien
+erottaminen ja virheen jäljittäminen kuuluvat opiskelijalle.
+
 ## Kurssin vaiheet
 
 | Vaihe | Näkymä | Tehtävätyypit | Tulosteen vertailu | Tarinat |
