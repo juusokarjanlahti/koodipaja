@@ -1,0 +1,38 @@
+# Judge0 configuration. Copy to infra/judge0.conf and change every password/token.
+# infra/judge0.conf is git-ignored.
+
+# --- Authentication: the app sends this header with every request ---
+AUTHN_HEADER=X-Auth-Token
+AUTHN_TOKEN=change-me-judge0-token
+
+# --- Judge0's own Redis ---
+REDIS_HOST=judge0-redis
+REDIS_PORT=6379
+REDIS_PASSWORD=change-me-judge0-redis
+
+# --- Judge0's own Postgres ---
+POSTGRES_HOST=judge0-db
+POSTGRES_PORT=5432
+POSTGRES_DB=judge0
+POSTGRES_USER=judge0
+POSTGRES_PASSWORD=change-me-judge0-db
+
+# --- Sandbox limits (safe defaults for beginner exercises) ---
+# Student code never gets network access.
+ENABLE_NETWORK=false
+ALLOW_ENABLE_NETWORK=false
+CPU_TIME_LIMIT=2
+MAX_CPU_TIME_LIMIT=5
+WALL_TIME_LIMIT=5
+MAX_WALL_TIME_LIMIT=10
+MEMORY_LIMIT=128000
+MAX_MEMORY_LIMIT=256000
+MAX_PROCESSES_AND_OR_THREADS=60
+MAX_FILE_SIZE=1024
+ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT=false
+ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT=false
+
+# --- Behaviour ---
+# The MVP worker uses ?wait=true. Switch to batch + polling before exam-scale load.
+ENABLE_WAIT_RESULT=true
+MAX_QUEUE_SIZE=200
