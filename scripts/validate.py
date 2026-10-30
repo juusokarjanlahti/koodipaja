@@ -327,6 +327,20 @@ def validate_concept(folder: Path) -> list[str]:
     return errors
 
 
+def check_numbering() -> list[str]:
+    """Numbered folders (NN-slug) must be unique and gapless within a language."""
+    errors: list[str] = []
+    for lang in sorted(p for p in EXERCISES.iterdir() if p.is_dir()):
+        numbers = [
+            int(m.group(1))
+            for p in lang.iterdir()
+            if p.is_dir() and (m := re.match(r"(\d+)-", p.name))
+        ]
+        if numbers and sorted(numbers) != list(range(1, len(numbers) + 1)):
+            errors.append(f"{lang.relative_to(ROOT)}: exercise numbers must be unique and gapless from 1, got {sorted(numbers)}")
+    return errors
+
+
 def main(argv: list[str]) -> int:
     rule_errors = self_test()
     if rule_errors:
@@ -340,6 +354,9 @@ def main(argv: list[str]) -> int:
 
     concept_failed = 0
     if not argv:
+        for err in check_numbering():
+            print(f"FAIL  {err}")
+            concept_failed += 1
         for folder in sorted(p.parent for p in CONCEPTS.glob("*/*/concept.yaml")):
             errors = validate_concept(folder)
             label = folder.relative_to(ROOT)

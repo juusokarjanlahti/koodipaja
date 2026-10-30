@@ -45,5 +45,5 @@ test("solved: go on; stuck: skip to an exercise that does not need this one, the
   await expect(page).toHaveURL(/\/exercises\/02-lukujen-summa$/);
 
   // Previous / next links between exercises.
-  await expect(page.getByRole("navigation", { name: "Tehtävien välillä" }).getByRole("link", { name: /← Tervehdys/ })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Tehtävien välillä" }).getByRole("link", { name: /← 1\. Tervehdys/ })).toBeVisible();
 });

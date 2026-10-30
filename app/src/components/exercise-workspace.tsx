@@ -16,7 +16,7 @@ import { runVerdict, type RunVerdict } from "@/lib/runs/verdict";
 import { editorTheme } from "./editor-theme";
 import { NextStepsBox } from "./next-steps";
 import { nextSteps, type ExerciseState, type PathExercise } from "@/lib/exercises/next-steps";
-import { isSolved } from "@/lib/submission-state";
+import { improvementNote, isSolved } from "@/lib/submission-state";
 import { ErrorHelp } from "./error-help";
 
 const POLL_MS = 800;
@@ -301,6 +301,11 @@ export function ExerciseWorkspace({
   else if (history.length > 0) states.set(exerciseId, "yritetty");
   const steps = nextSteps(path, states, exerciseId, failedHere);
   const latestDone = history.find((h) => h.status === "done");
+  const submissionIndex = submission ? history.findIndex((h) => h.id === submission.id) : -1;
+  const improvement =
+    submission?.status === "done" && submissionIndex >= 0
+      ? improvementNote(submission, history.slice(submissionIndex + 1).find((h) => h.status === "done"))
+      : null;
   // Stuck: the latest result still does not pass after several tries.
   const stuck = !solvedHere && !!latestDone && !isSolved(latestDone) && failedHere >= 3;
   const formattingCount =
@@ -427,6 +432,8 @@ export function ExerciseWorkspace({
               : `${submission.passedCount} / ${submission.totalCount} testiä läpi. Avoinna on ensimmäinen testi, joka ei vielä mene läpi.`}
           </p>
         )}
+
+        {improvement && !allPassed && <p className="rounded-lg border border-ok bg-ok-bg p-3 text-ok">{improvement}</p>}
 
         {!busy && (
           <NextStepsBox steps={steps} solved={solvedHere} stuck={stuck} conceptTitles={conceptTitles} />

@@ -130,3 +130,34 @@ export async function teachesAnyCourse(userId: string): Promise<boolean> {
     .where(and(eq(schema.courseMemberships.userId, userId), eq(schema.courseMemberships.role, "teacher")));
   return (row?.n ?? 0) > 0;
 }
+
+/** Per exercise: how many grades of this course reached Moodle and how many transfers failed. */
+export async function courseGradeSyncCounts(courseId: number) {
+  const rows = await getDb()
+    .select({
+      exerciseId: schema.ltiResourceLinks.exerciseId,
+      sent: sql<number>`count(*) filter (where ${schema.ltiGradeSyncs.status} = 'sent')::int`,
+      failed: sql<number>`count(*) filter (where ${schema.ltiGradeSyncs.status} = 'failed')::int`,
+    })
+    .from(schema.ltiGradeSyncs)
+    .innerJoin(schema.ltiResourceLinks, eq(schema.ltiResourceLinks.id, schema.ltiGradeSyncs.resourceLinkId))
+    .where(and(eq(schema.ltiResourceLinks.courseId, courseId), isNotNull(schema.ltiResourceLinks.exerciseId)))
+    .groupBy(schema.ltiResourceLinks.exerciseId);
+  return new Map(rows.map((r) => [r.exerciseId as string, { sent: r.sent, failed: r.failed }]));
+}
+
+/** The student's grade transfers to Moodle in this course, per exercise. */
+export async function studentGradeSyncs(courseId: number, userId: string) {
+  return getDb()
+    .select({
+      exerciseId: schema.ltiResourceLinks.exerciseId,
+      status: schema.ltiGradeSyncs.status,
+      scoreGiven: schema.ltiGradeSyncs.scoreGiven,
+      scoreMaximum: schema.ltiGradeSyncs.scoreMaximum,
+      sentAt: schema.ltiGradeSyncs.sentAt,
+      lastError: schema.ltiGradeSyncs.lastError,
+    })
+    .from(schema.ltiGradeSyncs)
+    .innerJoin(schema.ltiResourceLinks, eq(schema.ltiResourceLinks.id, schema.ltiGradeSyncs.resourceLinkId))
+    .where(and(eq(schema.ltiResourceLinks.courseId, courseId), eq(schema.ltiGradeSyncs.userId, userId)));
+}

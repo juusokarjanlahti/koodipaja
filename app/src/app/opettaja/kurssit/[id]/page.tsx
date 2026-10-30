@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
+import { retryGradesAction } from "./actions";
 import { LANGUAGE_LABELS } from "@/lib/exercises/languages";
-import { courseExercises, courseForTeacher, courseProgressRows, courseStudents } from "@/lib/teacher/course";
+import { courseExercises, courseGradeSyncCounts, courseForTeacher, courseProgressRows, courseStudents } from "@/lib/teacher/course";
 import { buildProgress, cellLabel, percent, type CellState, type SortOrder } from "@/lib/teacher/progress";
 
 export const metadata: Metadata = { title: "Kurssin eteneminen – Koodipaja" };
@@ -36,6 +37,8 @@ export default async function CourseProgressPage({
     students.map((s) => s.id),
     exercises.map((e) => e.id),
   );
+  const gradeCounts = await courseGradeSyncCounts(course.id);
+  const totalFailed = [...gradeCounts.values()].reduce((sum, g) => sum + g.failed, 0);
   const progress = buildProgress(students, exercises, rows, sort);
   const multiLanguage = new Set(exercises.map((e) => e.language)).size > 1;
   const title = course.title ?? "Nimetön kurssi";
@@ -74,6 +77,14 @@ export default async function CourseProgressPage({
               vähiten ratkaisseet ensin
             </Link>
           </nav>
+          {totalFailed > 0 && (
+            <form action={retryGradesAction.bind(null, course.id)} className="flex flex-wrap items-center gap-3 rounded-lg border border-fail bg-fail-bg p-3 text-sm">
+              <p className="text-fail">{totalFailed} arvosanan siirto Moodleen ei onnistunut.</p>
+              <button type="submit" className="rounded border border-border bg-surface px-3 py-1 font-medium">
+                Lähetä epäonnistuneet uudelleen
+              </button>
+            </form>
+          )}
           <div
             role="region"
             aria-labelledby="progress-caption"
@@ -133,6 +144,21 @@ export default async function CourseProgressPage({
                       {percent(e.solveRate)} <span className="text-muted">({e.solvedCount})</span>
                     </td>
                   ))}
+                </tr>
+                <tr>
+                  <th scope="row" className="sticky left-0 bg-surface p-2 text-left">
+                    Arvosanat Moodleen
+                  </th>
+                  <td />
+                  {progress.exercises.map((e) => {
+                    const g = gradeCounts.get(e.id) ?? { sent: 0, failed: 0 };
+                    return (
+                      <td key={e.id} className="p-2 tabular-nums">
+                        {g.sent} siirretty
+                        {g.failed > 0 && <span className="block font-medium text-fail">{g.failed} epäonnistui</span>}
+                      </td>
+                    );
+                  })}
                 </tr>
               </tfoot>
             </table>

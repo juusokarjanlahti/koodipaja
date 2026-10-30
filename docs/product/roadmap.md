@@ -21,7 +21,7 @@ Kirjautuminen on vielä kehityskäyttöön tarkoitettu.
 |---|---|
 | Tehtäväformaatti (`exercise.yaml`, mallivastaus, väärät vastaukset) | ✅ main |
 | CI-validointi (`scripts/validate.py`) | ✅ main |
-| Paikallinen infra: PostgreSQL, Redis, go-judge-sandbox (Docker Compose, ADR 0006) | ✅ main (go-judge-kuva testaamatta) |
+| Paikallinen infra: PostgreSQL, Redis, go-judge-sandbox (Docker Compose, ADR 0006) | ✅ main, kuva testataan jokaisessa PR:ssä |
 | Next.js-sovellus, tietokantaskeema, tehtävien tuonti Gitistä | ✅ main |
 | Koodieditori, palautus jonon kautta sandboxiin, testikohtainen palaute | ✅ main |
 | Kehityskirjautuminen | ✅ main |
@@ -49,7 +49,8 @@ Epicit: #4, #5, #6, #7 (sekä #17, #19 epicistä #2)
 | Tehtävän valinta Moodlen aktiviteetiksi, Deep Linking (#24) | ✅ main, testattu Moodle 4.5:llä |
 | Tehtävät myös Moodle CodeRunner -kysymyksinä ([coderunner.md](coderunner.md)) | ✅ main |
 | Tehtäväsarjat | ⬜ |
-| Opettajan näkymä | ⬜ |
+| Opettajan näkymä: kurssin eteneminen ja opiskelijan palautukset (#27, #28) | ✅ main |
+| Seuraava tehtävä läpäisyn jälkeen, muut tavat edetä jumissa (#91) ja muistilista aiheittain (#90) | ✅ main |
 | Saavutettavuus: editorin näppäimistökäyttö (#29) | ✅ main; ruudunlukijatestaus ⬜ |
 | Tietosuoja-aineisto, saavutettavuusseloste | ⬜ |
 | Python-peruskurssi 60–80 tehtävää | 🚧 15 |

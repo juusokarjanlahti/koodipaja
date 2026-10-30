@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isSolved } from "@/lib/progress";
-import { courseExercises, courseForTeacher, courseStudents, isStudentOf, studentSubmissions } from "@/lib/teacher/course";
+import { courseExercises, courseForTeacher, courseStudents, isStudentOf, studentGradeSyncs, studentSubmissions } from "@/lib/teacher/course";
 
 export const metadata: Metadata = { title: "Opiskelijan palautukset – Koodipaja" };
 export const dynamic = "force-dynamic";
@@ -31,6 +31,10 @@ export default async function StudentSubmissionsPage({ params }: { params: Promi
   const [exercises, students] = await Promise.all([courseExercises(course.id), courseStudents(course.id)]);
   const student = students.find((s) => s.id === userId)!;
   const submissions = await studentSubmissions(userId, exercises.map((e) => e.id));
+  const syncs = Map.groupBy(
+    (await studentGradeSyncs(course.id, userId)).filter((g) => g.exerciseId),
+    (g) => g.exerciseId as string,
+  );
   const byExercise = Map.groupBy(submissions, (s) => s.exerciseId);
   const dateFormat = new Intl.DateTimeFormat("fi-FI", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Helsinki" });
 
@@ -50,6 +54,15 @@ export default async function StudentSubmissionsPage({ params }: { params: Promi
             <h2 id={`ex-${e.id}`} className="text-lg font-semibold">
               {e.title} <span className="text-sm font-normal text-muted">({byExercise.get(e.id)!.length} palautusta, uusin ensin)</span>
             </h2>
+            {(syncs.get(e.id) ?? []).map((g, i) => (
+              <p key={i} className="text-sm text-muted">
+                {g.status === "sent" && g.sentAt
+                  ? `Moodleen siirretty ${g.scoreGiven} / ${g.scoreMaximum} (${dateFormat.format(g.sentAt)}).`
+                  : g.status === "failed"
+                    ? `Arvosanan siirto Moodleen ei onnistunut${g.lastError ? `: ${g.lastError}` : ""}.`
+                    : "Arvosanaa ei ole vielä siirretty Moodleen."}
+              </p>
+            ))}
             {byExercise.get(e.id)!.map((sub, index) => (
               <details key={sub.id} open={index === 0} className="rounded-xl border border-border bg-surface p-3">
                 <summary className="cursor-pointer font-medium">

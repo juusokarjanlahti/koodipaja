@@ -6,6 +6,7 @@ import { CheatsheetPanel } from "@/components/cheatsheet";
 import { ExerciseWorkspace } from "@/components/exercise-workspace";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCheatsheet } from "@/lib/concepts/queries";
+import { numberedTitle } from "@/lib/exercises/order";
 import { getExerciseStatuses, getSubmissionHistory } from "@/lib/progress";
 import { getDb, schema } from "@/lib/db";
 
@@ -65,14 +66,14 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
           <nav aria-label="Tehtävien välillä" className="flex justify-between gap-3 text-sm">
             {previous ? (
               <Link href={`/exercises/${previous.id}`} className="text-accent">
-                ← {previous.title}
+                ← {numberedTitle(previous.id, previous.title)}
               </Link>
             ) : (
               <span />
             )}
             {following && (
               <Link href={`/exercises/${following.id}`} className="text-right text-accent">
-                {following.title} →
+                {numberedTitle(following.id, following.title)} →
               </Link>
             )}
           </nav>
