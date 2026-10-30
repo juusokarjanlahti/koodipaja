@@ -97,7 +97,9 @@ async function checkSandbox() {
   const loop = await run({ ...base, sourceCode: "while True:\n    pass\n" });
   if (loop.statusId !== RUN_STATUS.TIME_LIMIT_EXCEEDED) fail(`sandbox: infinite loop gave ${loop.statusDescription}`);
   else console.log("ok    sandbox: infinite loop hits the time limit");
-  const mem = await run({ ...base, sourceCode: "x = bytearray(1024 * 1024 * 1024)\nprint('ALLOCATED')\n" });
+  // Write every byte: untouched zero pages are never charged, so bytearray(n) alone can
+  // "succeed" under any limit without using memory.
+  const mem = await run({ ...base, sourceCode: "x = b'x' * (1024 * 1024 * 1024)\nprint('ALLOCATED', len(x))\n" });
   if (mem.stdout.includes("ALLOCATED")) fail("sandbox: 1 GiB allocation succeeded with a 64 MiB limit");
   else console.log(`ok    sandbox: memory limit (${mem.statusDescription})`);
 }
