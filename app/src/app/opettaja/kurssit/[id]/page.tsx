@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
-import { retryGradesAction } from "./actions";
+import { openHelpRequests } from "@/lib/help/requests";
+import { answerHelpAction, retryGradesAction } from "./actions";
 import { LANGUAGE_LABELS } from "@/lib/exercises/languages";
 import { courseExercises, courseGradeSyncCounts, courseForTeacher, courseProgressRows, courseStudents } from "@/lib/teacher/course";
 import { buildProgress, cellLabel, percent, type CellState, type SortOrder } from "@/lib/teacher/progress";
@@ -37,6 +38,7 @@ export default async function CourseProgressPage({
     students.map((s) => s.id),
     exercises.map((e) => e.id),
   );
+  const helpRequests = await openHelpRequests(course.id);
   const gradeCounts = await courseGradeSyncCounts(course.id);
   const totalFailed = [...gradeCounts.values()].reduce((sum, g) => sum + g.failed, 0);
   const progress = buildProgress(students, exercises, rows, sort);
@@ -55,6 +57,38 @@ export default async function CourseProgressPage({
         {students.length} opiskelijaa · {exercises.length} tehtävää. Tehtävät ovat ne, joihin kurssin Moodle-aktiviteetit
         vievät.
       </p>
+
+      {helpRequests.length > 0 && (
+        <section aria-labelledby="help-requests" className="grid gap-3 rounded-xl border border-border bg-surface p-4">
+          <h2 id="help-requests" className="text-lg font-semibold">
+            Avunpyynnöt ({helpRequests.length})
+          </h2>
+          <ul className="grid gap-4">
+            {helpRequests.map((r) => (
+              <li key={r.id} className="grid gap-2">
+                <p>
+                  <Link href={`/opettaja/kurssit/${course.id}/opiskelijat/${r.userId}`} className="font-medium text-accent">
+                    {r.studentName ?? r.studentEmail ?? "Nimetön opiskelija"}
+                  </Link>{" "}
+                  · {r.exerciseTitle} ·{" "}
+                  {r.kind === "kiista" ? "Mielestään vastaus on oikein" : "Ei ymmärrä, miksi ei mene läpi"}
+                </p>
+                {r.message && <p className="text-sm">&ldquo;{r.message}&rdquo;</p>}
+                <form action={answerHelpAction.bind(null, course.id)} className="grid gap-2">
+                  <input type="hidden" name="requestId" value={r.id} />
+                  <label className="grid gap-1 text-sm">
+                    <span className="font-medium">Vastaus opiskelijalle (näkyy vain hänelle)</span>
+                    <textarea name="reply" required maxLength={1000} rows={2} className="rounded border border-border bg-bg p-2" />
+                  </label>
+                  <button type="submit" className="w-fit rounded border border-border px-3 py-1.5 text-sm font-medium">
+                    Lähetä vastaus
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {students.length === 0 || exercises.length === 0 ? (
         <p className="rounded-lg border border-border bg-surface p-4">
