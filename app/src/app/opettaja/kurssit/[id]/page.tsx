@@ -53,6 +53,11 @@ export default async function CourseProgressPage({
         </Link>
       </p>
       <h1 className="text-2xl font-semibold">{title}</h1>
+      <p className="text-sm">
+        <Link href={`/opettaja/kurssit/${course.id}/ohje`} className="text-accent">
+          Muokkaa kurssin ohjetta opiskelijoille
+        </Link>
+      </p>
       <p className="text-muted">
         {students.length} opiskelijaa · {exercises.length} tehtävää. Tehtävät ovat ne, joihin kurssin Moodle-aktiviteetit
         vievät.

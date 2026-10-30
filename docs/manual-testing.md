@@ -62,6 +62,19 @@ As the student again:
 Judge: is the wording shaming anywhere? Is the form usable with the keyboard only and
 announced by a screen reader (status line, labelled fields)?
 
+## C2. Guides (needs a Moodle course for the course part)
+
+- [ ] **Library guide:** "Ohje" in the header opens a page with the general guide, also when
+      not logged in. Read it as a new student: does it tell you what to do first, when to run,
+      when to ask for help? Is anything wrong, preachy or missing? (It lives in
+      `app/content/opiskelijan-opas.md`; edit it and reload.)
+- [ ] **Course guide, teacher:** on the course page, "Muokkaa kurssin ohjetta opiskelijoille"
+      opens a form. Write some Markdown (a heading, a list, bold) and save.
+- [ ] **Course guide, student:** in the same course, the Ohje page shows the teacher's text in
+      a highlighted box above the general guide. A student of another course (or none) does not
+      see it. Another teacher cannot edit this course's guide (404).
+- [ ] Ask yourself as a teacher: would you actually write this, and what would you put in it?
+
 ## D. Accessibility spot check (#30)
 
 - [ ] Tab through the front page, an exercise page and the teacher course page: focus is

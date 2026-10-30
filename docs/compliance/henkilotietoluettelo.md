@@ -34,6 +34,7 @@ säilytysaikojen suunnittelu (#33).
 | Arvosanan siirron tila | `lti_grade_syncs` (pisteet, tila, virhe, ajankohta) | Arvosanan vienti Moodleen, opettajan siirtonäkymä | Kurssin opettaja | Käyttäjän poiston yhteydessä |
 | Muistilistan omat muistiinpanot | `concept_notes.note` | Opiskelijan oma muistilista | Vain opiskelija itse | Käyttäjän poiston yhteydessä |
 | Avunpyyntö: viesti ja vastaus | `help_requests` (viesti, vastaus, laji, tila) | Opiskelija pyytää opettajaa katsomaan ratkaisua (#49) | Pyytävä opiskelija, kurssin opettaja | Opiskelija voi perua avoimen pyynnön (poistetaan heti); muuten käyttäjän poiston yhteydessä |
+| Kurssin ohje (opettajan kirjoittama teksti) | `course_guides.markdown`, `updated_by` | Kurssikohtainen ohje opiskelijoille | Kurssin opiskelijat ja opettajat | Kurssin poiston yhteydessä; ei sisällä opiskelijoiden tietoja (lomakkeessa varoitus) |
 | Istuntoeväste | Selaimen eväste, 12 h | Kirjautuminen | Opiskelija itse | Vanhenee 12 tunnissa |
 
 Hyväksytyt tulosteet (#50, suunnitteilla, `docs/specs/help-requests.md`) tallentavat vain

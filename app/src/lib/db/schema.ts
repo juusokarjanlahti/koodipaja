@@ -148,6 +148,16 @@ export const ltiGradeSyncs = pgTable(
   (t) => [primaryKey({ columns: [t.resourceLinkId, t.userId] })],
 );
 
+// The course teacher's own guide for students (Markdown), shown next to the library guide.
+export const courseGuides = pgTable("course_guides", {
+  courseId: integer("course_id")
+    .primaryKey()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  markdown: text("markdown").notNull(),
+  updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const helpRequestKind = pgEnum("help_request_kind", ["apu", "kiista"]);
 export const helpRequestStatus = pgEnum("help_request_status", ["open", "answered"]);
 

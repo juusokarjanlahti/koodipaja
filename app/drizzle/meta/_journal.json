@@ -50,6 +50,13 @@
       "when": 1793400061700,
       "tag": "0006_help_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793401770649,
+      "tag": "0007_course_guides",
+      "breakpoints": true
     }
   ]
 }
