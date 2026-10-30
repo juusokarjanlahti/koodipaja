@@ -119,3 +119,22 @@ export async function syncGrades(job: GradeJob, isLastAttempt: boolean, fetchImp
   if (errors.length > 0 && key) throw new Error(`grade sync failed for ${errors.length} activity(ies): ${errors[0]}`);
   return sent;
 }
+
+/** Queues every failed grade transfer of one course again; returns how many were queued. */
+export async function retryFailedGrades(courseId: number): Promise<number> {
+  const failed = await getDb()
+    .select({ userId: schema.ltiGradeSyncs.userId, exerciseId: schema.ltiResourceLinks.exerciseId })
+    .from(schema.ltiGradeSyncs)
+    .innerJoin(schema.ltiResourceLinks, eq(schema.ltiResourceLinks.id, schema.ltiGradeSyncs.resourceLinkId))
+    .where(
+      and(
+        eq(schema.ltiResourceLinks.courseId, courseId),
+        eq(schema.ltiGradeSyncs.status, "failed"),
+        isNotNull(schema.ltiResourceLinks.exerciseId),
+      ),
+    );
+  // One job per student and exercise: a job sends to every activity of that exercise.
+  const unique = new Map(failed.map((f) => [`${f.userId}/${f.exerciseId}`, { userId: f.userId, exerciseId: f.exerciseId! }]));
+  for (const job of unique.values()) await getGradeQueue().add("sync", job);
+  return unique.size;
+}
