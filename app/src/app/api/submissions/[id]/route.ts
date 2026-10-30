@@ -6,7 +6,7 @@ import { presentSubmission } from "@/lib/grading/present";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Kirjaudu sisään." }, { status: 401 });
 
@@ -26,7 +26,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     db.select().from(schema.submissionResults).where(eq(schema.submissionResults.submissionId, id)),
   ]);
 
-  return NextResponse.json(presentSubmission(submission, cases, results), {
+  // The student's own code is included on request, for reopening an earlier submission.
+  const includeSource = new URL(request.url).searchParams.get("includeSource") === "1";
+  const body = presentSubmission(submission, cases, results);
+  return NextResponse.json(includeSource ? { ...body, sourceCode: submission.sourceCode } : body, {
     headers: { "Cache-Control": "no-store" },
   });
 }
