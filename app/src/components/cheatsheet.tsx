@@ -71,40 +71,60 @@ function NoteEditor({ card }: { card: CheatsheetCard }) {
   );
 }
 
-function Card({ card }: { card: CheatsheetCard }) {
+function Card({ card, open, onToggle }: { card: CheatsheetCard; open: boolean; onToggle: (open: boolean) => void }) {
   return (
-    <article className="grid gap-2 rounded-xl border border-border bg-surface p-4 break-inside-avoid" data-concept={card.id}>
-      <h3 className="font-semibold">{card.title}</h3>
-      <div className="prose-exercise text-sm">
-        <Assignment markdown={card.explanationMarkdown} />
+    <details
+      open={open}
+      onToggle={(e) => {
+        const next = (e.currentTarget as HTMLDetailsElement).open;
+        if (next !== open) onToggle(next);
+      }}
+      className="rounded-xl border border-border bg-surface break-inside-avoid"
+      data-concept={card.id}
+    >
+      <summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-2.5 font-medium">
+        <span>{card.title}</span>
+        {card.note && (
+          <span className="shrink-0 text-xs font-normal text-muted" title="Kortissa on oma muistiinpano">
+            ✎ <span className="sr-only">oma muistiinpano</span>
+          </span>
+        )}
+      </summary>
+      <div className="grid gap-2 border-t border-border p-4">
+        <div className="prose-exercise text-sm">
+          <Assignment markdown={card.explanationMarkdown} />
+        </div>
+        <div className="prose-exercise text-sm">
+          <BlockSnippet text={card.exampleCode.replace(/\n$/, "")} />
+        </div>
+        <p className="text-xs text-muted print:hidden">
+          Vedä esimerkki tai koodisana editoriin, tai kopioi napauttamalla.
+        </p>
+        {card.exampleStdout && (
+          <details className="text-sm">
+            <summary className="cursor-pointer text-muted">Esimerkin tuloste</summary>
+            <pre className="mt-1 overflow-x-auto rounded-md border border-border bg-bg p-2 font-mono">
+              {card.exampleStdin && (
+                <span className="text-muted">
+                  {"# syöte:\n"}
+                  {card.exampleStdin}
+                  {"# tuloste:\n"}
+                </span>
+              )}
+              {card.exampleStdout}
+            </pre>
+          </details>
+        )}
+        {card.note && <p className="hidden text-sm print:block">Muistiinpano: {card.note}</p>}
+        <NoteEditor card={card} />
+        <p className="text-xs text-muted">
+          Opittu tehtävässä{" "}
+          <Link href={`/exercises/${card.learnedIn.exerciseId}`} className="underline">
+            {card.learnedIn.title}
+          </Link>
+        </p>
       </div>
-      <div className="prose-exercise text-sm">
-        <BlockSnippet text={card.exampleCode.replace(/\n$/, "")} />
-      </div>
-      {card.exampleStdout && (
-        <details className="text-sm">
-          <summary className="cursor-pointer text-muted">Esimerkin tuloste</summary>
-          <pre className="mt-1 overflow-x-auto rounded-md border border-border bg-bg p-2 font-mono">
-            {card.exampleStdin && (
-              <span className="text-muted">
-                {"# syöte:\n"}
-                {card.exampleStdin}
-                {"# tuloste:\n"}
-              </span>
-            )}
-            {card.exampleStdout}
-          </pre>
-        </details>
-      )}
-      {card.note && <p className="hidden text-sm print:block">Muistiinpano: {card.note}</p>}
-      <NoteEditor card={card} />
-      <p className="text-xs text-muted">
-        Opittu tehtävässä{" "}
-        <Link href={`/exercises/${card.learnedIn.exerciseId}`} className="underline">
-          {card.learnedIn.title}
-        </Link>
-      </p>
-    </article>
+    </details>
   );
 }
 
@@ -117,17 +137,43 @@ function toMarkdown(cards: CheatsheetCard[]): string {
   return lines.join("\n");
 }
 
-/** Search box + cards. `grouped` shows topic headings (the full cheat sheet page). */
-export function CheatsheetView({ cards, grouped = false }: { cards: CheatsheetCard[]; grouped?: boolean }) {
+const cardKey = (card: CheatsheetCard) => `${card.language}/${card.id}`;
+const topicAnchor = (topic: string) =>
+  `aihe-${topic.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-")}`;
+
+/**
+ * Search box + cards grouped by topic. Cards are closed, so the student scans titles and
+ * opens only what they need; a search opens the matching cards. `full` is the whole cheat
+ * sheet page: a topic menu, open/close all, print and download.
+ */
+export function CheatsheetView({ cards, full = false }: { cards: CheatsheetCard[]; full?: boolean }) {
   const [query, setQuery] = useState("");
+  const [openKeys, setOpenKeys] = useState<Set<string>>(new Set());
   const searchId = useId();
   const visible = useMemo(() => cards.filter((c) => matches(c, query)), [cards, query]);
+  const searching = query.trim() !== "";
 
   const groups = useMemo(() => {
     const map = new Map<string, CheatsheetCard[]>();
     for (const card of visible) map.set(card.topicLabel, [...(map.get(card.topicLabel) ?? []), card]);
     return [...map.entries()];
   }, [visible]);
+
+  const isOpen = (card: CheatsheetCard) => searching || openKeys.has(cardKey(card));
+  const toggle = (card: CheatsheetCard, open: boolean) =>
+    setOpenKeys((keys) => {
+      const next = new Set(keys);
+      if (open) next.add(cardKey(card));
+      else next.delete(cardKey(card));
+      return next;
+    });
+  const setAll = (open: boolean) => setOpenKeys(open ? new Set(cards.map(cardKey)) : new Set());
+
+  const print = () => {
+    setAll(true);
+    // Let React open every card before the print dialog takes its snapshot.
+    setTimeout(() => window.print(), 50);
+  };
 
   const download = () => {
     const url = URL.createObjectURL(new Blob([toMarkdown(cards)], { type: "text/markdown;charset=utf-8" }));
@@ -147,6 +193,7 @@ export function CheatsheetView({ cards, grouped = false }: { cards: CheatsheetCa
     );
   }
 
+  const Heading = full ? "h2" : "h3";
   return (
     <div className="grid gap-3">
       <div className="flex flex-wrap items-center gap-2 print:hidden">
@@ -161,9 +208,15 @@ export function CheatsheetView({ cards, grouped = false }: { cards: CheatsheetCa
           placeholder="Hae, esim. print tai silmukka"
           className="min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 py-2 text-sm"
         />
-        {grouped && (
+        {full && (
           <>
-            <button type="button" onClick={() => window.print()} className="rounded-lg border border-border px-3 py-2 text-sm">
+            <button type="button" onClick={() => setAll(true)} className="rounded-lg border border-border px-3 py-2 text-sm">
+              Avaa kaikki
+            </button>
+            <button type="button" onClick={() => setAll(false)} className="rounded-lg border border-border px-3 py-2 text-sm">
+              Sulje kaikki
+            </button>
+            <button type="button" onClick={print} className="rounded-lg border border-border px-3 py-2 text-sm">
               Tulosta
             </button>
             <button type="button" onClick={download} className="rounded-lg border border-border px-3 py-2 text-sm">
@@ -172,22 +225,35 @@ export function CheatsheetView({ cards, grouped = false }: { cards: CheatsheetCa
           </>
         )}
       </div>
+      {full && !searching && (
+        <nav aria-label="Aiheet" className="print:hidden">
+          <ul className="flex flex-wrap gap-2 text-sm">
+            {groups.map(([topic, group]) => (
+              <li key={topic}>
+                <a href={`#${topicAnchor(topic)}`} className="inline-block rounded-full border border-border px-3 py-1 hover:border-accent">
+                  {topic} <span className="text-muted">({group.length})</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
       <p className="sr-only" role="status">
-        {visible.length} korttia
+        {searching ? `${visible.length} korttia` : ""}
       </p>
       {visible.length === 0 && <p className="text-sm text-muted">Ei osumia haulle.</p>}
-      {grouped
-        ? groups.map(([topic, group]) => (
-            <section key={topic} className="grid gap-3">
-              <h2 className="text-lg font-semibold">{topic}</h2>
-              <div className="grid gap-3 md:grid-cols-2">
-                {group.map((card) => (
-                  <Card key={`${card.language}/${card.id}`} card={card} />
-                ))}
-              </div>
-            </section>
-          ))
-        : visible.map((card) => <Card key={`${card.language}/${card.id}`} card={card} />)}
+      {groups.map(([topic, group]) => (
+        <section key={topic} aria-labelledby={topicAnchor(topic)} className="grid gap-2">
+          <Heading id={topicAnchor(topic)} className={`scroll-mt-4 font-semibold ${full ? "text-lg" : "text-sm text-muted"}`}>
+            {topic}
+          </Heading>
+          <div className="grid gap-2">
+            {group.map((card) => (
+              <Card key={cardKey(card)} card={card} open={isOpen(card)} onToggle={(open) => toggle(card, open)} />
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }
