@@ -24,7 +24,7 @@ export default async function CheatsheetPage() {
       <p className="mb-6 text-muted print:hidden">
         Kaikki tähän mennessä oppimasi asiat yhdessä paikassa. Lista kasvaa jokaisesta palauttamastasi tehtävästä.
       </p>
-      <CheatsheetView cards={cards} grouped />
+      <CheatsheetView cards={cards} full />
     </>
   );
 }
