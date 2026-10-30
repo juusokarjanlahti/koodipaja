@@ -1,0 +1,6 @@
+id: if
+title: Ehtolause if, elif ja else
+topic: ehdot
+order: 5
+example_stdin: "-3\n"
+example_stdout: "Luku on negatiivinen\n"

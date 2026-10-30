@@ -1,0 +1,6 @@
+id: for
+title: Toisto for-silmukalla ja range()
+topic: silmukat
+order: 7
+example_stdin: ""
+example_stdout: "0\n1\n2\nomena\nbanaani\n"

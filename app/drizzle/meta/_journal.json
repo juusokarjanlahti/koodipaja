@@ -15,6 +15,13 @@
       "when": 1793314624160,
       "tag": "0001_output_match",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793319215288,
+      "tag": "0002_cheatsheet",
+      "breakpoints": true
     }
   ]
 }

@@ -59,6 +59,16 @@ näkymää itse milloin vain.
   (`outline`) ja jää lopulta pois (`none`). Opiskelija voi aina lisätä oman tyhjän
   suunnitelmapohjan Suunnittele-painikkeella ([ADR 0004](../adr/0004-suunnitelma-kommentteina.md)).
 
+## Kertaus ilman etsimistä
+
+- **Oma muistilista kertyy itsestään:** jokainen palautettu tehtävä lisää sen opettamat
+  käsitekortit opiskelijan muistilistaan (#69). Kortissa on lyhyt selitys, tavallisin
+  sudenkuoppa ja esimerkki, jonka voi kopioida tai vetää editoriin.
+- **Tehtäväsivulla muistilista on oletuksena suljettu:** muistista palauttaminen on itsessään
+  tehokas oppimiskeino, joten kertaus on yhden napautuksen päässä mutta ei korvaa sitä.
+- **Muistilistasivu** kokoaa kaikki kortit aiheittain, ja sen voi tulostaa tai ladata
+  Markdownina. Opiskelija voi lisätä kortteihin omia muistiinpanoja.
+
 ## Kohti tiimityötä
 
 - **Lokien ja tracebackien lukeminen** harjoitellaan omana taitonaan (#62).

@@ -4,6 +4,7 @@ import {
   integer,
   pgEnum,
   pgTable,
+  primaryKey,
   serial,
   text,
   timestamp,
@@ -39,11 +40,46 @@ export const exercises = pgTable("exercises", {
   starterCode: text("starter_code").notNull(),
   // "lenient" (default) or "exact", see docs/adr/0003-joustava-tulosteen-vertailu.md.
   outputMatch: outputMatchMode("output_match").notNull().default("lenient"),
+  // Concept cards this exercise teaches (concepts/<language>/<id>), for the cheat sheet (#69).
+  concepts: text("concepts").array().notNull().default([]),
   timeLimitSeconds: integer("time_limit_seconds").notNull(),
   memoryLimitMb: integer("memory_limit_mb").notNull(),
   contentHash: text("content_hash").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// Concept cards: the student's automatically built cheat sheet (#69).
+export const concepts = pgTable(
+  "concepts",
+  {
+    language: text("language").notNull(),
+    id: text("id").notNull(),
+    title: text("title").notNull(),
+    topic: text("topic").notNull(),
+    position: integer("position").notNull(),
+    explanationMarkdown: text("explanation_markdown").notNull(),
+    exampleCode: text("example_code").notNull(),
+    exampleStdin: text("example_stdin").notNull().default(""),
+    exampleStdout: text("example_stdout").notNull(),
+    contentHash: text("content_hash").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.language, t.id] })],
+);
+
+// The student's own short notes on a concept card. Visible only to that student.
+export const conceptNotes = pgTable(
+  "concept_notes",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    language: text("language").notNull(),
+    conceptId: text("concept_id").notNull(),
+    note: text("note").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.language, t.conceptId] })],
+);
 
 export const testCases = pgTable(
   "test_cases",
@@ -108,3 +144,4 @@ export type TestCase = typeof testCases.$inferSelect;
 export type Submission = typeof submissions.$inferSelect;
 export type SubmissionResult = typeof submissionResults.$inferSelect;
 export type User = typeof users.$inferSelect;
+export type Concept = typeof concepts.$inferSelect;

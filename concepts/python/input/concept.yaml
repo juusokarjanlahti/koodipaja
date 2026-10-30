@@ -1,0 +1,6 @@
+id: input
+title: Syötteen lukeminen input()-funktiolla
+topic: tulostus-ja-syote
+order: 2
+example_stdin: "Aino\n"
+example_stdout: "Mikä on nimesi? Hei, Aino\n"

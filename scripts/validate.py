@@ -32,6 +32,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 EXERCISES = ROOT / "exercises"
+CONCEPTS = ROOT / "concepts"
+CONCEPT_TOPICS = {"tulostus-ja-syote", "tietotyypit", "ehdot", "silmukat", "listat", "funktiot", "sanakirjat", "tiedostot"}
 MATCH_CASES = Path(__file__).resolve().parent / "output-match-cases.json"
 
 RUNNERS = {
@@ -147,6 +149,12 @@ def validate(folder: Path) -> list[str]:
     if runner is None:
         return errors + [f"{meta_path}: unsupported language {meta['language']!r}"]
 
+    concepts = meta.get("concepts", []) or []
+    known = known_concepts(meta["language"])
+    for concept in concepts:
+        if concept not in known:
+            errors.append(f"{meta_path}: unknown concept {concept!r} (add concepts/{meta['language']}/{concept}/)")
+
     cases = meta["cases"] or []
     if len(cases) < MIN_CASES:
         errors.append(f"{meta_path}: needs at least {MIN_CASES} cases, has {len(cases)}")
@@ -197,6 +205,46 @@ def validate(folder: Path) -> list[str]:
     return errors
 
 
+# --- Concept cards (the student's cheat sheet, #69) -------------------------------------
+
+def known_concepts(language: str) -> set[str]:
+    folder = CONCEPTS / language
+    return {p.parent.name for p in folder.glob("*/concept.yaml")} if folder.exists() else set()
+
+
+def validate_concept(folder: Path) -> list[str]:
+    errors: list[str] = []
+    meta_path = folder / "concept.yaml"
+    try:
+        meta = yaml.safe_load(meta_path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as exc:
+        return [f"{meta_path}: invalid YAML: {exc}"]
+    language = folder.parent.name
+    runner = RUNNERS.get(language)
+    if runner is None:
+        return [f"{folder}: unsupported language {language!r}"]
+    for field in ("id", "title", "topic", "order", "example_stdout"):
+        if field not in meta:
+            errors.append(f"{meta_path}: missing field {field!r}")
+    if errors:
+        return errors
+    if meta["id"] != folder.name:
+        errors.append(f"{meta_path}: id {meta['id']!r} != folder name {folder.name!r}")
+    if meta["topic"] not in CONCEPT_TOPICS:
+        errors.append(f"{meta_path}: topic must be one of {sorted(CONCEPT_TOPICS)}")
+    if not (folder / "README.md").exists():
+        errors.append(f"{folder}: missing README.md")
+    example = folder / f"example{runner['ext']}"
+    if not example.exists():
+        return errors + [f"{folder}: missing {example.name}"]
+    # The example is shown to students as a correct pattern, so it must run exactly as stated.
+    case = {"name": "example", "stdin": meta.get("example_stdin", ""), "expected_stdout": meta["example_stdout"]}
+    result = run_case(runner["cmd"], example, case, 2.0, "exact")
+    if result.outcome != "exact":
+        errors.append(f"{example}: output does not match example_stdout exactly: {result.detail}")
+    return errors
+
+
 def main(argv: list[str]) -> int:
     rule_errors = self_test()
     if rule_errors:
@@ -207,6 +255,19 @@ def main(argv: list[str]) -> int:
     print("ok    output comparison self-test")
     if argv == ["--self-test"]:
         return 0
+
+    concept_failed = 0
+    if not argv:
+        for folder in sorted(p.parent for p in CONCEPTS.glob("*/*/concept.yaml")):
+            errors = validate_concept(folder)
+            label = folder.relative_to(ROOT)
+            if errors:
+                concept_failed += 1
+                print(f"FAIL  {label}")
+                for err in errors:
+                    print(f"      - {err}")
+            else:
+                print(f"ok    {label}")
 
     if argv:
         folders = [Path(arg).resolve() for arg in argv]
@@ -230,7 +291,9 @@ def main(argv: list[str]) -> int:
             print(f"ok    {label}")
 
     print(f"\n{len(folders) - failed}/{len(folders)} exercises valid")
-    return 1 if failed else 0
+    if concept_failed:
+        print(f"{concept_failed} concept card(s) invalid")
+    return 1 if failed or concept_failed else 0
 
 
 if __name__ == "__main__":

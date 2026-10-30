@@ -24,7 +24,11 @@ exercises/<language>/<NN-slug>/   One exercise per folder (content-as-code)
   solution.<ext>                  Reference solution; MUST match every case exactly
   wrong/*.<ext>                   Conceptually wrong solutions; each MUST fail >= 1 case
   accepted/*.<ext>                (optional) Formatting-only differences; each MUST pass
-scripts/validate.py               Validates every exercise locally (no Judge0 needed)
+concepts/<language>/<id>/         Concept cards for the student's cheat sheet (#69)
+  concept.yaml                    id, title, topic, order, example_stdin, example_stdout
+  README.md                       Short Finnish explanation + the most common pitfall
+  example.<ext>                   Minimal correct example; MUST produce example_stdout exactly
+scripts/validate.py               Validates every exercise and concept card locally (no Judge0 needed)
 scripts/output-match-cases.json   Shared comparison vectors (Python and TypeScript)
 docs/                             Architecture and decisions (ADRs)
 app/                              Next.js application
@@ -75,6 +79,10 @@ app/                              Next.js application
   Fade to `outline` and then `none` as the course progresses. The plan describes steps,
   not code, and must not give away the key insight the exercise is meant to teach.
   Never use AI at runtime to check plans or break tasks down.
+- List the concepts an exercise teaches in `concepts: [...]` (ids of `concepts/<language>/`).
+  They are added to the student's cheat sheet when they submit the exercise. Add a concept
+  card when an exercise introduces something new; keep cards short (2-4 sentences, one
+  pitfall, one example).
 - `id` in exercise.yaml must equal the folder name.
 - Run `python3 scripts/validate.py` before committing. CI runs the same script.
 

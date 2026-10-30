@@ -1,0 +1,6 @@
+id: while
+title: Toisto while-silmukalla ja break
+topic: silmukat
+order: 6
+example_stdin: "5\n2\n0\n"
+example_stdout: "Summa: 7\n"
