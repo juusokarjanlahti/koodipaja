@@ -21,12 +21,13 @@ Kirjautuminen on vielä kehityskäyttöön tarkoitettu.
 |---|---|
 | Tehtäväformaatti (`exercise.yaml`, mallivastaus, väärät vastaukset) | ✅ main |
 | CI-validointi (`scripts/validate.py`) | ✅ main |
-| Paikallinen infra: PostgreSQL, Redis, eristetty Judge0 (Docker Compose) | 🚧 `phase-1-infra` |
-| Next.js-sovellus, tietokantaskeema, tehtävien tuonti Gitistä | 🚧 `phase-2-app` |
-| Koodieditori, palautus jonon kautta Judge0:aan, testikohtainen palaute | 🚧 vaihe 3 |
-| Kehityskirjautuminen | 🚧 vaihe 3 |
-| Peruskurssin ensimmäiset moduulit, vähintään 15 tehtävää (muuttujat, ehtolauseet, silmukat) | ⬜ (2 valmiina) |
-| Sandboxin pakotestit, tuotantokelpoinen EU-hosting | ⬜ |
+| Paikallinen infra: PostgreSQL, Redis, go-judge-sandbox (Docker Compose, ADR 0006) | ✅ main (go-judge-kuva testaamatta) |
+| Next.js-sovellus, tietokantaskeema, tehtävien tuonti Gitistä | ✅ main |
+| Koodieditori, palautus jonon kautta sandboxiin, testikohtainen palaute | ✅ main |
+| Kehityskirjautuminen | ✅ main |
+| Peruskurssin ensimmäiset moduulit, vähintään 15 tehtävää (muuttujat, ehtolauseet, silmukat) | ✅ 15 tehtävää |
+| Sandboxin pakotestit (`npm run runner-check`, CI:ssä) | ✅ main |
+| Tuotantokelpoinen EU-hosting | ⬜ |
 
 **Poistumiskriteerit**
 - Opiskelija voi kirjautua, avata tehtävän, palauttaa ja nähdä tuloksen jokaisesta testistä.
@@ -40,6 +41,18 @@ Kirjautuminen on vielä kehityskäyttöön tarkoitettu.
 Epicit: #4, #5, #6, #7 (sekä #17, #19 epicistä #2)
 
 **Tavoite:** yksi Ohjelmoinnin perusteet Pythonilla -toteutus ajetaan kokonaan Koodipajassa Moodlen kautta.
+
+| Sisältö | Tila |
+|---|---|
+| LTI 1.3 -kirjautuminen Moodlesta, roolit kurssikohtaisesti (#23) | ✅ main, testattu Moodle 4.5:llä |
+| Arvosanojen palautus Moodleen, paras tulos säilyy (#25) | ✅ main, testattu Moodle 4.5:llä |
+| Tehtävän valinta Moodlen aktiviteetiksi, Deep Linking (#24) | ✅ main, testattu Moodle 4.5:llä |
+| Tehtävät myös Moodle CodeRunner -kysymyksinä ([coderunner.md](coderunner.md)) | ✅ main |
+| Tehtäväsarjat | ⬜ |
+| Opettajan näkymä | ⬜ |
+| Saavutettavuus: editorin näppäimistökäyttö (#29) | ✅ main; ruudunlukijatestaus ⬜ |
+| Tietosuoja-aineisto, saavutettavuusseloste | ⬜ |
+| Python-peruskurssi 60–80 tehtävää | 🚧 15 |
 
 **Laajuus**
 - LTI 1.3 -kirjautuminen Moodlesta (opiskelija ja opettaja roolit Moodlesta).
