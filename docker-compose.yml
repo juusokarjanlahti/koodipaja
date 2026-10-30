@@ -53,6 +53,11 @@ services:
     # go-judge creates namespaces and cgroups for every run.
     privileged: true
     shm_size: 512m
+    # Equal limits mean no swap for the whole container cgroup tree. Without this, on
+    # cgroup v2 a sandboxed program over its memory limit is swapped out instead of
+    # stopped (ADR 0006). Size for parallelism x per-run limit plus compilers.
+    mem_limit: 4g
+    memswap_limit: 4g
     environment:
       GO_JUDGE_AUTH_TOKEN: ${GO_JUDGE_AUTH_TOKEN:?set GO_JUDGE_AUTH_TOKEN in .env}
     ports:

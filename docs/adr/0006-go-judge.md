@@ -61,6 +61,23 @@ päättyi 2024) ja yhden ylläpitäjän riippuvuus.
 - **CI** käynnistää go-judgen jokaisessa pull requestissa (`infra/go-judge/dev.sh`) ja ajaa
   samat tarkistukset. CI-ympäristö käyttää cgroup v2:ta, kehitysympäristö v1:tä.
 
+## Löydös: muistiraja ja swap cgroup v2:ssa
+
+CI:n turvatesti paljasti, että cgroup v2 -koneella, jossa on swap, 1 GiB:n varaus onnistui
+64 MiB:n rajalla. go-judgen taustakirjasto (go-sandbox) asettaa cgroup v2:ssa vain
+`memory.max`-rajan eikä `memory.swap.max`-rajaa, joten rajan ylittävä ohjelma valuu swappiin
+eikä pysähdy. cgroup v1:ssä ongelmaa ei esiinny.
+
+Korjaukset:
+- `infra/go-judge/dev.sh` kieltäytyy käynnistymästä cgroup v2 -koneella, jossa swap on päällä.
+- CI ajaa `swapoff -a` ennen sandboxin käynnistystä.
+- Docker Composessa sandbox-kontilla on `memswap_limit` = `mem_limit`, jolloin koko kontin
+  cgroup-puu on ilman swappia.
+- go-judge ajetaan `-no-fallback`-asetuksella: se ei käynnisty, jos cgroupit eivät toimi.
+- Tuotantopalvelimella swap pidetään pois päältä tai sandbox-kontin swap rajataan nollaan.
+
+Löydöksestä kannattaa tehdä issue go-judge-projektiin.
+
 ## Mitä ei ole testattu
 
 - **Tuotantokuva `infra/go-judge/Dockerfile`** on luonnos: sitä ei voitu rakentaa

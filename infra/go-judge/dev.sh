@@ -32,6 +32,15 @@ GO_JUDGE_TS_TYPE_ROOTS=$TYPES_IN_SANDBOX"
 # --print-env has no side effects, so it is safe while go-judge is running.
 if [[ "${1:-}" == "--print-env" ]]; then echo "$ENV_LINES"; exit 0; fi
 
+# On cgroup v2, go-judge limits memory with memory.max only. With swap enabled a program
+# over its limit is swapped out instead of stopped, so memory limits are not enforced.
+if [[ "$(stat -fc %T /sys/fs/cgroup)" == "cgroup2fs" ]] && [[ "$(awk 'NR > 1' /proc/swaps | wc -l)" -gt 0 ]] \
+   && [[ "${GO_JUDGE_ALLOW_SWAP:-0}" != "1" ]]; then
+  echo "error: swap is enabled on a cgroup v2 host, so the sandbox could not enforce memory limits." >&2
+  echo "       Run 'sudo swapoff -a' first (or set GO_JUDGE_ALLOW_SWAP=1 to start anyway)." >&2
+  exit 1
+fi
+
 mkdir -p "$WORK"
 BIN="$WORK/go-judge-$VERSION"
 if [[ ! -x "$BIN" ]]; then
