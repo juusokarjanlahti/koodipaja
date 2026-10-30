@@ -3,6 +3,7 @@ import { asc } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
 import { LANGUAGE_LABELS, languageRank } from "@/lib/exercises/languages";
+import { firstUnsolved, numberedTitle } from "@/lib/exercises/order";
 import { getExerciseStatuses, type ExerciseStatus } from "@/lib/progress";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +50,18 @@ export default async function HomePage() {
                   </span>
                 )}
               </div>
+              {user && (() => {
+                const next = firstUnsolved(items, (id) => statuses.get(id) === "ratkaistu");
+                if (!next) return null;
+                const started = items.some((ex) => statuses.get(ex.id) !== undefined);
+                return (
+                  <p className="mb-3">
+                    <Link href={`/exercises/${next.id}`} className="font-medium text-accent underline">
+                      {started ? "Jatka tästä" : "Aloita tästä"}: {numberedTitle(next.id, next.title)}
+                    </Link>
+                  </p>
+                );
+              })()}
               <ul className="grid gap-3 sm:grid-cols-2">
                 {items.map((ex) => (
                   <li key={ex.id}>
@@ -57,7 +70,7 @@ export default async function HomePage() {
                       className="block rounded-xl border border-border bg-surface p-4 transition-colors hover:border-accent"
                     >
                       <div className="flex items-baseline justify-between gap-3">
-                        <span className="font-medium">{ex.title}</span>
+                        <span className="font-medium">{numberedTitle(ex.id, ex.title)}</span>
                         {statuses.get(ex.id) === "ratkaistu" && (
                           <span className="rounded bg-ok-bg px-2 py-0.5 text-xs font-medium text-ok">✓ Ratkaistu</span>
                         )}
