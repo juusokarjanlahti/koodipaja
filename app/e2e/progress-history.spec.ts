@@ -14,7 +14,11 @@ test("progress shows on the exercise list and earlier submissions can be reopene
 
   await page.goto("/");
   const python = page.locator("section", { has: page.getByRole("heading", { name: "Python" }) });
-  await expect(python.getByText("Ratkaistu 0 / 2")).toBeVisible();
+  // Read the total from the page so adding exercises never breaks this test.
+  const progress = python.getByText(/^Ratkaistu \d+ \/ \d+$/);
+  await expect(progress).toHaveText(/^Ratkaistu 0 \/ \d+$/);
+  const total = Number((await progress.textContent())?.match(/\/ (\d+)/)?.[1]);
+  expect(total).toBeGreaterThan(0);
 
   // First attempt does not pass yet.
   await page.goto("/exercises/01-tervehdys");
@@ -43,6 +47,6 @@ test("progress shows on the exercise list and earlier submissions can be reopene
   await expect(page.locator(".cm-content")).toContainText('print("Hei")');
 
   await page.goto("/");
-  await expect(python.getByText("Ratkaistu 1 / 2")).toBeVisible();
+  await expect(progress).toHaveText(`Ratkaistu 1 / ${total}`);
   await expect(python.getByText("✓ Ratkaistu")).toBeVisible();
 });
