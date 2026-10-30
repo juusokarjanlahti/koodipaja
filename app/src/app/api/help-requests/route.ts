@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth/session";
-import { MAX_HELP_MESSAGE, courseForStudentExercise, saveHelpRequest } from "@/lib/help/requests";
+import { MAX_HELP_MESSAGE, courseForStudentExercise, saveHelpRequest, withdrawHelpRequest } from "@/lib/help/requests";
 
 const bodySchema = z.object({
   exerciseId: z.string().min(1).max(200),
@@ -25,5 +25,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Tälle tehtävälle ei löydy opettajaa, jolle pyyntö voisi mennä." }, { status: 404 });
   }
   await saveHelpRequest({ userId: user.id, exerciseId, courseId, kind, message: message?.trim() || null });
+  return NextResponse.json({ ok: true });
+}
+
+/** The student withdraws their open request for an exercise. */
+export async function DELETE(request: Request) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Kirjaudu sisään." }, { status: 401 });
+  const exerciseId = new URL(request.url).searchParams.get("exerciseId");
+  if (!exerciseId) return NextResponse.json({ error: "Virheellinen pyyntö." }, { status: 400 });
+  await withdrawHelpRequest(user.id, exerciseId);
   return NextResponse.json({ ok: true });
 }

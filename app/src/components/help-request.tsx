@@ -32,6 +32,14 @@ export function HelpRequest({ exerciseId, initial }: { exerciseId: string; initi
     setOpen(false);
   }
 
+  async function withdraw() {
+    setBusy(true);
+    const res = await fetch(`/api/help-requests?exerciseId=${encodeURIComponent(exerciseId)}`, { method: "DELETE" });
+    setBusy(false);
+    if (res.ok) setCurrent(null);
+    else setError("Peruminen ei onnistunut.");
+  }
+
   return (
     <section aria-labelledby="help-heading" className="rounded-xl border border-border bg-surface p-4">
       <h2 id="help-heading" className="font-semibold">
@@ -49,14 +57,22 @@ export function HelpRequest({ exerciseId, initial }: { exerciseId: string; initi
       </div>
 
       {!open ? (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-expanded={false}
-          className="mt-2 rounded border border-border px-3 py-1.5 text-sm font-medium"
-        >
-          {current?.status === "open" ? "Muokkaa pyyntöä" : "Pyydä apua"}
-        </button>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-expanded={false}
+            className="rounded border border-border px-3 py-1.5 text-sm font-medium"
+          >
+            {current?.status === "open" ? "Muokkaa pyyntöä" : "Pyydä apua"}
+          </button>
+          {current?.status === "open" && (
+            <button type="button" onClick={withdraw} disabled={busy} className="rounded border border-border px-3 py-1.5 text-sm">
+              Peruuta pyyntö
+            </button>
+          )}
+        </div>
+        {error && <p className="mt-2 text-sm text-fail">{error}</p>}
       ) : (
         <form onSubmit={send} className="mt-3 grid gap-3">
           <fieldset className="grid gap-1 text-sm">

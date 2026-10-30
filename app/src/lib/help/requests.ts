@@ -108,3 +108,18 @@ export async function answerHelpRequest(courseId: number, requestId: string, rep
     .returning({ id: schema.helpRequests.id });
   return rows.length > 0;
 }
+
+/** The student withdraws their own open request; it is deleted, nothing is kept. */
+export async function withdrawHelpRequest(userId: string, exerciseId: string): Promise<boolean> {
+  const rows = await getDb()
+    .delete(schema.helpRequests)
+    .where(
+      and(
+        eq(schema.helpRequests.userId, userId),
+        eq(schema.helpRequests.exerciseId, exerciseId),
+        eq(schema.helpRequests.status, "open"),
+      ),
+    )
+    .returning({ id: schema.helpRequests.id });
+  return rows.length > 0;
+}

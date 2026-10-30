@@ -73,7 +73,13 @@ with an answer that really is wrong; the teacher replies privately.
   only within that course.
 - Native `<button>` and labelled `<textarea>`, status text in a `role="status"` region, no
   colour-only state (WCAG 2.1 AA).
-- Requests and approvals are deleted with the course data under the retention rules (#33).
+- **Withdrawing:** the student can withdraw their own open request at any time; it is
+  deleted. Requests never expire on a timer.
+- **Personal data:** submissions and help messages are linked to an identifiable student,
+  so they are personal data. `approved_outputs` stores only a hash, the approving teacher
+  and the reason, never the student; the reason field warns teachers not to quote a
+  student's code. Requests and approvals are deleted with the course data under the
+  retention rules (#33).
 
 ## Acceptance criteria
 
@@ -87,10 +93,10 @@ second student with the same output passes without asking; a rejected group stay
 2. `approved_outputs`, the grading check, approval action and re-evaluation (#50).
 3. Grouping and the "already approved or waiting" notices (#51).
 
-## Open questions for the owner
+## Decisions by the owner
 
-1. Approval is scoped to the course (assumed). Should a teacher also be able to make it
-   global for the whole library? That would affect other universities' courses, so I
-   suggest not, and offering an `accepted/` pull request instead.
-2. Do you want a hard limit on how long a request stays open, or is the teacher's list
-   enough for the pilot?
+- The teacher's reply is private to the student by default.
+- One open request per student and exercise; the student may withdraw it; no expiry.
+- Approval is scoped to the course. Making it library-wide stays a maintainer action
+  (an `accepted/` pull request), not a teacher power; a "propose to the library" step may
+  follow later.
