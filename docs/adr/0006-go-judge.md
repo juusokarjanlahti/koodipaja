@@ -80,9 +80,10 @@ Löydöksestä kannattaa tehdä issue go-judge-projektiin.
 
 ## Mitä ei ole testattu
 
-- **Tuotantokuva `infra/go-judge/Dockerfile`** on luonnos: sitä ei voitu rakentaa
-  ympäristössä, jossa se kirjoitettiin (Docker Hub estetty). Sama työkaluketjujen rakenne on
-  testattu CI:ssä dev-skriptin kautta.
+- **Tuotantokuva `infra/go-judge/Dockerfile`** rakennetaan ja testataan jokaisessa PR:ssä
+  quickstart-workflowssa (#88): kaikki tehtävät, sandbox-testit, smoke ja Playwright. Sama
+  työkaluketjujen rakenne on testattu myös dev-skriptin kautta. Tuotantoympäristössä
+  (EU-hosting) kuvaa ei ole vielä ajettu.
 - **Kuormitus** (tenttipiikki) on testaamatta, katso #35.
 
 ## Seuraukset

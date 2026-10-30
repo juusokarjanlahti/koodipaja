@@ -1,6 +1,6 @@
-# go-judge with current language versions (ADR 0006). UNTESTED DRAFT: it could not be
-# built in the environment where it was written (Docker Hub blocked). The same toolchain
-# layout is tested in CI through infra/go-judge/dev.sh.
+# go-judge with current language versions (ADR 0006). Built and tested in every PR by the
+# quickstart workflow (all exercises, sandbox probes, smoke and Playwright); the same
+# toolchain layout is also tested through infra/go-judge/dev.sh.
 #
 #   docker compose build go-judge
 #
