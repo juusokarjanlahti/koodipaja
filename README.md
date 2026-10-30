@@ -19,7 +19,7 @@ cd app && npm run dev:all        # sovellus ja worker; Ctrl+C pysäyttää
 
 Avaa <http://localhost:3000>, kirjaudu millä tahansa sähköpostiosoitteella (vain
 kehityskäyttöön) ja avaa tehtävä. Ensimmäinen `dev-setup.sh` rakentaa sandbox-kuvan
-kääntäjineen, mikä kestää muutaman minuutin. Lisää: [docs/local-dev.md](docs/local-dev.md).
+kääntäjineen, mikä kestää muutaman minuutin. Lisää voi lukea täältä: [docs/local-dev.md](docs/local-dev.md).
 
 ## Periaatteet
 
