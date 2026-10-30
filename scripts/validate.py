@@ -41,6 +41,8 @@ RUNNERS = {
 REQUIRED_FIELDS = {"id", "title", "language", "difficulty", "cases"}
 OUTPUT_MATCH_MODES = {"lenient", "exact"}
 LEVELS = {"perus", "soveltava", "haaste"}
+SCAFFOLDS = {"full", "outline", "none"}
+PLAN_LINE_RE = re.compile(r"^\s*#\s*\d+\.\s*\S", re.MULTILINE)
 MIN_CASES = 3
 MIN_WRONG = 2
 
@@ -137,6 +139,10 @@ def validate(folder: Path) -> list[str]:
     if level not in LEVELS:
         errors.append(f"{meta_path}: level must be one of {sorted(LEVELS)}")
 
+    scaffold = meta.get("scaffold", "none")
+    if scaffold not in SCAFFOLDS:
+        errors.append(f"{meta_path}: scaffold must be one of {sorted(SCAFFOLDS)}")
+
     runner = RUNNERS.get(meta["language"])
     if runner is None:
         return errors + [f"{meta_path}: unsupported language {meta['language']!r}"]
@@ -148,6 +154,16 @@ def validate(folder: Path) -> list[str]:
     for required in ("README.md", f"starter{runner['ext']}"):
         if not (folder / required).exists():
             errors.append(f"{folder}: missing {required}")
+
+    # ADR 0004: a plan scaffold means numbered plan comments in the starter code.
+    starter = folder / f"starter{runner['ext']}"
+    if scaffold in ("full", "outline") and starter.exists():
+        plan_lines = len(PLAN_LINE_RE.findall(starter.read_text(encoding="utf-8")))
+        needed = 2 if scaffold == "full" else 1
+        if plan_lines < needed:
+            errors.append(
+                f"{starter}: scaffold '{scaffold}' needs at least {needed} numbered plan comments like '# 1. ...'"
+            )
 
     timeout = float(meta.get("time_limit_seconds", 2))
 

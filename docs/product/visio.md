@@ -63,6 +63,12 @@ Nämä ohjaavat tehtävien sisältöä, palautteen sävyä ja kaikkia ominaisuuk
 6. **Tuki puretaan vähitellen kohti oikeita työkaluja.** Ensikertalainen aloittaa
    yksinkertaisesta näkymästä, ja kurssin edetessä näkymä, vertailun tarkkuus ja
    palaute lähestyvät ammattilaisen ympäristöä (IDE, terminaali, testiraportit).
+7. **Työmuisti on rajallinen: pidä näkyvillä kaikki, mitä ei tarvitse muistaa.**
+   Opiskelijan ei pitäisi joutua muistamaan mitään, minkä alusta voi pitää näkyvillä:
+   tehtävänanto editorin vieressä, esimerkkisyöte valmiina, opitut mallit muistilistassa
+   ja ratkaisusuunnitelma kommentteina koodissa
+   ([ADR 0004](../adr/0004-suunnitelma-kommentteina.md)). Tehtävän laatija päättää, kuinka
+   paljon suunnitelmaa annetaan valmiina, ja opiskelija voi aina pilkkoa tehtävän itse.
 
 Miten periaatteet toteutuvat kurssin aikana: [oppimispolku.md](oppimispolku.md).
 
