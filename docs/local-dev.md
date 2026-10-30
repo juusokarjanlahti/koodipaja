@@ -2,42 +2,59 @@
 
 ## Requirements
 
-- Docker with Compose v2
+- Docker with Compose v2 (Postgres, Redis, go-judge image), or Postgres and Redis installed
+  locally
 - Node.js 22+
 - Python 3.10+ with `pyyaml` (exercise validation)
+- Compilers for the languages you work on: Python, GCC, OpenJDK 21, Rust. Validation and
+  the local sandbox use the ones on your PATH.
 
 ## Start the infrastructure
 
 ```bash
-cp .env.example .env
-cp infra/judge0.conf.example infra/judge0.conf   # then change the passwords
-docker compose up -d
-./infra/judge0-smoke.sh
+cp .env.example .env            # change the passwords and GO_JUDGE_AUTH_TOKEN
+docker compose up -d            # Postgres, Redis and go-judge
 ```
 
-## Judge0 on Ubuntu 22.04 and newer: cgroup v1
+## The code sandbox: go-judge (ADR 0006)
 
-Judge0 1.13.x uses `isolate`, which needs cgroup v1. Ubuntu 22.04+ boots with
-cgroup v2 by default, and then every submission fails with an internal error.
+Student code runs in [go-judge](https://github.com/criyle/go-judge). Every run gets its own
+namespaces (no network, read-only toolchains, a 128 MiB work directory) and cgroup limits for
+CPU time, memory and processes. go-judge works with **both cgroup v1 and v2**, so modern
+Ubuntu and Debian need no kernel changes.
 
-Check which one you have:
+### Without Docker: `infra/go-judge/dev.sh`
+
+Runs a real sandbox directly on your machine, using the compilers on your PATH:
 
 ```bash
-stat -fc %T /sys/fs/cgroup    # "cgroup2fs" = v2, "tmpfs" = v1
+sudo env "PATH=$PATH" ./infra/go-judge/dev.sh          # keep running in a terminal
+./infra/go-judge/dev.sh --print-env >> app/.env.local  # once: tell the app where it is
 ```
 
-Switch to v1 (affects the whole machine; revert by removing the parameter):
+The script downloads a pinned go-judge release, verifies its checksum and bind-mounts your
+toolchains read-only into the sandbox. With rustup, also pass
+`RUSTUP_HOME="$HOME/.rustup" CARGO_HOME="$HOME/.cargo"` to `sudo env`.
+
+### Check the sandbox
 
 ```bash
-sudo sed -i 's/GRUB_CMDLINE_LINUX="/GRUB_CMDLINE_LINUX="systemd.unified_cgroup_hierarchy=0 /' /etc/default/grub
-sudo update-grub && sudo reboot
+cd app && npm run runner-check
 ```
 
-For production, run Judge0 on a dedicated VM configured this way rather than on the
-same host as the app.
+Runs every exercise's reference, wrong and accepted solutions through the sandbox and
+probes the sandbox: no network, no host files, read-only system directories, process,
+memory and time limits. CI runs the same check on every pull request.
 
-## Without Judge0
+## Without any sandbox
 
-`app/scripts/fake-judge0.mjs` implements the small part of the Judge0 API the app uses
-and runs Python **without any sandbox**. It exists only for tests and quick UI work on
-machines where Judge0 cannot run. Never expose it to a network.
+`app/scripts/fake-judge0.mjs` implements the small part of the Judge0 API the app uses and
+runs code **without any sandbox** (`RUNNER=judge0`, `JUDGE0_URL=http://127.0.0.1:2358`).
+It exists only for quick UI work on machines where go-judge cannot run. Never expose it to a
+network.
+
+## Legacy: Judge0 (ADR 0005)
+
+Judge0 is no longer developed (last code change April 2024) and needs cgroup v1. It is
+still available with `docker compose --profile judge0 up -d` and `RUNNER=judge0`; see
+`infra/judge0.conf.example` and `infra/judge0-smoke.sh`.

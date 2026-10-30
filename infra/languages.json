@@ -1,0 +1,55 @@
+{
+  "$comment": "Single source of build and run steps for every language (ADR 0006). Read by scripts/validate.py, app/scripts/fake-judge0.mjs and the go-judge runner (app/src/lib/runner/go-judge.ts). Commands are resolved via PATH. 'artifacts' are the build outputs the run step needs. 'tsconfig' means a tsconfig.json is generated before the build. Limits are multipliers applied to the exercise's own limits.",
+  "python": {
+    "ext": ".py",
+    "source": "main.py",
+    "build": null,
+    "artifacts": [],
+    "run": ["python3", "-I", "main.py"]
+  },
+  "javascript": {
+    "ext": ".js",
+    "source": "main.js",
+    "build": null,
+    "artifacts": [],
+    "run": ["node", "main.js"]
+  },
+  "typescript": {
+    "ext": ".ts",
+    "source": "main.ts",
+    "tsconfig": true,
+    "build": ["tsc", "-p", "tsconfig.json"],
+    "artifacts": ["out/main.js"],
+    "run": ["node", "out/main.js"]
+  },
+  "c": {
+    "ext": ".c",
+    "source": "main.c",
+    "build": ["gcc", "-O2", "-std=c17", "-Wall", "-o", "prog", "main.c", "-lm"],
+    "artifacts": ["prog"],
+    "run": ["./prog"]
+  },
+  "cpp": {
+    "ext": ".cpp",
+    "source": "main.cpp",
+    "build": ["g++", "-O2", "-std=c++20", "-Wall", "-o", "prog", "main.cpp"],
+    "artifacts": ["prog"],
+    "run": ["./prog"]
+  },
+  "java": {
+    "ext": ".java",
+    "source": "Main.java",
+    "build": ["sh", "-c", "javac -encoding UTF-8 -d classes Main.java && jar -J-Djava.io.tmpdir=. --create --file main.jar -C classes ."],
+    "artifacts": ["main.jar"],
+    "run": ["java", "-Xss8m", "-cp", "main.jar", "Main"],
+    "memoryMultiplier": 4,
+    "procLimit": 128
+  },
+  "rust": {
+    "ext": ".rs",
+    "source": "main.rs",
+    "build": ["rustc", "-O", "--edition", "2021", "-o", "prog", "main.rs"],
+    "artifacts": ["prog"],
+    "run": ["./prog"]
+  }
+}

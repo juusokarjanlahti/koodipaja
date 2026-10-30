@@ -1,14 +1,17 @@
-# Local development infrastructure for Koodipaja.
+# Infrastructure for Koodipaja.
 #
 #   cp .env.example .env
-#   cp infra/judge0.conf.example infra/judge0.conf
-#   docker compose up -d
-#   ./infra/judge0-smoke.sh
+#   docker compose up -d                     # Postgres, Redis and the go-judge sandbox
 #
 # The app (app/) runs on the host with `npm run dev` and `npm run worker`.
 #
-# Judge0 is deliberately isolated: it has its own database and Redis and sits on
-# its own network, so code running in the sandbox side can never reach app data.
+# Code runs in go-judge (ADR 0006). It sits on its own network, so code running in the
+# sandbox can never reach app data; each run also gets its own network namespace with no
+# network at all. For a sandbox without Docker see infra/go-judge/dev.sh.
+#
+# Legacy Judge0 (ADR 0005, replaced by ADR 0006) is still available behind a profile:
+#   cp infra/judge0.conf.example infra/judge0.conf
+#   docker compose --profile judge0 up -d     # and set RUNNER=judge0
 
 services:
   db:
@@ -44,7 +47,25 @@ services:
       retries: 10
     networks: [app]
 
+  go-judge:
+    build: ./infra/go-judge
+    restart: unless-stopped
+    # go-judge creates namespaces and cgroups for every run.
+    privileged: true
+    shm_size: 512m
+    # Equal limits mean no swap for the whole container cgroup tree. Without this, on
+    # cgroup v2 a sandboxed program over its memory limit is swapped out instead of
+    # stopped (ADR 0006). Size for parallelism x per-run limit plus compilers.
+    mem_limit: 4g
+    memswap_limit: 4g
+    environment:
+      GO_JUDGE_AUTH_TOKEN: ${GO_JUDGE_AUTH_TOKEN:?set GO_JUDGE_AUTH_TOKEN in .env}
+    ports:
+      - "127.0.0.1:5050:5050"
+    networks: [sandbox]
+
   judge0-server:
+    profiles: [judge0]
     image: judge0/judge0:1.13.1
     restart: unless-stopped
     privileged: true
@@ -60,6 +81,7 @@ services:
     networks: [judge0]
 
   judge0-workers:
+    profiles: [judge0]
     image: judge0/judge0:1.13.1
     restart: unless-stopped
     command: ["./scripts/workers"]
@@ -74,6 +96,7 @@ services:
     networks: [judge0]
 
   judge0-db:
+    profiles: [judge0]
     image: postgres:16-alpine
     restart: unless-stopped
     env_file: ./infra/judge0.conf
@@ -87,6 +110,7 @@ services:
     networks: [judge0]
 
   judge0-redis:
+    profiles: [judge0]
     image: redis:7-alpine
     restart: unless-stopped
     command: ["sh", "-c", "redis-server --appendonly no --requirepass \"$$REDIS_PASSWORD\""]
@@ -100,6 +124,7 @@ services:
 
 networks:
   app:
+  sandbox:
   judge0:
 
 volumes:

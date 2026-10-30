@@ -1,6 +1,8 @@
 # ADR 0005: Ohjelmointikielet ja kääntäjäversiot
 
-- Tila: hyväksytty (oma Judge0-kuva on luonnos, testaamatta)
+- Tila: osittain korvattu: päätökset 1 ja 2 (Judge0 ja oma Judge0-kielikuva) korvattu
+  [ADR 0006](0006-go-judge.md):lla. Kielivalikoima, tavoiteversiot ja kieliriippumattomuus ovat
+  edelleen voimassa.
 - Päivämäärä: 2026-10-30
 
 ## Tausta

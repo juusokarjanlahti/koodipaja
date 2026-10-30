@@ -41,7 +41,8 @@ jobs:
       - run: npm run build
 
   smoke:
-    # End-to-end: app + queue + worker + fake Judge0 (no sandbox; CI only).
+    # End-to-end against a real go-judge sandbox (ADR 0006): every exercise in every
+    # language, sandbox security probes, smoke test and Playwright user flows.
     runs-on: ubuntu-latest
     needs: test
     defaults:
@@ -64,15 +65,16 @@ jobs:
     env:
       DATABASE_URL: postgres://koodipaja:ci@localhost:5432/koodipaja
       REDIS_URL: redis://localhost:6379
-      JUDGE0_URL: http://127.0.0.1:2358
-      JUDGE0_AUTH_HEADER: X-Auth-Token
-      JUDGE0_AUTH_TOKEN: ci-token
+      RUNNER: go-judge
       SESSION_SECRET: ci-secret-0123456789abcdef0123456789abcdef0123456789abcdef
       DEV_LOGIN: "true"
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
-      # Compilers for every exercise language, used by the fake Judge0 (ADR 0005).
+      # Toolchains for every exercise language; go-judge mounts them read-only (ADR 0006).
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -84,10 +86,18 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
       - run: npm ci
+      - name: Start go-judge sandbox
+        run: |
+          # cgroup v2 memory limits do not cover swap (ADR 0006), so turn swap off.
+          sudo swapoff -a
+          sudo env "PATH=$PATH" "RUSTUP_HOME=${RUSTUP_HOME:-$HOME/.rustup}" "CARGO_HOME=${CARGO_HOME:-$HOME/.cargo}" \
+            ../infra/go-judge/dev.sh > "$RUNNER_TEMP/go-judge.log" 2>&1 &
+          for i in $(seq 1 90); do curl -fs -H "Authorization: Bearer localtoken" localhost:5050/version && break; sleep 1; done
+          ../infra/go-judge/dev.sh --print-env >> "$GITHUB_ENV"
       - run: npm run db:migrate
       - run: npm run import-exercises
+      - run: npm run runner-check
       - run: |
-          npm run fake-judge0 &
           npm run worker &
           npx next dev -p 3000 &
           for i in $(seq 1 90); do curl -fs localhost:3000/login >/dev/null && break; sleep 1; done
@@ -96,3 +106,10 @@ jobs:
       - run: npm run e2e
         env:
           APP_URL: http://localhost:3000
+      - if: failure()
+        run: |
+          sudo tail -n 80 "$RUNNER_TEMP/go-judge.log" || true
+          log="$(sudo grep -iE 'cgroup|fallback|error|warn|fatal' "$RUNNER_TEMP/go-judge.log" 2>/dev/null | tail -n 25 | cut -c1-300 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
+          echo "::warning title=go-judge log::${log:-empty}"
+          echo "::warning title=cgroup::$(stat -fc %T /sys/fs/cgroup) $(uname -r) $(id -u)"
+          echo "::warning title=go-judge config::$(curl -s -H 'Authorization: Bearer localtoken' localhost:5050/config | head -c 400)"

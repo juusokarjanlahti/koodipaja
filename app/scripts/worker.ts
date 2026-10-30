@@ -5,15 +5,14 @@
  */
 import { Worker } from "bullmq";
 import { closeDb } from "../src/lib/db";
-import { gradeSubmission, judge0Runner, markSubmissionFailed } from "../src/lib/grading/grade";
-import { judge0ConfigFromEnv, runOnJudge0, type RunRequest } from "../src/lib/judge0/client";
+import { gradeSubmission, markSubmissionFailed } from "../src/lib/grading/grade";
+import { runnerFromEnv, runnerKind, type RunRequest } from "../src/lib/runner";
 import { redisConnection, SUBMISSION_QUEUE, type SubmissionJob } from "../src/lib/queue";
 import { toRunOutput, type RunOutput } from "../src/lib/runs/output";
 import { RUN_QUEUE } from "../src/lib/runs/queue";
 
 const concurrency = Number(process.env.WORKER_CONCURRENCY ?? 4);
-const judge0 = judge0ConfigFromEnv();
-const runner = judge0Runner(judge0);
+const runner = runnerFromEnv();
 
 const worker = new Worker<SubmissionJob>(
   SUBMISSION_QUEUE,
@@ -35,12 +34,14 @@ worker.on("failed", async (job, err) => {
 // "Aja omalla syötteellä": result goes back to the waiting API request, nothing is stored.
 const runWorker = new Worker<RunRequest, RunOutput>(
   RUN_QUEUE,
-  async (job) => toRunOutput(await runOnJudge0(judge0, job.data)),
+  async (job) => toRunOutput(await runner(job.data)),
   { connection: redisConnection(), concurrency },
 );
 runWorker.on("failed", (_job, err) => console.error(`run failed: ${err.message}`));
 
-console.log(`worker listening on "${SUBMISSION_QUEUE}" and "${RUN_QUEUE}" with concurrency ${concurrency}`);
+console.log(
+  `worker listening on "${SUBMISSION_QUEUE}" and "${RUN_QUEUE}" with concurrency ${concurrency}, runner ${runnerKind()}`,
+);
 
 async function shutdown() {
   console.log("shutting down");
