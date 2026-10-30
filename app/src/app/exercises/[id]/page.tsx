@@ -29,22 +29,21 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
     : [];
 
   const cases = await db
-    .select({ stdin: schema.testCases.stdin, hidden: schema.testCases.hidden })
+    .select({ stdin: schema.testCases.stdin, expectedStdout: schema.testCases.expectedStdout, hidden: schema.testCases.hidden })
     .from(schema.testCases)
     .where(eq(schema.testCases.exerciseId, id))
     .orderBy(asc(schema.testCases.position));
-  const caseCount = cases.length;
   const cheatsheet = user ? await getCheatsheet(user.id) : [];
   const history = user ? await getSubmissionHistory(user.id, exercise.id) : [];
   // Prefill "Aja" with the first visible example so the first run works straight away.
-  const exampleStdin = cases.find((c) => !c.hidden)?.stdin ?? "";
+  const example = cases.find((c) => !c.hidden);
+  const exampleStdin = example?.stdin ?? "";
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <div className="grid gap-4 self-start">
         <article className="prose-exercise rounded-xl border border-border bg-surface p-5">
           <Assignment markdown={exercise.promptMarkdown} />
-          <p className="mt-4 text-sm text-muted">Testitapauksia: {caseCount}</p>
         </article>
         {user && <CheatsheetPanel cards={cheatsheet} />}
       </div>
@@ -57,6 +56,8 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
             starterCode={exercise.starterCode}
             initialCode={latest?.sourceCode ?? exercise.starterCode}
             exampleStdin={exampleStdin}
+            exampleStdout={example?.expectedStdout ?? null}
+            outputMatch={exercise.outputMatch}
             initialHistory={history}
           />
         ) : (
