@@ -3,7 +3,7 @@ import { createSessionToken, SESSION_COOKIE, sessionCookieOptions } from "@/lib/
 import { requireEnv } from "@/lib/env";
 import { appOrigin, errorRedirect, readParams, STATE_COOKIE_PREFIX, stateCookieOptions } from "@/lib/lti/http";
 import { decodeJwt, JwtError, verifyRs256 } from "@/lib/lti/jwt";
-import { redirectPath, validateLaunch } from "@/lib/lti/launch";
+import { exerciseIdFromPath, redirectPath, validateLaunch } from "@/lib/lti/launch";
 import { platformKey } from "@/lib/lti/keys";
 import { consumeLaunchState, getPlatform, recordLaunch } from "@/lib/lti/store";
 
@@ -40,8 +40,9 @@ export async function POST(request: Request) {
   // Inside a cross-site iframe the session cookie would be a blocked third-party cookie.
   if (request.headers.get("sec-fetch-dest") === "iframe") return errorRedirect("iframe");
 
-  const userId = await recordLaunch(platform.id, launch);
-  const response = NextResponse.redirect(new URL(redirectPath(launch.targetLinkUri, appOrigin()), appOrigin()), 303);
+  const target = redirectPath(launch.targetLinkUri, appOrigin());
+  const userId = await recordLaunch(platform.id, launch, exerciseIdFromPath(target));
+  const response = NextResponse.redirect(new URL(target, appOrigin()), 303);
   response.cookies.set(SESSION_COOKIE, createSessionToken(userId, requireEnv("SESSION_SECRET")), sessionCookieOptions);
   response.cookies.set(cookieName, "", { ...stateCookieOptions, maxAge: 0 });
   return response;

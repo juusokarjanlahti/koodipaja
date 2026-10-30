@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { JwtError, type JwtPayload } from "./jwt";
-import { CLAIM, redirectPath, roleFromClaims, validateLaunch } from "./launch";
+import { AGS_SCORE_SCOPE, CLAIM, exerciseIdFromPath, redirectPath, roleFromClaims, validateLaunch } from "./launch";
 
 const platform = { issuer: "https://moodle.example.fi", clientId: "abc123", deploymentIds: ["1"] };
 const NOW = 1_800_000_000;
@@ -47,6 +47,7 @@ describe("validateLaunch", () => {
       context: { id: "course-9", title: "Ohjelmoinnin perusteet" },
       resourceLinkId: "rl-7",
       targetLinkUri: "https://koodipaja.example.fi/exercises/01-tervehdys",
+      ags: null,
     });
     expect(JSON.stringify(launch)).not.toContain("aino@example.fi");
   });
@@ -82,6 +83,33 @@ describe("validateLaunch", () => {
     );
     expect(launch.displayName).toBe("Aino O");
     expect(launch.context).toBeNull();
+  });
+});
+
+describe("AGS endpoint", () => {
+  const lineitem = "https://moodle.example.fi/mod/lti/services.php/2/lineitems/7/lineitem?type_id=1";
+  it("is kept when the activity takes scores", () => {
+    const launch = validateLaunch(
+      claims({ [CLAIM.agsEndpoint]: { lineitem, scope: [AGS_SCORE_SCOPE, "other"] } }),
+      platform,
+      "n1",
+      NOW,
+    );
+    expect(launch.ags).toEqual({ lineItem: lineitem, scopes: [AGS_SCORE_SCOPE, "other"] });
+  });
+
+  it("is ignored without a line item or the score scope", () => {
+    expect(validateLaunch(claims({ [CLAIM.agsEndpoint]: { scope: [AGS_SCORE_SCOPE] } }), platform, "n1", NOW).ags).toBeNull();
+    expect(validateLaunch(claims({ [CLAIM.agsEndpoint]: { lineitem, scope: [] } }), platform, "n1", NOW).ags).toBeNull();
+  });
+});
+
+describe("exerciseIdFromPath", () => {
+  it("finds exercise pages only", () => {
+    expect(exerciseIdFromPath("/exercises/01-tervehdys")).toBe("01-tervehdys");
+    expect(exerciseIdFromPath("/exercises/java-lukujen-summa?x=1")).toBe("java-lukujen-summa");
+    expect(exerciseIdFromPath("/exercises/../admin")).toBeNull();
+    expect(exerciseIdFromPath("/muistilista")).toBeNull();
   });
 });
 

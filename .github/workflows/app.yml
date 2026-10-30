@@ -98,6 +98,8 @@ jobs:
       - run: npm run db:migrate
       - run: npm run import-exercises
       - run: npm run runner-check
+      # Throwaway tool key for the LTI e2e tests (grade passback signs with it).
+      - run: echo "LTI_PRIVATE_KEY=$(npm run --silent lti:keygen -- --value)" >> "$GITHUB_ENV"
       - run: |
           npm run worker &
           npx next dev -p 3000 &

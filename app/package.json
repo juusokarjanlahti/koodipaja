@@ -18,7 +18,8 @@
     "e2e": "playwright test",
     "runner-check": "tsx scripts/runner-check.ts",
     "lti:keygen": "tsx scripts/lti-keygen.ts",
-    "lti:register": "tsx scripts/lti-register.ts"
+    "lti:register": "tsx scripts/lti-register.ts",
+    "lti:grades": "tsx scripts/lti-grades.ts"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",
