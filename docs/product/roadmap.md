@@ -46,11 +46,11 @@ Epicit: #4, #5, #6, #7 (sekä #17, #19 epicistä #2)
 |---|---|
 | LTI 1.3 -kirjautuminen Moodlesta, roolit kurssikohtaisesti (#23) | ✅ main, testattu Moodle 4.5:llä |
 | Arvosanojen palautus Moodleen, paras tulos säilyy (#25) | ✅ main, testattu Moodle 4.5:llä |
-| Tehtävän valinta Moodlen aktiviteetiksi, Deep Linking (#24) | 🚧 PR |
+| Tehtävän valinta Moodlen aktiviteetiksi, Deep Linking (#24) | ✅ main, testattu Moodle 4.5:llä |
 | Tehtävät myös Moodle CodeRunner -kysymyksinä ([coderunner.md](coderunner.md)) | ✅ main |
 | Tehtäväsarjat | ⬜ |
 | Opettajan näkymä | ⬜ |
-| Saavutettavuus: editorin näppäimistökäyttö (#29) | 🚧 PR; ruudunlukijatestaus ⬜ |
+| Saavutettavuus: editorin näppäimistökäyttö (#29) | ✅ main; ruudunlukijatestaus ⬜ |
 | Tietosuoja-aineisto, saavutettavuusseloste | ⬜ |
 | Python-peruskurssi 60–80 tehtävää | 🚧 15 |
 
