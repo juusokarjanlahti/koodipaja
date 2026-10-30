@@ -36,7 +36,7 @@ test("a student asks for help, the teacher answers, and only that student sees t
   await expect(teacher.getByRole("heading", { name: /Avunpyynnöt/ })).toHaveCount(0);
 
   await asker.reload();
-  await expect(asker.getByRole("status")).toContainText("Katso rivin 1 tulostus.");
+  await expect(asker.getByRole("status").filter({ hasText: "Katso rivin 1 tulostus." })).toBeVisible();
   await other.reload();
   await expect(other.getByText("Katso rivin 1 tulostus.")).toHaveCount(0);
 });

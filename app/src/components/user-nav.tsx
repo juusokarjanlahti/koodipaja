@@ -19,6 +19,9 @@ export async function UserNav() {
           Opettajan näkymä
         </Link>
       )}
+      <Link href="/ohje" className="font-medium">
+        Ohje
+      </Link>
       <Link href="/muistilista" className="font-medium">
         Muistilista
       </Link>

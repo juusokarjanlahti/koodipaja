@@ -69,6 +69,15 @@ Nämä ohjaavat tehtävien sisältöä, palautteen sävyä ja kaikkia ominaisuuk
    ja ratkaisusuunnitelma kommentteina koodissa
    ([ADR 0004](../adr/0004-suunnitelma-kommentteina.md)). Tehtävän laatija päättää, kuinka
    paljon suunnitelmaa annetaan valmiina, ja opiskelija voi aina pilkkoa tehtävän itse.
+8. **Opiskelijan luottamus järjestelmään on tuotteen tärkein omaisuus.** Jos opiskelija alkaa
+   epäillä, että tulos riippuu arvasta eikä koodista, hän lopettaa lukemasta palautetta.
+   Siksi: sama koodi antaa aina saman tuloksen; järjestelmävirhe sanotaan järjestelmän
+   viaksi eikä lasketa yritykseksi; palaute näyttää, mitä verrataan mihin; opiskelija näkee,
+   mikä arvosana Moodleen on lähetetty; ja riitatilanteelle on näkyvä, nopea polku, jonka
+   tulos koskee kaikkia samoin (hyväksytty vastaus näkyy hyväksyttynä). Opettajan
+   epäilyihin vastataan todisteilla, ei lupauksilla: mallivastaus, testit sekä väärät ja
+   hyväksytyt esimerkit ovat avoimia ja CI-tarkistettuja. Kun tämä periaate ja
+   toteutusmukavuus ovat ristiriidassa, periaate voittaa.
 
 Miten periaatteet toteutuvat kurssin aikana: [oppimispolku.md](oppimispolku.md).
 
