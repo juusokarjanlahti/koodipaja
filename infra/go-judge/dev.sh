@@ -42,8 +42,8 @@ if [[ ! -x "$BIN" ]]; then
 fi
 
 # Toolchain links: name -> executable inside the sandbox. Toolchains outside the default
-# mounts (/bin, /lib, /usr) are bind-mounted read-only under /opt/koodipaja/tools/<label>,
-# because their host paths (e.g. /root/.rustup) may not be readable by the sandbox user.
+# mounts (/bin, /lib, /usr) are bind-mounted read-only: /opt ones at the same path, ones
+# under home directories (e.g. /root/.rustup) under /opt/koodipaja/tools/<label>.
 rm -rf "$TOOLBIN" && mkdir -p "$TOOLBIN"
 declare -A EXTRA=()   # host dir -> sandbox dir
 link() {
@@ -51,6 +51,9 @@ link() {
   [[ -x "$real" ]] || { echo "warning: $name not found, skipping" >&2; return; }
   case "$real" in
     /usr/*|/bin/*|/lib/*|/lib64/*) ln -s "$real" "$TOOLBIN/$name" ;;
+    # /opt toolchains (setup-python, setup-node, ...) keep their path: their binaries
+    # may find shared libraries through absolute paths.
+    /opt/*) EXTRA["$prefix"]="$prefix"; ln -s "$real" "$TOOLBIN/$name" ;;
     *) EXTRA["$prefix"]="$TOOLS/$label"; ln -s "$TOOLS/$label/${real#"$prefix"/}" "$TOOLBIN/$name" ;;
   esac
 }
