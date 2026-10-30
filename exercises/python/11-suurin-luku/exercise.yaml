@@ -5,6 +5,7 @@ difficulty: 3
 level: soveltava
 scaffold: outline
 concepts: [lista, for]
+requires: [print, input, tyyppimuunnos, if, f-merkkijono]
 topics: [listat, silmukat]
 time_limit_seconds: 2
 memory_limit_mb: 64

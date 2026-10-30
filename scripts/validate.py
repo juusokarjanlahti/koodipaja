@@ -217,6 +217,14 @@ def validate(folder: Path) -> list[str]:
     for concept in concepts:
         if concept not in known:
             errors.append(f"{meta_path}: unknown concept {concept!r} (add concepts/{meta['language']}/{concept}/)")
+    # requires: concepts the exercise uses but does not teach. Decides which exercises a
+    # stuck student can skip to (docs/specs/next-exercise.md).
+    requires = meta.get("requires", []) or []
+    for concept in requires:
+        if concept not in known:
+            errors.append(f"{meta_path}: unknown required concept {concept!r}")
+        if concept in concepts:
+            errors.append(f"{meta_path}: {concept!r} is in both concepts and requires; list it once")
 
     cases = meta["cases"] or []
     if len(cases) < MIN_CASES:

@@ -29,6 +29,7 @@ export const exerciseMetaSchema = z.object({
   topics: z.array(z.string()).default([]),
   output_match: z.enum(["lenient", "exact"]).default("lenient"),
   concepts: z.array(z.string()).default([]),
+  requires: z.array(z.string()).default([]),
   time_limit_seconds: z.number().positive().default(2),
   memory_limit_mb: z.number().int().positive().default(64),
   cases: z.array(caseSchema).min(3),
@@ -42,6 +43,7 @@ export interface LoadedExercise {
   topics: string[];
   outputMatch: "lenient" | "exact";
   concepts: string[];
+  requires: string[];
   promptMarkdown: string;
   starterCode: string;
   timeLimitSeconds: number;
@@ -83,6 +85,7 @@ export async function loadExercise(folder: string): Promise<LoadedExercise> {
     topics: meta.topics,
     outputMatch: meta.output_match,
     concepts: meta.concepts,
+    requires: meta.requires,
     promptMarkdown,
     starterCode,
     timeLimitSeconds: Math.ceil(meta.time_limit_seconds),

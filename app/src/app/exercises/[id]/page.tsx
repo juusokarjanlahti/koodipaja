@@ -6,7 +6,7 @@ import { CheatsheetPanel } from "@/components/cheatsheet";
 import { ExerciseWorkspace } from "@/components/exercise-workspace";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCheatsheet } from "@/lib/concepts/queries";
-import { getSubmissionHistory } from "@/lib/progress";
+import { getExerciseStatuses, getSubmissionHistory } from "@/lib/progress";
 import { getDb, schema } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -36,12 +36,47 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
   const cheatsheet = user ? await getCheatsheet(user.id) : [];
   const history = user ? await getSubmissionHistory(user.id, exercise.id) : [];
   // Prefill "Aja" with the first visible example so the first run works straight away.
+  // The exercises of this language in course order, for "next exercise" suggestions.
+  const path = await db
+    .select({
+      id: schema.exercises.id,
+      title: schema.exercises.title,
+      concepts: schema.exercises.concepts,
+      requires: schema.exercises.requires,
+    })
+    .from(schema.exercises)
+    .where(eq(schema.exercises.language, exercise.language))
+    .orderBy(asc(schema.exercises.id));
+  const position = path.findIndex((e) => e.id === exercise.id);
+  const previous = position > 0 ? path[position - 1] : null;
+  const following = position >= 0 && position < path.length - 1 ? path[position + 1] : null;
+  const statuses = user ? await getExerciseStatuses(user.id) : new Map();
+  const conceptRows = await db
+    .select({ id: schema.concepts.id, title: schema.concepts.title })
+    .from(schema.concepts)
+    .where(eq(schema.concepts.language, exercise.language));
   const example = cases.find((c) => !c.hidden);
   const exampleStdin = example?.stdin ?? "";
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <div className="grid gap-4 self-start">
+        {(previous || following) && (
+          <nav aria-label="Tehtävien välillä" className="flex justify-between gap-3 text-sm">
+            {previous ? (
+              <Link href={`/exercises/${previous.id}`} className="text-accent">
+                ← {previous.title}
+              </Link>
+            ) : (
+              <span />
+            )}
+            {following && (
+              <Link href={`/exercises/${following.id}`} className="text-right text-accent">
+                {following.title} →
+              </Link>
+            )}
+          </nav>
+        )}
         <article className="prose-exercise rounded-xl border border-border bg-surface p-5">
           <Assignment markdown={exercise.promptMarkdown} />
         </article>
@@ -58,6 +93,9 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
             exampleStdin={exampleStdin}
             exampleStdout={example?.expectedStdout ?? null}
             outputMatch={exercise.outputMatch}
+            path={path}
+            initialStates={Object.fromEntries(statuses)}
+            conceptTitles={Object.fromEntries(conceptRows.map((c) => [c.id, c.title]))}
             initialHistory={history}
           />
         ) : (

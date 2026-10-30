@@ -14,6 +14,9 @@ import type { OutputMatchMode } from "@/lib/grading/normalise";
 import type { RunOutput } from "@/lib/runs/output";
 import { runVerdict, type RunVerdict } from "@/lib/runs/verdict";
 import { editorTheme } from "./editor-theme";
+import { NextStepsBox } from "./next-steps";
+import { nextSteps, type ExerciseState, type PathExercise } from "@/lib/exercises/next-steps";
+import { isSolved } from "@/lib/submission-state";
 import { ErrorHelp } from "./error-help";
 
 const POLL_MS = 800;
@@ -125,6 +128,9 @@ export function ExerciseWorkspace({
   exampleStdout,
   outputMatch,
   initialHistory,
+  path,
+  initialStates,
+  conceptTitles,
 }: {
   exerciseId: string;
   language: string;
@@ -135,6 +141,10 @@ export function ExerciseWorkspace({
   exampleStdout: string | null;
   outputMatch: OutputMatchMode;
   initialHistory: SubmissionSummary[];
+  /** The exercises of this language in course order, for "next exercise" suggestions. */
+  path: PathExercise[];
+  initialStates: Record<string, ExerciseState>;
+  conceptTitles: Record<string, string>;
 }) {
   const [code, setCode] = useState(initialCode);
   const [history, setHistory] = useState<SubmissionSummary[]>(initialHistory);
@@ -282,6 +292,17 @@ export function ExerciseWorkspace({
   };
 
   const allPassed = submission?.status === "done" && submission.passedCount === submission.totalCount;
+
+  // This exercise's state follows the submissions made on this page; the others come from the server.
+  const solvedHere = history.some(isSolved);
+  const failedHere = history.filter((h) => h.status === "done" && !isSolved(h)).length;
+  const states = new Map(Object.entries(initialStates));
+  if (solvedHere) states.set(exerciseId, "ratkaistu");
+  else if (history.length > 0) states.set(exerciseId, "yritetty");
+  const steps = nextSteps(path, states, exerciseId, failedHere);
+  const latestDone = history.find((h) => h.status === "done");
+  // Stuck: the latest result still does not pass after several tries.
+  const stuck = !solvedHere && !!latestDone && !isSolved(latestDone) && failedHere >= 3;
   const formattingCount =
     submission?.status === "done" ? submission.cases.filter((c) => c.judgeStatus === FORMATTING_DIFFERENCE).length : 0;
   // Open only the first failing visible case so the list stays scannable.
@@ -405,6 +426,10 @@ export function ExerciseWorkspace({
               ? `Kaikki ${submission.totalCount} testiä meni läpi!`
               : `${submission.passedCount} / ${submission.totalCount} testiä läpi. Avoinna on ensimmäinen testi, joka ei vielä mene läpi.`}
           </p>
+        )}
+
+        {!busy && (
+          <NextStepsBox steps={steps} solved={solvedHere} stuck={stuck} conceptTitles={conceptTitles} />
         )}
 
         {formattingCount > 0 && (

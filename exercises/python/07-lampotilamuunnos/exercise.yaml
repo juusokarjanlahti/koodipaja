@@ -5,6 +5,7 @@ difficulty: 2
 level: perus
 scaffold: outline
 concepts: [tyyppimuunnos, f-merkkijono]
+requires: [print, input]
 topics: [tietotyypit, tulostus]
 time_limit_seconds: 2
 memory_limit_mb: 64

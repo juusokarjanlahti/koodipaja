@@ -160,6 +160,8 @@ export const exercises = pgTable("exercises", {
   outputMatch: outputMatchMode("output_match").notNull().default("lenient"),
   // Concept cards this exercise teaches (concepts/<language>/<id>), for the cheat sheet (#69).
   concepts: text("concepts").array().notNull().default([]),
+  // Concepts the exercise uses but does not teach (docs/specs/next-exercise.md).
+  requires: text("requires").array().notNull().default([]),
   timeLimitSeconds: integer("time_limit_seconds").notNull(),
   memoryLimitMb: integer("memory_limit_mb").notNull(),
   contentHash: text("content_hash").notNull(),

@@ -12,9 +12,7 @@ export interface SubmissionSummary {
 }
 
 /** A submission solves the exercise when it finished and every test passed. */
-export function isSolved(s: Pick<SubmissionSummary, "status" | "passedCount" | "totalCount">): boolean {
-  return s.status === "done" && s.totalCount > 0 && s.passedCount === s.totalCount;
-}
+export { isSolved } from "./submission-state";
 
 /** Status per exercise for one student: solved if any submission solved it, else attempted. */
 export async function getExerciseStatuses(userId: string): Promise<Map<string, ExerciseStatus>> {
