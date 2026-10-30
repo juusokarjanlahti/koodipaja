@@ -46,3 +46,20 @@ test("runtime errors are shown, and Ctrl+Shift+Enter runs from the editor", asyn
   await expect(page.getByText("Tekstiä ei voi muuttaa kokonaisluvuksi")).toBeVisible();
   await expect(page.getByText(/Ohjelma pysähtyi virheeseen/)).toBeVisible();
 });
+
+test("with the example input, Aja says whether the output matches the example", async ({ page }) => {
+  const solution = "total = 0\nwhile True:\n    n = int(input())\n    if n == 0:\n        break\n    total += n\nprint(f\"Summa: {total}\")\n";
+  await setCode(page, solution);
+  await page.getByRole("button", { name: "Aja", exact: true }).click();
+  await expect(page.getByText("✓ Tuloste vastaa tehtävänannon esimerkkiä.")).toBeVisible();
+  await expect(page.getByText("Palauta, niin ohjelmasi tarkistetaan myös muilla syötteillä.")).toBeVisible();
+
+  await setCode(page, 'print("Summa: 0")\n');
+  await page.getByRole("button", { name: "Aja", exact: true }).click();
+  await expect(page.getByText("○ Tuloste ei vielä vastaa tehtävänannon esimerkkiä.")).toBeVisible();
+  await expect(page.getByText("Esimerkin tuloste samalla syötteellä")).toBeVisible();
+});
+
+test("the assignment does not show a test count", async ({ page }) => {
+  await expect(page.getByText(/Testitapauksia/)).toHaveCount(0);
+});

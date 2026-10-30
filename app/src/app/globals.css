@@ -12,6 +12,14 @@
   --ok-bg: #e9f3df;
   --fail: #9b2c2c;
   --fail-bg: #fbeaea;
+  /* Code editor (components/editor-theme.ts): all at least 6:1 against --surface. */
+  --code-keyword: #8a2b8f;
+  --code-string: #2f6b1f;
+  --code-number: #9a4a00;
+  --code-comment: #5f5d57;
+  --code-function: #1f5fa8;
+  --code-selection: #cfe5dd;
+  --code-active-line: #f4f3ee;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,6 +35,13 @@
     --ok-bg: #1f2e15;
     --fail: #f2a3a3;
     --fail-bg: #3a1a1a;
+    --code-keyword: #e0a3f0;
+    --code-string: #a5d47c;
+    --code-number: #f0b072;
+    --code-comment: #a9a79f;
+    --code-function: #8cc4ff;
+    --code-selection: #2f4a42;
+    --code-active-line: #262623;
   }
 }
 
@@ -44,6 +59,21 @@
   --color-fail-bg: var(--fail-bg);
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+}
+
+/* A short highlight on each new run result, so a re-run is visibly a new result. */
+@media (prefers-reduced-motion: no-preference) {
+  .kp-flash {
+    animation: kp-flash 0.9s ease-out;
+  }
+}
+@keyframes kp-flash {
+  from {
+    box-shadow: 0 0 0 3px var(--accent);
+  }
+  to {
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 
 body {

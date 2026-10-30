@@ -10,7 +10,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PresentedCase, PresentedSubmission } from "@/lib/grading/present";
 import { FORMATTING_DIFFERENCE } from "@/lib/grading/status";
 import type { SubmissionSummary } from "@/lib/progress";
+import type { OutputMatchMode } from "@/lib/grading/normalise";
 import type { RunOutput } from "@/lib/runs/output";
+import { runVerdict, type RunVerdict } from "@/lib/runs/verdict";
+import { editorTheme } from "./editor-theme";
 import { ErrorHelp } from "./error-help";
 
 const POLL_MS = 800;
@@ -70,6 +73,37 @@ function runStatusLabel(r: RunOutput): string {
   return r.statusDescription;
 }
 
+function RunResultBox({ verdict, output }: { verdict: RunVerdict; output: RunOutput }) {
+  if (verdict.kind === "matches-example") {
+    return (
+      <div className="kp-flash rounded-lg border border-ok bg-ok-bg p-3 text-ok">
+        <p className="font-medium">
+          ✓ Tuloste vastaa tehtävänannon esimerkkiä{verdict.formattingDifference ? " (pieniä muotoilueroja, ne eivät haittaa)" : ""}.
+        </p>
+        <p className="mt-1 text-sm">Palauta, niin ohjelmasi tarkistetaan myös muilla syötteillä.</p>
+      </div>
+    );
+  }
+  if (verdict.kind === "differs-from-example") {
+    return (
+      <div className="kp-flash grid gap-2 rounded-lg border border-border bg-surface p-3">
+        <p className="font-medium">○ Tuloste ei vielä vastaa tehtävänannon esimerkkiä.</p>
+        <Output label="Esimerkin tuloste samalla syötteellä" text={verdict.expected} />
+      </div>
+    );
+  }
+  return (
+    <div className="kp-flash rounded-lg border border-border bg-surface p-3">
+      <p className="font-medium">{runStatusLabel(output)}</p>
+      {verdict.kind === "finished" && (
+        <p className="mt-1 text-sm text-muted">
+          Tällä syötteellä ei ole esimerkkiä, joten tulostetta ei verrata. Palauta tarkistaa ohjelman.
+        </p>
+      )}
+    </div>
+  );
+}
+
 function Output({ label, text }: { label: string; text: string | null | undefined }) {
   if (text === undefined || text === null) return null;
   return (
@@ -88,6 +122,8 @@ export function ExerciseWorkspace({
   starterCode,
   initialCode,
   exampleStdin,
+  exampleStdout,
+  outputMatch,
   initialHistory,
 }: {
   exerciseId: string;
@@ -95,6 +131,9 @@ export function ExerciseWorkspace({
   starterCode: string;
   initialCode: string;
   exampleStdin: string;
+  /** Expected output of the first visible case, or null when there is none. */
+  exampleStdout: string | null;
+  outputMatch: OutputMatchMode;
   initialHistory: SubmissionSummary[];
 }) {
   const [code, setCode] = useState(initialCode);
@@ -104,6 +143,10 @@ export function ExerciseWorkspace({
   const [viewing, setViewing] = useState<{ id: string; createdAt: string; sourceCode: string } | null>(null);
   const [stdin, setStdin] = useState(exampleStdin);
   const [runOutput, setRunOutput] = useState<RunOutput | null>(null);
+  // The input the last run used (the field may change afterwards) and a counter that
+  // re-mounts the result box, so every run visibly produces a fresh result.
+  const [ranWithStdin, setRanWithStdin] = useState("");
+  const [runCount, setRunCount] = useState(0);
   const [runError, setRunError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [submission, setSubmission] = useState<PresentedSubmission | null>(null);
@@ -192,13 +235,19 @@ export function ExerciseWorkspace({
       const data = (await res.json()) as RunOutput & { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Ajo epäonnistui.");
       setRunOutput(data);
+      setRanWithStdin(stdin);
     } catch (err) {
       setRunOutput(null);
       setRunError((err as Error).message);
     } finally {
       setRunning(false);
+      setRunCount((n) => n + 1);
     }
   }, [running, exerciseId, code, stdin]);
+
+  const verdict: RunVerdict | null = runOutput
+    ? runVerdict(runOutput, ranWithStdin, exampleStdout === null ? null : { stdin: exampleStdin, stdout: exampleStdout }, outputMatch)
+    : null;
 
   const openSubmission = async (item: SubmissionSummary) => {
     setError(null);
@@ -256,6 +305,7 @@ export function ExerciseWorkspace({
           extensions={extensions}
           minHeight="18rem"
           basicSetup={{ autocompletion: false }}
+          theme={editorTheme}
         />
         <p id="editor-help" className="border-t border-border px-3 py-1.5 text-xs text-muted">
           <kbd>Tab</kbd> sisentää. Pois editorista: <kbd>Esc</kbd> ja sitten <kbd>Tab</kbd>.{" "}
@@ -277,24 +327,35 @@ export function ExerciseWorkspace({
             className="rounded-md border border-border bg-bg p-2 font-mono text-sm"
           />
         </div>
-        <div className="grid content-start gap-1" aria-live="polite">
+        <div className="grid content-start gap-1">
           <div className="text-sm font-medium">Tuloste</div>
-          {runError ? (
-            <p className="rounded-md border border-border bg-bg p-2 text-sm">{runError}</p>
-          ) : runOutput ? (
+          {runOutput ? (
             <>
-              <pre className="min-h-[5.5rem] overflow-x-auto whitespace-pre-wrap rounded-md border border-border bg-bg p-2 font-mono text-sm">
+              <pre
+                key={runCount}
+                className="kp-flash min-h-[5.5rem] overflow-x-auto whitespace-pre-wrap rounded-md border border-border bg-bg p-2 font-mono text-sm"
+              >
                 {runOutput.stdout === "" ? <span className="text-muted">(ei tulostetta)</span> : runOutput.stdout}
               </pre>
               {runOutput.stderr && <ErrorHelp stderr={runOutput.stderr} language={language} />}
               {runOutput.stderr && <Output label="Virheilmoitus" text={runOutput.stderr} />}
-              <p className="text-xs text-muted">{runStatusLabel(runOutput)}</p>
             </>
           ) : (
             <p className="min-h-[5.5rem] rounded-md border border-dashed border-border p-2 text-sm text-muted">
-              Kokeile koodiasi painamalla Aja. Ajoja ei arvioida eikä tallenneta.
+              Kokeile koodiasi painamalla Aja. Jos syöte on tehtävänannon esimerkki, näet heti, vastaako tuloste
+              esimerkkiä.
             </p>
           )}
+        </div>
+        {/* Always rendered so screen readers announce each run's result (WCAG 4.1.3). */}
+        <div aria-live="polite" className="sm:col-span-2">
+          {runError ? (
+            <p key={runCount} className="kp-flash rounded-lg border border-fail bg-fail-bg p-3 text-fail">
+              {runError}
+            </p>
+          ) : runOutput && verdict ? (
+            <RunResultBox key={runCount} verdict={verdict} output={runOutput} />
+          ) : null}
         </div>
       </div>
 
