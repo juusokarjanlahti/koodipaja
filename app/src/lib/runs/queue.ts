@@ -1,7 +1,7 @@
 import { Queue, QueueEvents } from "bullmq";
 import { Redis } from "ioredis";
 import { requireEnv } from "../env";
-import type { RunRequest } from "../judge0/client";
+import type { RunRequest } from "../runner/types";
 import { redisConnection } from "../queue";
 import type { RunOutput } from "./output";
 

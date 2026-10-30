@@ -28,7 +28,7 @@ exercises/python/01-tervehdys/
 ```
 
 Testitapaukset ovat syöte/tuloste-pareja, joten ne voidaan lähettää suoraan
-Judge0-sandboxiin ilman muunnoksia.
+sandboxiin ilman muunnoksia.
 
 ## Käyttö
 
@@ -46,7 +46,7 @@ Lait ja hankintaehdot (tietosuoja, saavutettavuus, tiedonhallinta, hankintalaki)
 
 ## Arkkitehtuuri
 
-Suunniteltu pino: Next.js + TypeScript, PostgreSQL, Redis-jono, itse ylläpidetty Judge0
+Pino: Next.js + TypeScript, PostgreSQL, Redis-jono ja itse ylläpidetty go-judge-sandbox
 ja LTI 1.3 -integraatio Moodleen. Katso [docs/architecture.md](docs/architecture.md).
 
 ## Tekoälyagentit

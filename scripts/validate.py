@@ -42,17 +42,22 @@ MATCH_CASES = Path(__file__).resolve().parent / "output-match-cases.json"
 APP_BIN = ROOT / "app" / "node_modules" / ".bin"
 APP_TYPES = ROOT / "app" / "node_modules" / "@types"
 
-# Each language: file extension, canonical file name in the build dir, optional build
-# command and the run command. Mirrors the Judge0 language definitions (ADR 0005).
+# Each language: file extension, canonical source file name, optional build command,
+# build artifacts and the run command. Single source shared with the app (ADR 0006).
+LANGUAGES_FILE = ROOT / "infra" / "languages.json"
 RUNNERS: dict[str, dict] = {
-    "python": {"ext": ".py", "file": "main.py", "build": None, "run": [sys.executable, "-I", "main.py"]},
-    "javascript": {"ext": ".js", "file": "main.js", "build": None, "run": ["node", "main.js"]},
-    "typescript": {"ext": ".ts", "file": "main.ts", "build": "typescript", "run": ["node", "out/main.js"]},
-    "c": {"ext": ".c", "file": "main.c", "build": ["gcc", "-O2", "-std=c17", "-Wall", "-o", "prog", "main.c", "-lm"], "run": ["./prog"]},
-    "cpp": {"ext": ".cpp", "file": "main.cpp", "build": ["g++", "-O2", "-std=c++20", "-Wall", "-o", "prog", "main.cpp"], "run": ["./prog"]},
-    "java": {"ext": ".java", "file": "Main.java", "build": ["javac", "-encoding", "UTF-8", "Main.java"], "run": ["java", "-cp", ".", "Main"]},
-    "rust": {"ext": ".rs", "file": "main.rs", "build": ["rustc", "-O", "--edition", "2021", "-o", "prog", "main.rs"], "run": ["./prog"]},
+    name: spec for name, spec in json.loads(LANGUAGES_FILE.read_text(encoding="utf-8")).items() if not name.startswith("$")
 }
+
+
+def resolve_command(cmd: list[str]) -> list[str]:
+    """Use this interpreter for python3 and the app's local TypeScript compiler for tsc."""
+    head, rest = cmd[0], cmd[1:]
+    if head == "python3":
+        return [sys.executable, *rest]
+    if head == "tsc" and (APP_BIN / "tsc").exists():
+        return [str(APP_BIN / "tsc"), *rest]
+    return cmd
 
 REQUIRED_FIELDS = {"id", "title", "language", "difficulty", "cases"}
 OUTPUT_MATCH_MODES = {"lenient", "exact"}
@@ -114,18 +119,12 @@ class Program:
     error: str = ""
 
 
-def tsc_command() -> list[str]:
-    local = APP_BIN / "tsc"
-    return [str(local)] if local.exists() else ["tsc"]
-
-
 def build_program(language: str, source: Path) -> Program:
     """Copy the source into a fresh build dir under its canonical name and compile it."""
     runner = RUNNERS[language]
     workdir = Path(tempfile.mkdtemp(prefix="koodipaja-"))
-    shutil.copy(source, workdir / runner["file"])
-    build = runner["build"]
-    if build == "typescript":
+    shutil.copy(source, workdir / runner["source"])
+    if runner.get("tsconfig"):
         tsconfig = {
             "compilerOptions": {
                 "target": "es2022",
@@ -139,8 +138,9 @@ def build_program(language: str, source: Path) -> Program:
             "files": ["main.ts"],
         }
         (workdir / "tsconfig.json").write_text(json.dumps(tsconfig), encoding="utf-8")
-        build = [*tsc_command(), "-p", "tsconfig.json"]
+    build = runner["build"]
     if build:
+        build = resolve_command(build)
         try:
             proc = subprocess.run(build, cwd=workdir, capture_output=True, text=True, timeout=120)
         except FileNotFoundError:
@@ -150,7 +150,7 @@ def build_program(language: str, source: Path) -> Program:
         if proc.returncode != 0:
             out = (proc.stdout + proc.stderr).strip().splitlines()
             return Program(workdir, None, "compile error: " + (out[0] if out else "(no output)"))
-    return Program(workdir, runner["run"])
+    return Program(workdir, resolve_command(runner["run"]))
 
 
 def run_case(program: Program, case: dict, timeout: float, mode: str) -> CaseResult:

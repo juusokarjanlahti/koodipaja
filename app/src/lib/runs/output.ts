@@ -1,4 +1,4 @@
-import { JUDGE0_STATUS, type RunResult } from "../judge0/client";
+import { RUN_STATUS as JUDGE0_STATUS, type RunResult } from "../runner/types";
 import { truncate } from "../grading/evaluate";
 
 /** What the student sees after "Aja". Never stored in the database. */

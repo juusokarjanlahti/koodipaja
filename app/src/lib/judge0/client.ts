@@ -1,3 +1,5 @@
+import { RUN_STATUS, RunnerUnavailableError, type RunRequest, type RunResult } from "../runner/types";
+
 /**
  * Minimal Judge0 client. Only the endpoint the worker needs.
  * https://ce.judge0.com/ (API reference, self-hosted 1.13.x is compatible)
@@ -25,14 +27,9 @@ export function judge0LanguageIds(env: string | undefined = process.env.JUDGE0_L
   return { ...DEFAULT_JUDGE0_LANGUAGE_IDS, ...overrides };
 }
 
-// Judge0 status ids we care about.
-export const JUDGE0_STATUS = {
-  ACCEPTED: 3,
-  TIME_LIMIT_EXCEEDED: 5,
-  COMPILATION_ERROR: 6,
-  INTERNAL_ERROR: 13,
-  EXEC_FORMAT_ERROR: 14,
-} as const;
+// Status ids and the shared request/result types live in ../runner/types (ADR 0006).
+export const JUDGE0_STATUS = RUN_STATUS;
+export type { RunRequest, RunResult };
 
 export interface Judge0Config {
   url: string;
@@ -41,26 +38,8 @@ export interface Judge0Config {
   requestTimeoutMs?: number;
 }
 
-export interface RunRequest {
-  sourceCode: string;
-  language: string;
-  stdin: string;
-  cpuTimeLimitSeconds: number;
-  memoryLimitMb: number;
-}
-
-export interface RunResult {
-  statusId: number;
-  statusDescription: string;
-  stdout: string;
-  stderr: string;
-  compileOutput: string;
-  timeMs: number | null;
-  memoryKb: number | null;
-}
-
-/** Thrown for infrastructure problems (Judge0 down, 5xx, internal error), so the job can retry. */
-export class Judge0UnavailableError extends Error {}
+/** Kept as an alias so existing callers keep working. */
+export const Judge0UnavailableError = RunnerUnavailableError;
 
 const b64 = (s: string) => Buffer.from(s, "utf8").toString("base64");
 const unb64 = (s: string | null | undefined) => (s ? Buffer.from(s, "base64").toString("utf8") : "");

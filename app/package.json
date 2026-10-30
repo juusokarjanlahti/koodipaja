@@ -15,7 +15,8 @@
     "worker": "tsx scripts/worker.ts",
     "fake-judge0": "node scripts/fake-judge0.mjs",
     "smoke": "tsx scripts/smoke.ts",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "runner-check": "tsx scripts/runner-check.ts"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",

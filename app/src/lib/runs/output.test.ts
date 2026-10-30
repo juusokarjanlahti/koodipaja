@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RunResult } from "../judge0/client";
+import type { RunResult } from "../runner/types";
 import { allowRun, RUNS_PER_MINUTE, toRunOutput } from "./output";
 
 const base: RunResult = {

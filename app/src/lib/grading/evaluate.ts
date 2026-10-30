@@ -1,4 +1,4 @@
-import { JUDGE0_STATUS, type RunResult } from "../judge0/client";
+import { RUN_STATUS as JUDGE0_STATUS, type RunResult } from "../runner/types";
 import { compareOutput, type OutputMatchMode } from "./normalise";
 import { FORMATTING_DIFFERENCE } from "./status";
 

@@ -1,0 +1,77 @@
+# Sandbox filesystem for the production go-judge image (infra/go-judge/Dockerfile).
+# Every toolchain lives under /usr, mounted read-only. Student code gets a 128 MiB tmpfs
+# work directory and /tmp, nothing else is writable. No network (go-judge default).
+mount:
+  - type: bind
+    source: /bin
+    target: /bin
+    readonly: true
+  - type: bind
+    source: /lib
+    target: /lib
+    readonly: true
+  - type: bind
+    source: /lib64
+    target: /lib64
+    readonly: true
+  - type: bind
+    source: /usr
+    target: /usr
+    readonly: true
+  - type: bind
+    source: /etc/ld.so.cache
+    target: /etc/ld.so.cache
+    readonly: true
+  - type: bind
+    source: /etc/alternatives
+    target: /etc/alternatives
+    readonly: true
+  - type: bind
+    source: /etc/java-21-openjdk
+    target: /etc/java-21-openjdk
+    readonly: true
+  - type: bind
+    source: /dev/null
+    target: /dev/null
+  - type: bind
+    source: /dev/urandom
+    target: /dev/urandom
+  - type: bind
+    source: /dev/random
+    target: /dev/random
+  - type: bind
+    source: /dev/zero
+    target: /dev/zero
+  - type: bind
+    source: /dev/full
+    target: /dev/full
+  - type: tmpfs
+    target: /w
+    data: size=128m,nr_inodes=4k
+  - type: tmpfs
+    target: /tmp
+    data: size=128m,nr_inodes=4k
+proc: true
+symLink:
+  - linkPath: /dev/fd
+    target: /proc/self/fd
+  - linkPath: /dev/stdin
+    target: /proc/self/fd/0
+  - linkPath: /dev/stdout
+    target: /proc/self/fd/1
+  - linkPath: /dev/stderr
+    target: /proc/self/fd/2
+maskPath:
+  - /sys/firmware
+  - /proc/acpi
+  - /proc/kcore
+  - /proc/keys
+  - /proc/latency_stats
+  - /proc/timer_list
+  - /proc/sched_debug
+  - /proc/scsi
+workDir: /w
+hostName: koodipaja
+domainName: koodipaja
+uid: 1536
+gid: 1536

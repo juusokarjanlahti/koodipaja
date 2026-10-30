@@ -1,14 +1,10 @@
 import { asc, eq } from "drizzle-orm";
 import { getDb, schema } from "../db";
-import { runOnJudge0, type Judge0Config, type RunRequest, type RunResult } from "../judge0/client";
+import type { RunResult, Runner } from "../runner/types";
 import type { TestCase } from "../db/schema";
 import { evaluateCase, type CaseOutcome } from "./evaluate";
 
-export type Runner = (req: RunRequest) => Promise<RunResult>;
-
-export function judge0Runner(config: Judge0Config): Runner {
-  return (req) => runOnJudge0(config, req);
-}
+export type { Runner };
 
 /**
  * Grade one submission: run every test case, store per-case results, finalise counts.

@@ -28,7 +28,9 @@ concepts/<language>/<id>/         Concept cards for the student's cheat sheet (#
   concept.yaml                    id, title, topic, order, example_stdin, example_stdout
   README.md                       Short Finnish explanation + the most common pitfall
   example.<ext>                   Minimal correct example; MUST produce example_stdout exactly
-scripts/validate.py               Validates every exercise and concept card locally (no Judge0 needed)
+scripts/validate.py               Validates every exercise and concept card locally (no sandbox needed)
+infra/languages.json              Build and run steps for every language (single source)
+infra/go-judge/                   Sandbox image (production) and dev.sh (local and CI sandbox)
 scripts/output-match-cases.json   Shared comparison vectors (Python and TypeScript)
 docs/                             Architecture and decisions (ADRs)
 app/                              Next.js application
@@ -38,23 +40,24 @@ app/                              Next.js application
 
 - **App:** Next.js (App Router) + TypeScript (strict). One language across the stack.
 - **DB:** PostgreSQL with Drizzle ORM. Migrations are committed; never edit an applied migration.
-- **Code execution:** self-hosted Judge0 behind a Redis-backed queue (BullMQ).
+- **Code execution:** self-hosted go-judge behind a Redis-backed queue (BullMQ), see
+  docs/adr/0006-go-judge.md. The app talks to it only through `app/src/lib/runner`;
+  `RUNNER=judge0` keeps legacy Judge0 selectable.
   The app never executes student code itself. Never.
 - **Auth:** LTI 1.3 launch from Moodle first; a development-only email login (DEV_LOGIN, never in production).
   SAML/HAKA later.
 - **Editor:** CodeMirror 6 (see docs/adr/0001-codemirror-instead-of-monaco.md).
 - **Languages:** python, javascript, typescript, c, cpp, java, rust (see
-  docs/adr/0005-kielet-ja-kaantajaversiot.md). Build and run commands are defined in three
-  places that MUST stay in sync: `scripts/validate.py`, `app/scripts/fake-judge0.mjs` and
-  `infra/judge0-languages/`. Judge0 ids come from `JUDGE0_LANGUAGE_IDS`. The pilot course is
+  docs/adr/0005-kielet-ja-kaantajaversiot.md). Build and run commands live ONLY in
+  `infra/languages.json`; validation, the go-judge runner and the fake Judge0 read it. A new
+  language also needs its toolchain in `infra/go-judge/Dockerfile`. The pilot course is
   Python; other languages have example exercises.
 - **Hosting:** EU only (UpCloud or Hetzner), Docker Compose. GDPR: student data never
   leaves the EU, and no third-party analytics.
 
 ## Exercise format rules
 
-- Test cases are stdin/stdout pairs so they map 1:1 to Judge0 submissions
-  (`stdin`, `expected_output`).
+- Test cases are stdin/stdout pairs: each case is one sandbox run with that stdin.
 - Output comparison follows `docs/adr/0003-joustava-tulosteen-vertailu.md`:
   - `output_match: lenient` (default): only words (case-insensitive) and numbers are compared,
     in order. Punctuation, spacing and line breaks are ignored. Students must never have to
@@ -104,8 +107,8 @@ app/                              Next.js application
 3. **Small PRs.** One concern per PR. Use separate git worktrees for parallel work.
 4. **Merge when CI is green.** Agents may merge their own PRs, including exercise
    content, without waiting for a human review; the owner reviews afterwards when they
-   choose to. PRs touching authentication, LTI, the Judge0 integration or its sandbox
-   config, personal data, or database migrations must still be flagged clearly at the top
+   choose to. PRs touching authentication, LTI, the code runner (go-judge or Judge0) or its
+   sandbox config, personal data, or database migrations must still be flagged clearly at the top
    of the PR so the owner can find them later. Never merge with failing or skipped checks,
    and never weaken a validation rule to get content through.
 5. **No new dependencies** without stating why in the PR. Prefer the standard library.
@@ -118,4 +121,5 @@ app/                              Next.js application
 ```bash
 python3 scripts/validate.py              # validate all exercises
 python3 scripts/validate.py exercises/python/01-tervehdys   # validate one
+cd app && npm run runner-check           # every exercise + sandbox probes through go-judge
 ```
