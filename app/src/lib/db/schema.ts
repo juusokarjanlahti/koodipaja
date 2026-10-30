@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -145,6 +146,39 @@ export const ltiGradeSyncs = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.resourceLinkId, t.userId] })],
+);
+
+export const helpRequestKind = pgEnum("help_request_kind", ["apu", "kiista"]);
+export const helpRequestStatus = pgEnum("help_request_status", ["open", "answered"]);
+
+// A student's request to the course teacher about one exercise (#49). At most one open
+// request per student and exercise. The reply is visible only to the asking student.
+export const helpRequests = pgTable(
+  "help_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    exerciseId: text("exercise_id")
+      .notNull()
+      .references(() => exercises.id, { onDelete: "cascade" }),
+    courseId: integer("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    // The student's latest submission when asking; kept if the submission is deleted.
+    submissionId: uuid("submission_id").references(() => submissions.id, { onDelete: "set null" }),
+    kind: helpRequestKind("kind").notNull(),
+    message: text("message"),
+    status: helpRequestStatus("status").notNull().default("open"),
+    reply: text("reply"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    answeredAt: timestamp("answered_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("help_requests_one_open").on(t.userId, t.exerciseId).where(sql`status = 'open'`),
+    index("help_requests_course_status").on(t.courseId, t.status),
+  ],
 );
 
 export const exercises = pgTable("exercises", {

@@ -12,6 +12,9 @@ tavalliseen kysymykseen on valmis vastaus ja dokumentti.
 
 - [lait.md](lait.md): kukin laki lyhyesti. Koskeeko se AMK:ta, mitä se vaatii Koodipajalta
   ja mikä on tilanne.
+- [henkilotietoluettelo.md](henkilotietoluettelo.md): mitä henkilötietoja tallennetaan,
+  miksi, kuka niitä näkee ja milloin ne poistuvat. Päivitetään jokaisen tietomuutoksen
+  yhteydessä.
 - [hankinta.md](hankinta.md): miten AMK hankkii palvelun (kynnysarvot, sopimusehdot) ja
   tarkistuslista asiakirjoista, joita hankinnassa kysytään.
 

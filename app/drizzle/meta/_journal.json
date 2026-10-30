@@ -43,6 +43,13 @@
       "when": 1793365508319,
       "tag": "0005_exercise_requires",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793400061700,
+      "tag": "0006_help_requests",
+      "breakpoints": true
     }
   ]
 }

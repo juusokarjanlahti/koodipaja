@@ -6,6 +6,8 @@ import { CheatsheetPanel } from "@/components/cheatsheet";
 import { ExerciseWorkspace } from "@/components/exercise-workspace";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCheatsheet } from "@/lib/concepts/queries";
+import { HelpRequest } from "@/components/help-request";
+import { courseForStudentExercise, currentHelpRequest } from "@/lib/help/requests";
 import { numberedTitle } from "@/lib/exercises/order";
 import { getExerciseStatuses, getSubmissionHistory } from "@/lib/progress";
 import { getDb, schema } from "@/lib/db";
@@ -56,6 +58,8 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
     .select({ id: schema.concepts.id, title: schema.concepts.title })
     .from(schema.concepts)
     .where(eq(schema.concepts.language, exercise.language));
+  const hasTeacher = user ? (await courseForStudentExercise(user.id, exercise.id)) !== null : false;
+  const helpRequest = user && hasTeacher ? await currentHelpRequest(user.id, exercise.id) : null;
   const example = cases.find((c) => !c.hidden);
   const exampleStdin = example?.stdin ?? "";
 
@@ -81,6 +85,7 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
         <article className="prose-exercise rounded-xl border border-border bg-surface p-5">
           <Assignment markdown={exercise.promptMarkdown} />
         </article>
+        {user && hasTeacher && <HelpRequest exerciseId={exercise.id} initial={helpRequest} />}
         {user && <CheatsheetPanel cards={cheatsheet} />}
       </div>
 
