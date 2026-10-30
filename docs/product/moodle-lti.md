@@ -2,9 +2,11 @@
 
 Opiskelija ja opettaja avaavat Koodipajan Moodle-kurssilta ilman erillisiä tunnuksia.
 Tämä ohje on Moodlen ylläpitäjälle ja Koodipajan ylläpitäjälle. Tekniset speksit:
-[kirjautuminen](../specs/lti-launch.md) ja [arvosanat](../specs/lti-grades.md).
+[kirjautuminen](../specs/lti-launch.md), [arvosanat](../specs/lti-grades.md) ja
+[tehtävän valinta](../specs/lti-deep-linking.md).
 
-**Testattu:** Moodle 4.5.15, opiskelija ja opettaja, arvosana arviointikirjaan, lokakuu 2026.
+**Testattu:** Moodle 4.5.15, opiskelija ja opettaja, arvosana arviointikirjaan ja tehtävän
+valinta aktiviteetin asetuksista, lokakuu 2026.
 
 ## Mitä toimii nyt
 
@@ -14,7 +16,7 @@ Tämä ohje on Moodlen ylläpitäjälle ja Koodipajan ylläpitäjälle. Tekniset
 - Arvosana siirtyy Moodlen arviointikirjaan palautuksen jälkeen (Assignment and Grade
   Services). Siirtyy **paras** tulos (läpi menneet testit / kaikki testit), joten myöhempi
   huonompi yritys ei laske arvosanaa. Epäonnistunut lähetys yritetään uudelleen viisi kertaa.
-- **Tulossa:** tehtävän valinta Moodlen aktiviteettivalitsimesta (Deep Linking, #24).
+- Opettaja valitsee tehtävän Koodipajan listasta aktiviteetin asetuksissa (Deep Linking).
 
 ## Mitä Koodipaja saa ja tallentaa
 
@@ -51,6 +53,8 @@ configure a tool manually**
 | Initiate login URL | `https://koodipaja.example.fi/api/lti/login` |
 | Redirection URI(s) | `https://koodipaja.example.fi/api/lti/launch` |
 | Tool configuration usage | Show in activity chooser and as a preconfigured tool |
+| Supports Deep Linking (Content-Item Message) | kyllä |
+| Content Selection URL | `https://koodipaja.example.fi/api/lti/launch` |
 | Default launch container | **New window** |
 | Privacy: Share launcher's name with tool | Always |
 | Privacy: Share launcher's email with tool | Never |
@@ -76,11 +80,16 @@ Moodlen osoitteiden oletukset ovat `/mod/lti/auth.php`, `/mod/lti/token.php` ja
 
 ## 4. Opettaja: aktiviteetti kurssille
 
-**Lisää aktiviteetti → Koodipaja**. Kunnes Deep Linking on valmis, kirjoita
-*Tool URL* -kenttään tehtävän osoite, esim.
-`https://koodipaja.example.fi/exercises/01-tervehdys`. Ilman osoitetta opiskelija päätyy
-Koodipajan etusivulle. Arvosanaa varten aktiviteetin asetuksissa *Grade*-tyypiksi
-"Point" (esim. 100). Moodle skaalaa Koodipajan pisteet (esim. 3/4 → 75).
+**Lisää aktiviteetti → Koodipaja → Select content.** Koodipajan tehtävälista avautuu;
+valitse tehtävä ja **Lisää Moodleen**. Moodle täyttää aktiviteetin nimen ja osoitteen ja
+luo arviointikohteen (100 pistettä). Moodle skaalaa Koodipajan pisteet (esim. 3/4 → 75).
+
+Ilman valintaa aktiviteetin *Tool URL* -kenttään voi myös kirjoittaa tehtävän osoitteen,
+esim. `https://koodipaja.example.fi/exercises/01-tervehdys`.
+
+**Tunnettu rajoitus:** Moodle avaa valintalistan sivun sisään upotettuna. Selaimet, jotka
+estävät kolmannen osapuolen evästeet (Safari oletuksena), keskeyttävät valinnan; käytä
+silloin toista selainta tai kirjoita osoite käsin.
 
 ## Arvosanojen tila
 

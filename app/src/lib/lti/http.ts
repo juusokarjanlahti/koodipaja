@@ -21,7 +21,7 @@ export const stateCookieOptions = {
 };
 
 /** Error codes shown on /lti-virhe. Keep in sync with that page. */
-export type LtiErrorCode = "platform" | "state" | "token" | "iframe";
+export type LtiErrorCode = "platform" | "state" | "token" | "iframe" | "role" | "choice";
 
 export function errorRedirect(code: LtiErrorCode): NextResponse {
   return NextResponse.redirect(new URL(`/lti-virhe?koodi=${code}`, appOrigin()), 303);

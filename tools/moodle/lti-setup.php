@@ -4,7 +4,7 @@
 //   php tools/moodle/lti-setup.php --moodle=/path/to/moodle --app=http://localhost:3000
 //
 // Creates (or reuses) a site-level LTI 1.3 tool "Koodipaja" that opens in a new window and
-// accepts grades, a course with one graded Koodipaja activity, and users kp-student /
+// accepts grades and Deep Linking, a course with one graded Koodipaja activity, and users kp-student /
 // kp-teacher (password
 // Koodipaja-1). Prints the client id and deployment id for `npm run lti:register`.
 // For a test site only: it creates users with a known password.
@@ -51,12 +51,21 @@ if (!$type) {
         // Assignment and Grade Services: grade sync and column management.
         'ltiservice_gradesynchronization' => 2,
         'lti_forcessl' => 0,
+        // Deep Linking: the teacher chooses the exercise in Koodipaja.
+        'lti_contentitem' => 1,
+        'lti_toolurl_ContentItemSelectionRequest' => "$app/api/lti/launch",
     ];
     $typeid = lti_add_type($type, $config);
     $type = $DB->get_record('lti_types', ['id' => $typeid]);
 }
-// Older runs of this script created the tool without grades; make sure they are on.
-foreach (['acceptgrades' => LTI_SETTING_ALWAYS, 'ltiservice_gradesynchronization' => 2] as $name => $value) {
+// Older runs of this script created the tool without these; make sure they are on.
+$typeconfig = [
+    'acceptgrades' => LTI_SETTING_ALWAYS,
+    'ltiservice_gradesynchronization' => 2,
+    'contentitem' => 1,
+    'toolurl_ContentItemSelectionRequest' => "$app/api/lti/launch",
+];
+foreach ($typeconfig as $name => $value) {
     $existing = $DB->get_record('lti_types_config', ['typeid' => $type->id, 'name' => $name]);
     if ($existing) {
         $DB->set_field('lti_types_config', 'value', $value, ['id' => $existing->id]);
