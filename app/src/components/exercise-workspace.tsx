@@ -5,7 +5,7 @@ import { java } from "@codemirror/lang-java";
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
 import { rust } from "@codemirror/lang-rust";
-import CodeMirror from "@uiw/react-codemirror";
+import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PresentedCase, PresentedSubmission } from "@/lib/grading/present";
 import { FORMATTING_DIFFERENCE } from "@/lib/grading/status";
@@ -113,7 +113,9 @@ export function ExerciseWorkspace({
 
   const extensions = useMemo(() => {
     const make = LANGUAGE_EXTENSIONS[language as keyof typeof LANGUAGE_EXTENSIONS];
-    return make ? [make()] : [];
+    // The editable element itself needs the name and the keyboard help (WCAG 4.1.2, 2.1.2).
+    const a11y = EditorView.contentAttributes.of({ "aria-label": "Ratkaisun koodi", "aria-describedby": "editor-help" });
+    return make ? [make(), a11y] : [a11y];
   }, [language]);
 
   useEffect(() => () => {
@@ -247,9 +249,6 @@ export function ExerciseWorkspace({
           }
         }}
       >
-        <label htmlFor="code-editor" className="sr-only">
-          Ratkaisun koodi
-        </label>
         <CodeMirror
           id="code-editor"
           value={code}
@@ -257,8 +256,11 @@ export function ExerciseWorkspace({
           extensions={extensions}
           minHeight="18rem"
           basicSetup={{ autocompletion: false }}
-          aria-label="Ratkaisun koodi"
         />
+        <p id="editor-help" className="border-t border-border px-3 py-1.5 text-xs text-muted">
+          <kbd>Tab</kbd> sisentää. Pois editorista: <kbd>Esc</kbd> ja sitten <kbd>Tab</kbd>.{" "}
+          <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd> ajaa, <kbd>Ctrl</kbd> + <kbd>Enter</kbd> palauttaa.
+        </p>
       </div>
 
       <div className="grid gap-3 rounded-xl border border-border bg-surface p-3 sm:grid-cols-2">
@@ -327,7 +329,6 @@ export function ExerciseWorkspace({
         <button type="button" onClick={reset} disabled={busy} className="rounded-lg border border-border px-4 py-2">
           Pohjakoodi
         </button>
-        <span className="text-sm text-muted">Ctrl + Shift + Enter ajaa, Ctrl + Enter palauttaa</span>
       </div>
 
       <div aria-live="polite" className="grid gap-3">
