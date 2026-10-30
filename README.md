@@ -44,6 +44,9 @@ Visio, käyttäjät, roadmap ja riskit: [docs/product/](docs/product/README.md).
 Lait ja hankintaehdot (tietosuoja, saavutettavuus, tiedonhallinta, hankintalaki):
 [docs/compliance/](docs/compliance/README.md).
 
+Vertailu Moodle CodeRunneriin ja tehtävien vienti CodeRunner-kysymyksiksi:
+[docs/product/coderunner.md](docs/product/coderunner.md).
+
 ## Arkkitehtuuri
 
 Pino: Next.js + TypeScript, PostgreSQL, Redis-jono ja itse ylläpidetty go-judge-sandbox
