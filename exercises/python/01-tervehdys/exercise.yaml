@@ -5,7 +5,7 @@ difficulty: 1
 level: perus
 scaffold: full
 concepts: [print, input, f-merkkijono]
-topics: [input, output, string]
+topics: [syöte, tuloste, merkkijonot]
 time_limit_seconds: 2
 memory_limit_mb: 64
 cases:

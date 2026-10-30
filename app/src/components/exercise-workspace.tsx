@@ -9,6 +9,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PresentedCase, PresentedSubmission } from "@/lib/grading/present";
 import { FORMATTING_DIFFERENCE } from "@/lib/grading/status";
+import type { SubmissionSummary } from "@/lib/progress";
 import type { RunOutput } from "@/lib/runs/output";
 import { ErrorHelp } from "./error-help";
 
@@ -49,6 +50,17 @@ function statusLabel(c: PresentedCase): string {
   }
 }
 
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleString("fi-FI", { dateStyle: "short", timeStyle: "short" });
+}
+
+function summaryLabel(s: SubmissionSummary): string {
+  if (s.status === "queued" || s.status === "running") return "Arvioidaan…";
+  if (s.status === "error") return "Arviointi epäonnistui";
+  if (s.totalCount > 0 && s.passedCount === s.totalCount) return `✓ Kaikki ${s.totalCount} testiä läpi`;
+  return `${s.passedCount} / ${s.totalCount} testiä läpi`;
+}
+
 function runStatusLabel(r: RunOutput): string {
   const time = r.timeMs !== null ? ` (${r.timeMs} ms)` : "";
   if (r.ok) return `Ajo valmis${time}`;
@@ -76,14 +88,20 @@ export function ExerciseWorkspace({
   starterCode,
   initialCode,
   exampleStdin,
+  initialHistory,
 }: {
   exerciseId: string;
   language: string;
   starterCode: string;
   initialCode: string;
   exampleStdin: string;
+  initialHistory: SubmissionSummary[];
 }) {
   const [code, setCode] = useState(initialCode);
+  const [history, setHistory] = useState<SubmissionSummary[]>(initialHistory);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  // When the student reopens an earlier submission: its id, time and code.
+  const [viewing, setViewing] = useState<{ id: string; createdAt: string; sourceCode: string } | null>(null);
   const [stdin, setStdin] = useState(exampleStdin);
   const [runOutput, setRunOutput] = useState<RunOutput | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
@@ -109,6 +127,13 @@ export function ExerciseWorkspace({
         if (!res.ok) throw new Error("Tuloksen haku epäonnistui.");
         const data = (await res.json()) as PresentedSubmission;
         setSubmission(data);
+        setHistory((h) =>
+          h.map((item) =>
+            item.id === data.id
+              ? { ...item, status: data.status, passedCount: data.passedCount, totalCount: data.totalCount }
+              : item,
+          ),
+        );
         if (data.status === "done" || data.status === "error") {
           setBusy(false);
           if (data.errorMessage) setError(data.errorMessage);
@@ -139,7 +164,13 @@ export function ExerciseWorkspace({
       const data = (await res.json()) as { id?: string; error?: string };
       if (res.status === 409 && data.id) return poll(data.id, Date.now());
       if (!res.ok || !data.id) throw new Error(data.error ?? "Palautus epäonnistui.");
-      poll(data.id, Date.now());
+      const newId = data.id;
+      setViewing(null);
+      setHistory((h) => [
+        { id: newId, createdAt: new Date().toISOString(), status: "queued", passedCount: 0, totalCount: 0 },
+        ...h,
+      ]);
+      poll(newId, Date.now());
     } catch (err) {
       setBusy(false);
       setError((err as Error).message);
@@ -166,6 +197,26 @@ export function ExerciseWorkspace({
       setRunning(false);
     }
   }, [running, exerciseId, code, stdin]);
+
+  const openSubmission = async (item: SubmissionSummary) => {
+    setError(null);
+    try {
+      const res = await fetch(`/api/submissions/${item.id}?includeSource=1`, { cache: "no-store" });
+      if (!res.ok) throw new Error("Palautuksen haku epäonnistui.");
+      const data = (await res.json()) as PresentedSubmission & { sourceCode: string };
+      setSubmission(data);
+      setViewing({ id: item.id, createdAt: item.createdAt, sourceCode: data.sourceCode });
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  const restoreViewedCode = () => {
+    if (!viewing) return;
+    if (code === viewing.sourceCode || window.confirm("Korvataanko editorin koodi tämän palautuksen koodilla?")) {
+      setCode(viewing.sourceCode);
+    }
+  };
 
   // ADR 0004: the student may break the task down themselves with numbered plan comments.
   const hasPlan = /^\s*(?:#|\/\/)\s*Suunnitelma/m.test(code);
@@ -338,7 +389,51 @@ export function ExerciseWorkspace({
             ))}
           </ol>
         )}
-      </div>
+            </div>
+
+      {viewing && (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-3 text-sm" role="status">
+          <span>Näytät aiempaa palautusta ({formatTime(viewing.createdAt)}).</span>
+          <button type="button" onClick={restoreViewedCode} className="rounded-md border border-border px-3 py-1">
+            Palauta tämä koodi editoriin
+          </button>
+        </div>
+      )}
+
+      {history.length > 0 && (
+        <section className="rounded-xl border border-border bg-surface">
+          <button
+            type="button"
+            aria-expanded={historyOpen}
+            aria-controls="submission-history"
+            onClick={() => setHistoryOpen((o) => !o)}
+            className="flex w-full items-center justify-between px-4 py-3 text-left font-medium"
+          >
+            <span>Aiemmat palautukset ({history.length})</span>
+            <span aria-hidden="true">{historyOpen ? "−" : "+"}</span>
+          </button>
+          {historyOpen && (
+            <ol id="submission-history" className="grid border-t border-border">
+              {history.map((item) => (
+                <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2 last:border-b-0">
+                  <span className="text-sm">
+                    <span className="text-muted">{formatTime(item.createdAt)}</span>
+                    <span className="ml-3">{summaryLabel(item)}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void openSubmission(item)}
+                    disabled={item.status === "queued" || item.status === "running"}
+                    className="rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
+                  >
+                    Näytä
+                  </button>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+      )}
     </div>
   );
 }

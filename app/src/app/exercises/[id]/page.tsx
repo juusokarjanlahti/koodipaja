@@ -6,6 +6,7 @@ import { CheatsheetPanel } from "@/components/cheatsheet";
 import { ExerciseWorkspace } from "@/components/exercise-workspace";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCheatsheet } from "@/lib/concepts/queries";
+import { getSubmissionHistory } from "@/lib/progress";
 import { getDb, schema } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,7 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
     .orderBy(asc(schema.testCases.position));
   const caseCount = cases.length;
   const cheatsheet = user ? await getCheatsheet(user.id) : [];
+  const history = user ? await getSubmissionHistory(user.id, exercise.id) : [];
   // Prefill "Aja" with the first visible example so the first run works straight away.
   const exampleStdin = cases.find((c) => !c.hidden)?.stdin ?? "";
 
@@ -55,6 +57,7 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
             starterCode={exercise.starterCode}
             initialCode={latest?.sourceCode ?? exercise.starterCode}
             exampleStdin={exampleStdin}
+            initialHistory={history}
           />
         ) : (
           <div className="rounded-xl border border-border bg-surface p-5">

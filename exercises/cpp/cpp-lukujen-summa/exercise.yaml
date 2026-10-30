@@ -4,7 +4,7 @@ language: cpp
 difficulty: 2
 level: perus
 scaffold: full
-topics: [loops, integers, input]
+topics: [silmukat, kokonaisluvut, syöte]
 time_limit_seconds: 3
 memory_limit_mb: 128
 cases:
