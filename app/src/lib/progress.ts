@@ -43,3 +43,20 @@ export async function getSubmissionHistory(userId: string, exerciseId: string, l
     .limit(limit);
   return rows.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() }));
 }
+
+/** What was last sent to the platform (Moodle) for this student's exercise, if anything. */
+export async function getSentGrade(userId: string, exerciseId: string) {
+  const [row] = await getDb()
+    .select({
+      status: schema.ltiGradeSyncs.status,
+      scoreGiven: schema.ltiGradeSyncs.scoreGiven,
+      scoreMaximum: schema.ltiGradeSyncs.scoreMaximum,
+      sentAt: schema.ltiGradeSyncs.sentAt,
+    })
+    .from(schema.ltiGradeSyncs)
+    .innerJoin(schema.ltiResourceLinks, eq(schema.ltiResourceLinks.id, schema.ltiGradeSyncs.resourceLinkId))
+    .where(and(eq(schema.ltiGradeSyncs.userId, userId), eq(schema.ltiResourceLinks.exerciseId, exerciseId)))
+    .orderBy(desc(schema.ltiGradeSyncs.updatedAt))
+    .limit(1);
+  return row ?? null;
+}

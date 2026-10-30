@@ -62,6 +62,17 @@ As the student again:
 Judge: is the wording shaming anywhere? Is the form usable with the keyboard only and
 announced by a screen reader (status line, labelled fields)?
 
+## C1. Trust (system errors, grade visibility)
+
+- [ ] **Sandbox down:** stop go-judge (`docker compose stop go-judge`), then press Palauta
+      and Aja. The student sees a calm message saying the fault is in the service, not their
+      code, and that it is not counted as an attempt. No technical text. The history row says
+      "Järjestelmävirhe (ei johdu koodistasi)". Start it again and resubmit; the "stuck" help
+      (after three failed tries) is not triggered by system errors.
+- [ ] **Grade visibility (needs Moodle):** after solving, the exercise page says what was sent
+      to Moodle ("Moodleen on lähetetty 3 / 3 (pvm)"). If the transfer fails, the message says
+      the teacher can resend it and the student need do nothing.
+
 ## C2. Guides (needs a Moodle course for the course part)
 
 - [ ] **Library guide:** "Ohje" in the header opens a page with the general guide, also when

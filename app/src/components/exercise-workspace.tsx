@@ -56,13 +56,17 @@ function statusLabel(c: PresentedCase): string {
   }
 }
 
+// A system failure is never the student's fault: say so, and never show technical details.
+const SYSTEM_ERROR_MESSAGE =
+  "Arviointi ei onnistunut juuri nyt. Vika on palvelussa, ei koodissasi, eikä tätä lasketa yritykseksi. Yritä hetken päästä uudelleen.";
+
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleString("fi-FI", { dateStyle: "short", timeStyle: "short" });
 }
 
 function summaryLabel(s: SubmissionSummary): string {
   if (s.status === "queued" || s.status === "running") return "Arvioidaan…";
-  if (s.status === "error") return "Arviointi epäonnistui";
+  if (s.status === "error") return "Järjestelmävirhe (ei johdu koodistasi)";
   if (s.totalCount > 0 && s.passedCount === s.totalCount) return `✓ Kaikki ${s.totalCount} testiä läpi`;
   return `${s.passedCount} / ${s.totalCount} testiä läpi`;
 }
@@ -191,7 +195,7 @@ export function ExerciseWorkspace({
         );
         if (data.status === "done" || data.status === "error") {
           setBusy(false);
-          if (data.errorMessage) setError(data.errorMessage);
+          if (data.status === "error") setError(SYSTEM_ERROR_MESSAGE);
         } else if (Date.now() - startedAt > POLL_TIMEOUT_MS) {
           setBusy(false);
           setError("Arviointi kestää tavallista kauemmin. Päivitä sivu hetken päästä.");
@@ -243,6 +247,7 @@ export function ExerciseWorkspace({
         body: JSON.stringify({ exerciseId, sourceCode: code, stdin }),
       });
       const data = (await res.json()) as RunOutput & { error?: string };
+      if (res.status >= 500) throw new Error("Ajo ei onnistunut juuri nyt. Vika on palvelussa, ei koodissasi. Yritä hetken päästä uudelleen.");
       if (!res.ok) throw new Error(data.error ?? "Ajo epäonnistui.");
       setRunOutput(data);
       setRanWithStdin(stdin);

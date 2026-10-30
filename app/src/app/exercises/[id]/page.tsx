@@ -9,7 +9,7 @@ import { getCheatsheet } from "@/lib/concepts/queries";
 import { HelpRequest } from "@/components/help-request";
 import { courseForStudentExercise, currentHelpRequest } from "@/lib/help/requests";
 import { numberedTitle } from "@/lib/exercises/order";
-import { getExerciseStatuses, getSubmissionHistory } from "@/lib/progress";
+import { getExerciseStatuses, getSentGrade, getSubmissionHistory } from "@/lib/progress";
 import { getDb, schema } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +60,7 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
     .where(eq(schema.concepts.language, exercise.language));
   const hasTeacher = user ? (await courseForStudentExercise(user.id, exercise.id)) !== null : false;
   const helpRequest = user && hasTeacher ? await currentHelpRequest(user.id, exercise.id) : null;
+  const sentGrade = user && hasTeacher ? await getSentGrade(user.id, exercise.id) : null;
   const example = cases.find((c) => !c.hidden);
   const exampleStdin = example?.stdin ?? "";
 
@@ -85,6 +86,15 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
         <article className="prose-exercise rounded-xl border border-border bg-surface p-5">
           <Assignment markdown={exercise.promptMarkdown} />
         </article>
+        {sentGrade && (
+          <p role="status" className="rounded-lg border border-border bg-surface p-3 text-sm">
+            {sentGrade.status === "sent" && sentGrade.sentAt
+              ? `Moodleen on lähetetty ${sentGrade.scoreGiven} / ${sentGrade.scoreMaximum} (${new Intl.DateTimeFormat("fi-FI", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Helsinki" }).format(sentGrade.sentAt)}).`
+              : sentGrade.status === "failed"
+                ? "Arvosanan lähetys Moodleen ei onnistunut. Opettaja näkee tilan ja voi lähettää sen uudelleen, eikä sinun tarvitse tehdä mitään."
+                : "Arvosanaa ei ole vielä lähetetty Moodleen. Se lähtee, kun palautat ratkaisun."}
+          </p>
+        )}
         {user && hasTeacher && <HelpRequest exerciseId={exercise.id} initial={helpRequest} />}
         {user && <CheatsheetPanel cards={cheatsheet} />}
       </div>
