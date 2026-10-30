@@ -68,6 +68,7 @@ jobs:
       RUNNER: go-judge
       SESSION_SECRET: ci-secret-0123456789abcdef0123456789abcdef0123456789abcdef
       DEV_LOGIN: "true"
+      APP_URL: http://localhost:3000
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
@@ -104,8 +105,6 @@ jobs:
       - run: npm run smoke
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
-        env:
-          APP_URL: http://localhost:3000
       - if: failure()
         run: |
           sudo tail -n 80 "$RUNNER_TEMP/go-judge.log" || true

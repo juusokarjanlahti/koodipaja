@@ -23,6 +23,16 @@ exercises/ (Git) ──> CI validation (scripts/validate.py) ──> imported in
 | Content | Git folders, CC BY 4.0 | Reviewable, versioned, forkable by any teacher |
 | Hosting | EU VPS, Docker Compose | GDPR, low cost, simple operations |
 
+## Moodle launch (LTI 1.3)
+
+1. Moodle sends the browser to `/api/lti/login`; the app stores a single-use state and
+   nonce and redirects to Moodle's OIDC endpoint.
+2. Moodle posts a signed `id_token` to `/api/lti/launch`. The app verifies it against
+   Moodle's key set (RS256, `node:crypto`), checks every claim, stores only the platform
+   user id, name, course and course role, and sets the normal session cookie.
+3. Platforms are rows in `lti_platforms` (`npm run lti:register`). See
+   `docs/specs/lti-launch.md` and `docs/product/moodle-lti.md`.
+
 ## Submission flow
 
 1. Student submits code from the editor.

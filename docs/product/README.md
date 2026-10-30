@@ -12,6 +12,7 @@ tekniset speksit kansiossa `docs/specs/`.
 | [roadmap.md](roadmap.md) | Milestonet M1–M4, laajuus, poistumiskriteerit ja tila |
 | [coderunner.md](coderunner.md) | Vertailu Moodle CodeRunneriin ja tehtävien vienti CodeRunner-kysymyksiksi |
 | [riskit.md](riskit.md) | Keskeiset riskit, todennäköisyys, vaikutus ja lievennys |
+| [moodle-lti.md](moodle-lti.md) | Koodipaja Moodleen LTI 1.3:lla: rekisteröinti ja tallennettavat tiedot |
 
 ## Speksit ja GitHub-issuet
 

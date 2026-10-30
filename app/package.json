@@ -16,7 +16,9 @@
     "fake-judge0": "node scripts/fake-judge0.mjs",
     "smoke": "tsx scripts/smoke.ts",
     "e2e": "playwright test",
-    "runner-check": "tsx scripts/runner-check.ts"
+    "runner-check": "tsx scripts/runner-check.ts",
+    "lti:keygen": "tsx scripts/lti-keygen.ts",
+    "lti:register": "tsx scripts/lti-register.ts"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",

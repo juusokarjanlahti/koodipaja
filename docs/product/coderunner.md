@@ -15,7 +15,7 @@ asennettiin paikallisesti, ja Koodipajan tehtävät vietiin CodeRunneriin.
 |---|---|---|
 | **Hinta ja lisenssi** | Maksuton, GPL | Maksuton, MIT; tehtävät CC BY 4.0 |
 | **Valmis sisältö** | Muutama esimerkkikysymys; opettaja kirjoittaa jokaisen tehtävän ja testit itse | Python-peruskurssin 15 tehtävää ja esimerkit kuudella muulla kielellä, kaikki koneellisesti validoitu |
-| **Integraatio** | Toimii Moodlen sisällä: arvosanat, tentit ja Safe Exam Browser suoraan | Moodle LTI 1.3:n kautta (työn alla) |
+| **Integraatio** | Toimii Moodlen sisällä: arvosanat, tentit ja Safe Exam Browser suoraan | Moodle LTI 1.3:n kautta: kirjautuminen toimii, arvosanojen palautus työn alla ([moodle-lti.md](moodle-lti.md)) |
 | **Tulosteen vertailu** | Tarkka (`EqualityGrader`) tai kirjainkoon ja ylimääräiset välilyönnit ohittava (`NearEqualityGrader`); välimerkit ja rivitys ratkaisevat | Oletuksena vain sanat ja luvut (ADR 0003); "pieni muotoiluero" ei hylkää |
 | **Palaute** | Testitaulukko; oletuksena kaikki tai ei mitään ja punainen "Your code must pass all tests to earn any marks" | "Ei vielä läpi" -sävy, yleisimmät virheet selitetty suomeksi |
 | **Kokeilu ennen palautusta** | Precheck ajaa esimerkkitestit | Aja omalla syötteellä, ei tallennu |
