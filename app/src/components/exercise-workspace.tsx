@@ -8,6 +8,7 @@ import { FORMATTING_DIFFERENCE } from "@/lib/grading/status";
 import type { RunOutput } from "@/lib/runs/output";
 
 const POLL_MS = 800;
+const PLAN_TEMPLATE = "# Suunnitelma:\n# 1. \n# 2. \n# 3. \n\n";
 const POLL_TIMEOUT_MS = 90_000;
 
 const LANGUAGE_EXTENSIONS = { python: () => python() } as const;
@@ -144,6 +145,12 @@ export function ExerciseWorkspace({
     }
   }, [running, exerciseId, code, stdin]);
 
+  // ADR 0004: the student may break the task down themselves with numbered plan comments.
+  const hasPlan = /^\s*#\s*Suunnitelma/m.test(code);
+  const addPlan = () => {
+    if (!hasPlan) setCode(`${PLAN_TEMPLATE}${code}`);
+  };
+
   const reset = () => {
     if (code === starterCode || window.confirm("Palautetaanko pohjakoodi? Nykyinen koodi häviää editorista.")) {
       setCode(starterCode);
@@ -233,6 +240,15 @@ export function ExerciseWorkspace({
           className="rounded-lg bg-accent px-5 py-2 font-medium text-accent-text disabled:opacity-60"
         >
           {busy ? "Arvioidaan…" : "Palauta"}
+        </button>
+        <button
+          type="button"
+          onClick={addPlan}
+          disabled={hasPlan}
+          title={hasPlan ? "Koodissa on jo suunnitelma" : "Lisää koodin alkuun numeroitu suunnitelmapohja"}
+          className="rounded-lg border border-border px-4 py-2 disabled:opacity-50"
+        >
+          Suunnittele
         </button>
         <button type="button" onClick={reset} disabled={busy} className="rounded-lg border border-border px-4 py-2">
           Pohjakoodi

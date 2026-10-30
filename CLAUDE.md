@@ -69,6 +69,12 @@ app/                              Next.js application
   exercises must test core skills (variables, conditions, loops, data types); `haaste`
   exercises are graded on algorithmic correctness, not output formatting.
   See `docs/product/oppimispolku.md`.
+- Set `scaffold: full | outline | none` (default `none`, see
+  `docs/adr/0004-suunnitelma-kommentteina.md`). Early exercises get `full`: the starter
+  code begins with `# Suunnitelma:` and numbered plan comments (`# 1. ...`) in Finnish.
+  Fade to `outline` and then `none` as the course progresses. The plan describes steps,
+  not code, and must not give away the key insight the exercise is meant to teach.
+  Never use AI at runtime to check plans or break tasks down.
 - `id` in exercise.yaml must equal the folder name.
 - Run `python3 scripts/validate.py` before committing. CI runs the same script.
 

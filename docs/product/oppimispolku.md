@@ -54,6 +54,10 @@ näkymää itse milloin vain.
   -tehtäviä, joissa ei tarvitse kirjoittaa tyhjästä (#60).
 - **Syntaksi on este, jonka yli autetaan:** yleisimmät virheilmoitukset selitetään
   suomeksi, ja alkuperäinen virheilmoitus näkyy aina (#52).
+- **Suunnitelma ennen koodia:** ensimmäisten viikkojen pohjakoodissa on valmis
+  suunnitelmarunko kommentteina (`scaffold: full`). Runko kevenee kurssin edetessä
+  (`outline`) ja jää lopulta pois (`none`). Opiskelija voi aina lisätä oman tyhjän
+  suunnitelmapohjan Suunnittele-painikkeella ([ADR 0004](../adr/0004-suunnitelma-kommentteina.md)).
 
 ## Kohti tiimityötä
 
