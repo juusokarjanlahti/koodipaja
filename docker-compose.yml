@@ -62,6 +62,11 @@ services:
       GO_JUDGE_AUTH_TOKEN: ${GO_JUDGE_AUTH_TOKEN:?set GO_JUDGE_AUTH_TOKEN in .env}
     ports:
       - "127.0.0.1:5050:5050"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -H \"Authorization: Bearer $${GO_JUDGE_AUTH_TOKEN}\" http://127.0.0.1:5050/version >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
     networks: [sandbox]
 
   judge0-server:

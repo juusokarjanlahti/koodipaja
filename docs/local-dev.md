@@ -1,31 +1,46 @@
 # Local development
 
-## Requirements
+## Quickstart (Docker)
 
-- Docker with Compose v2 (Postgres, Redis, go-judge image), or Postgres and Redis installed
-  locally
-- Node.js 22+
-- Python 3.10+ with `pyyaml` (exercise validation)
-- Compilers for the languages you work on: Python, GCC, OpenJDK 21, Rust. Validation and
-  the local sandbox use the ones on your PATH.
-
-## Start the infrastructure
+Needs Docker with Compose v2 and Node.js 22+. On Windows, use WSL 2 with Docker Desktop's
+WSL integration and run everything inside WSL.
 
 ```bash
-cp .env.example .env            # change the passwords and GO_JUDGE_AUTH_TOKEN
-docker compose up -d            # Postgres, Redis and go-judge
+./scripts/dev-setup.sh       # once; safe to run again
+cd app && npm run dev:all    # web + worker, Ctrl+C stops both
 ```
+
+Open <http://localhost:3000>, log in with any email address (development login) and open an
+exercise.
+
+`dev-setup.sh` creates `.env` (Docker) and `app/.env.local` (app) with random secrets,
+builds the go-judge sandbox image, starts Postgres, Redis and go-judge
+(`docker compose up -d --build --wait`), installs dependencies, migrates the database and
+imports the exercises. CI runs exactly this on every pull request (`quickstart` workflow),
+including the sandbox probes and the Playwright flows.
+
+Every npm script in `app/` reads `app/.env.local`; variables already set in the
+environment win.
+
+| Command (in `app/`) | What it does |
+|---|---|
+| `npm run dev:all` | Development server and worker together |
+| `npm run import-exercises` | Re-import exercises after editing `exercises/` |
+| `npm run runner-check` | Every exercise and the sandbox security probes through go-judge |
+| `npm run e2e` | Playwright flows against the running app |
+| `docker compose stop` (repo root) | Stop the containers; data stays in Docker volumes |
 
 ## The code sandbox: go-judge (ADR 0006)
 
 Student code runs in [go-judge](https://github.com/criyle/go-judge). Every run gets its own
 namespaces (no network, read-only toolchains, a 128 MiB work directory) and cgroup limits for
 CPU time, memory and processes. go-judge works with **both cgroup v1 and v2**, so modern
-Ubuntu and Debian need no kernel changes.
+Ubuntu and Debian need no kernel changes. The Compose service disables swap for the
+container (`memswap_limit`), otherwise memory limits do not hold on cgroup v2.
 
 ### Without Docker: `infra/go-judge/dev.sh`
 
-Runs a real sandbox directly on your machine, using the compilers on your PATH:
+Runs a real sandbox directly on your machine (Linux), using the compilers on your PATH:
 
 ```bash
 sudo env "PATH=$PATH" ./infra/go-judge/dev.sh          # keep running in a terminal
@@ -34,7 +49,8 @@ sudo env "PATH=$PATH" ./infra/go-judge/dev.sh          # keep running in a termi
 
 The script downloads a pinned go-judge release, verifies its checksum and bind-mounts your
 toolchains read-only into the sandbox. With rustup, also pass
-`RUSTUP_HOME="$HOME/.rustup" CARGO_HOME="$HOME/.cargo"` to `sudo env`.
+`RUSTUP_HOME="$HOME/.rustup" CARGO_HOME="$HOME/.cargo"` to `sudo env`. Postgres and Redis
+can then come from Docker (`docker compose up -d db redis`) or from the system.
 
 ### Check the sandbox
 
@@ -44,14 +60,14 @@ cd app && npm run runner-check
 
 Runs every exercise's reference, wrong and accepted solutions through the sandbox and
 probes the sandbox: no network, no host files, read-only system directories, process,
-memory and time limits. CI runs the same check on every pull request.
+memory and time limits.
 
 ## Moodle (LTI 1.3)
 
-Set `APP_URL` and `LTI_PRIVATE_KEY` (`npm run lti:keygen`), then follow
-[product/moodle-lti.md](product/moodle-lti.md). `tools/moodle/lti-setup.php` prepares a
-local test Moodle in one command. The e2e test `e2e/lti-launch.spec.ts` runs the whole
-flow against a fake platform, so no Moodle is needed for CI.
+`dev-setup.sh` already generates `LTI_PRIVATE_KEY`. Follow
+[product/moodle-lti.md](product/moodle-lti.md); `tools/moodle/lti-setup.php` prepares a
+local test Moodle in one command. The e2e tests run the whole flow against a fake platform,
+so no Moodle is needed for CI.
 
 ## Without any sandbox
 

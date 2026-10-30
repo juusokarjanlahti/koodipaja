@@ -4,8 +4,22 @@ Avoin ja maksuton ohjelmointitehtäväalusta ammattikorkeakouluille. Opiskelija 
 koodia selaimessa ja saa automaattisen palautteen testitapauksista. Opettaja kokoaa
 kurssin avoimesta tehtäväkirjastosta.
 
-> Tila: varhainen vaihe. Tässä repossa on nyt tehtäväformaatti, validointiputki ja
-> agenttien työohjeet. Sovellus (`app/`) rakennetaan seuraavaksi.
+> Tila: varhainen vaihe. Opiskelijan tehtävänäkymä, palaute, Moodle-kirjautuminen (LTI 1.3),
+> arvosanat Moodleen ja opettajan etenemisnäkymä toimivat; pilottia valmistellaan.
+
+## Kokeile omalla koneella
+
+Tarvitset Dockerin (Compose v2) ja Node.js 22:n. Windowsissa aja komennot WSL 2:ssa.
+
+```bash
+git clone https://github.com/juusokarjanlahti/koodipaja.git && cd koodipaja
+./scripts/dev-setup.sh          # kerran: salaisuudet, Postgres, Redis, go-judge, tietokanta
+cd app && npm run dev:all        # sovellus ja worker; Ctrl+C pysäyttää
+```
+
+Avaa <http://localhost:3000>, kirjaudu millä tahansa sähköpostiosoitteella (vain
+kehityskäyttöön) ja avaa tehtävä. Ensimmäinen `dev-setup.sh` rakentaa sandbox-kuvan
+kääntäjineen, mikä kestää muutaman minuutin. Lisää: [docs/local-dev.md](docs/local-dev.md).
 
 ## Periaatteet
 
