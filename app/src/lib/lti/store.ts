@@ -45,8 +45,11 @@ export async function consumeLaunchState(state: string, now = Date.now()) {
   return row;
 }
 
-/** Creates or updates the user, course and membership for a validated launch. Returns the user id. */
-export async function recordLaunch(platformId: number, launch: Launch): Promise<string> {
+/**
+ * Creates or updates the user, course, membership and activity (resource link) for a
+ * validated launch. `exerciseId` is the exercise the activity opens, if any. Returns the user id.
+ */
+export async function recordLaunch(platformId: number, launch: Launch, exerciseId: string | null = null): Promise<string> {
   return getDb().transaction(async (tx) => {
     const [identity] = await tx
       .select({ userId: schema.ltiIdentities.userId })
@@ -84,6 +87,7 @@ export async function recordLaunch(platformId: number, launch: Launch): Promise<
       }
     }
 
+    let courseId: number | null = null;
     if (launch.context) {
       const [course] = await tx
         .insert(schema.courses)
@@ -93,6 +97,7 @@ export async function recordLaunch(platformId: number, launch: Launch): Promise<
           set: { title: launch.context.title, updatedAt: sql`now()` },
         })
         .returning({ id: schema.courses.id });
+      courseId = course.id;
       await tx
         .insert(schema.courseMemberships)
         .values({ courseId: course.id, userId, role: launch.role })
@@ -101,6 +106,31 @@ export async function recordLaunch(platformId: number, launch: Launch): Promise<
           set: { role: launch.role, lastLaunchAt: sql`now()` },
         });
     }
+
+    const [exercise] = exerciseId
+      ? await tx.select({ id: schema.exercises.id }).from(schema.exercises).where(eq(schema.exercises.id, exerciseId))
+      : [];
+    const link = {
+      courseId,
+      exerciseId: exercise?.id ?? null,
+      lineItemUrl: launch.ags?.lineItem ?? null,
+      agsScopes: launch.ags?.scopes ?? [],
+    };
+    const [resourceLink] = await tx
+      .insert(schema.ltiResourceLinks)
+      .values({ platformId, resourceLinkId: launch.resourceLinkId, ...link })
+      .onConflictDoUpdate({
+        target: [schema.ltiResourceLinks.platformId, schema.ltiResourceLinks.resourceLinkId],
+        set: { ...link, updatedAt: sql`now()` },
+      })
+      .returning({ id: schema.ltiResourceLinks.id });
+    await tx
+      .insert(schema.ltiGradeSyncs)
+      .values({ resourceLinkId: resourceLink.id, userId, platformUserId: launch.sub })
+      .onConflictDoUpdate({
+        target: [schema.ltiGradeSyncs.resourceLinkId, schema.ltiGradeSyncs.userId],
+        set: { platformUserId: launch.sub },
+      });
     return userId;
   });
 }

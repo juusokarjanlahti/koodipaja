@@ -102,6 +102,51 @@ export const courseMemberships = pgTable(
   (t) => [primaryKey({ columns: [t.courseId, t.userId] })],
 );
 
+export const gradeSyncStatus = pgEnum("grade_sync_status", ["idle", "pending", "sent", "failed"]);
+
+// A Moodle activity (LTI resource link): which exercise it opens and where its grade goes.
+export const ltiResourceLinks = pgTable(
+  "lti_resource_links",
+  {
+    id: serial("id").primaryKey(),
+    platformId: integer("platform_id")
+      .notNull()
+      .references(() => ltiPlatforms.id, { onDelete: "cascade" }),
+    resourceLinkId: text("resource_link_id").notNull(),
+    courseId: integer("course_id").references(() => courses.id, { onDelete: "set null" }),
+    // Null when the target link is not an exercise page.
+    exerciseId: text("exercise_id").references(() => exercises.id, { onDelete: "set null" }),
+    // AGS line item URL; null when the activity does not accept grades.
+    lineItemUrl: text("line_item_url"),
+    agsScopes: text("ags_scopes").array().notNull().default([]),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("lti_resource_links_platform_link").on(t.platformId, t.resourceLinkId)],
+);
+
+// A user who launched from a resource link, and the state of their grade in the platform.
+export const ltiGradeSyncs = pgTable(
+  "lti_grade_syncs",
+  {
+    resourceLinkId: integer("resource_link_id")
+      .notNull()
+      .references(() => ltiResourceLinks.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    // The platform's user id (sub) the score is sent for.
+    platformUserId: text("platform_user_id").notNull(),
+    status: gradeSyncStatus("status").notNull().default("idle"),
+    scoreGiven: integer("score_given"),
+    scoreMaximum: integer("score_maximum"),
+    attempts: integer("attempts").notNull().default(0),
+    lastError: text("last_error"),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.resourceLinkId, t.userId] })],
+);
+
 export const exercises = pgTable("exercises", {
   // The folder name in exercises/<language>/<id>, e.g. "01-tervehdys".
   id: text("id").primaryKey(),

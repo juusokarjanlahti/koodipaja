@@ -9,7 +9,10 @@ export const CLAIM = {
   resourceLink: "https://purl.imsglobal.org/spec/lti/claim/resource_link",
   roles: "https://purl.imsglobal.org/spec/lti/claim/roles",
   context: "https://purl.imsglobal.org/spec/lti/claim/context",
+  agsEndpoint: "https://purl.imsglobal.org/spec/lti-ags/claim/endpoint",
 } as const;
+
+export const AGS_SCORE_SCOPE = "https://purl.imsglobal.org/spec/lti-ags/scope/score";
 
 /** How far apart the platform's and our clocks may be. */
 const CLOCK_SKEW_SECONDS = 60;
@@ -24,6 +27,8 @@ export type Launch = {
   context: { id: string; title: string | null } | null;
   resourceLinkId: string;
   targetLinkUri: string | null;
+  /** Where scores for this activity go; null when the activity does not take grades. */
+  ags: { lineItem: string; scopes: string[] } | null;
 };
 
 function fail(code: string, message: string): never {
@@ -97,6 +102,10 @@ export function validateLaunch(
   const resourceLinkId = str(resourceLink?.id);
   if (!resourceLinkId) fail("resource_link", "resource link id is missing");
 
+  const endpoint = payload[CLAIM.agsEndpoint] as { lineitem?: unknown; scope?: unknown } | undefined;
+  const lineItem = str(endpoint?.lineitem);
+  const scopes = Array.isArray(endpoint?.scope) ? endpoint.scope.filter((s): s is string => typeof s === "string") : [];
+
   const context = payload[CLAIM.context] as { id?: unknown; title?: unknown; label?: unknown } | undefined;
   const contextId = str(context?.id);
 
@@ -108,7 +117,14 @@ export function validateLaunch(
     context: contextId ? { id: contextId, title: str(context?.title) ?? str(context?.label) } : null,
     resourceLinkId,
     targetLinkUri: str(payload[CLAIM.targetLinkUri]),
+    ags: lineItem && scopes.includes(AGS_SCORE_SCOPE) ? { lineItem, scopes } : null,
   };
+}
+
+/** The exercise id when a path is an exercise page (/exercises/<id>), otherwise null. */
+export function exerciseIdFromPath(path: string): string | null {
+  const match = /^\/exercises\/([a-z0-9][a-z0-9-]*)\/?(?:\?.*)?$/.exec(path);
+  return match ? match[1] : null;
 }
 
 /**

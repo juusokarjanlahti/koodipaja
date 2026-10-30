@@ -1,18 +1,20 @@
 # Koodipaja Moodleen (LTI 1.3)
 
 Opiskelija ja opettaja avaavat Koodipajan Moodle-kurssilta ilman erillisiä tunnuksia.
-Tämä ohje on Moodlen ylläpitäjälle ja Koodipajan ylläpitäjälle. Tekninen speksi:
-[../specs/lti-launch.md](../specs/lti-launch.md).
+Tämä ohje on Moodlen ylläpitäjälle ja Koodipajan ylläpitäjälle. Tekniset speksit:
+[kirjautuminen](../specs/lti-launch.md) ja [arvosanat](../specs/lti-grades.md).
 
-**Testattu:** Moodle 4.5.15, opiskelija ja opettaja, lokakuu 2026.
+**Testattu:** Moodle 4.5.15, opiskelija ja opettaja, arvosana arviointikirjaan, lokakuu 2026.
 
 ## Mitä toimii nyt
 
 - Kirjautuminen Moodlesta (LTI 1.3 launch). Koodipaja avaa aktiviteettiin liitetyn tehtävän.
 - Rooli tulee Moodlesta kurssikohtaisesti: opettaja (Instructor, Content Developer,
   Teaching Assistant) tai opiskelija.
-- **Tulossa:** tehtävän valinta Moodlen aktiviteettivalitsimesta (Deep Linking, #24) ja
-  arvosanojen palautus arviointikirjaan (#25).
+- Arvosana siirtyy Moodlen arviointikirjaan palautuksen jälkeen (Assignment and Grade
+  Services). Siirtyy **paras** tulos (läpi menneet testit / kaikki testit), joten myöhempi
+  huonompi yritys ei laske arvosanaa. Epäonnistunut lähetys yritetään uudelleen viisi kertaa.
+- **Tulossa:** tehtävän valinta Moodlen aktiviteettivalitsimesta (Deep Linking, #24).
 
 ## Mitä Koodipaja saa ja tallentaa
 
@@ -23,6 +25,8 @@ Tämä ohje on Moodlen ylläpitäjälle ja Koodipajan ylläpitäjälle. Tekninen
 | Sähköposti | **ei** | ei tarvita; asetus kannattaa jättää pois päältä |
 | Kurssin tunniste ja nimi | kyllä | tulokset kurssikohtaisesti |
 | Rooli kurssilla | kyllä | opettajan näkymät |
+
+Moodleen Koodipaja lähettää vain käyttäjän tunnisteen ja pisteet.
 
 ## 1. Koodipajan ylläpitäjä: avain
 
@@ -50,7 +54,8 @@ configure a tool manually**
 | Default launch container | **New window** |
 | Privacy: Share launcher's name with tool | Always |
 | Privacy: Share launcher's email with tool | Never |
-| Privacy: Accept grades from the tool | Never (kunnes #25 on valmis) |
+| Services: IMS LTI Assignment and Grade Services | Use this service for grade sync and column management |
+| Privacy: Accept grades from the tool | Always (tai "Delegate to teacher") |
 
 Tallennuksen jälkeen **View configuration details** näyttää *Client ID*:n ja
 *Deployment ID*:n. Lähetä ne Koodipajan ylläpitäjälle.
@@ -74,7 +79,19 @@ Moodlen osoitteiden oletukset ovat `/mod/lti/auth.php`, `/mod/lti/token.php` ja
 **Lisää aktiviteetti → Koodipaja**. Kunnes Deep Linking on valmis, kirjoita
 *Tool URL* -kenttään tehtävän osoite, esim.
 `https://koodipaja.example.fi/exercises/01-tervehdys`. Ilman osoitetta opiskelija päätyy
-Koodipajan etusivulle.
+Koodipajan etusivulle. Arvosanaa varten aktiviteetin asetuksissa *Grade*-tyypiksi
+"Point" (esim. 100). Moodle skaalaa Koodipajan pisteet (esim. 3/4 → 75).
+
+## Arvosanojen tila
+
+```bash
+cd app && npm run lti:grades              # odottavat ja epäonnistuneet
+cd app && npm run lti:grades -- --retry   # lähetä epäonnistuneet uudelleen
+```
+
+Moodlen pitää pystyä hakemaan Koodipajan julkinen avain (`/api/lti/jwks`) tokenia varten.
+Tuotannossa osoite on tavallinen HTTPS-osoite; testi-Moodlessa sisäverkon osoitteet ja muut
+portit kuin 80 ja 443 pitää sallia (`curlsecurityblockedhosts`, `curlsecurityallowedport`).
 
 ## Paikallinen kokeilu
 
@@ -82,6 +99,6 @@ Koodipajan etusivulle.
 php tools/moodle/lti-setup.php --moodle=/polku/moodle --app=http://localhost:3000
 ```
 
-Luo testi-Moodleen työkalun, kurssin, aktiviteetin sekä käyttäjät `kp-student` ja
+Luo testi-Moodleen työkalun (arvosanat päällä), kurssin, arvioitavan aktiviteetin sekä käyttäjät `kp-student` ja
 `kp-teacher` (salasana `Koodipaja-1`) ja tulostaa `lti:register`-komennon. Vain
 testiympäristöön.

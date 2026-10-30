@@ -3,8 +3,9 @@
 //
 //   php tools/moodle/lti-setup.php --moodle=/path/to/moodle --app=http://localhost:3000
 //
-// Creates (or reuses) a site-level LTI 1.3 tool "Koodipaja" that opens in a new window,
-// a course with one Koodipaja activity, and users kp-student / kp-teacher (password
+// Creates (or reuses) a site-level LTI 1.3 tool "Koodipaja" that opens in a new window and
+// accepts grades, a course with one graded Koodipaja activity, and users kp-student /
+// kp-teacher (password
 // Koodipaja-1). Prints the client id and deployment id for `npm run lti:register`.
 // For a test site only: it creates users with a known password.
 
@@ -19,6 +20,7 @@ $app = rtrim($opts['app'], '/');
 
 require($opts['moodle'] . '/config.php');
 require_once($CFG->dirroot . '/mod/lti/locallib.php');
+require_once($CFG->dirroot . '/mod/lti/lib.php');
 require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->dirroot . '/user/lib.php');
 require_once($CFG->libdir . '/enrollib.php');
@@ -45,11 +47,22 @@ if (!$type) {
         'lti_launchcontainer' => LTI_LAUNCH_CONTAINER_WINDOW,
         'lti_sendname' => LTI_SETTING_ALWAYS,
         'lti_sendemailaddr' => LTI_SETTING_NEVER,
-        'lti_acceptgrades' => LTI_SETTING_NEVER,
+        'lti_acceptgrades' => LTI_SETTING_ALWAYS,
+        // Assignment and Grade Services: grade sync and column management.
+        'ltiservice_gradesynchronization' => 2,
         'lti_forcessl' => 0,
     ];
     $typeid = lti_add_type($type, $config);
     $type = $DB->get_record('lti_types', ['id' => $typeid]);
+}
+// Older runs of this script created the tool without grades; make sure they are on.
+foreach (['acceptgrades' => LTI_SETTING_ALWAYS, 'ltiservice_gradesynchronization' => 2] as $name => $value) {
+    $existing = $DB->get_record('lti_types_config', ['typeid' => $type->id, 'name' => $name]);
+    if ($existing) {
+        $DB->set_field('lti_types_config', 'value', $value, ['id' => $existing->id]);
+    } else {
+        $DB->insert_record('lti_types_config', (object)['typeid' => $type->id, 'name' => $name, 'value' => $value]);
+    }
 }
 
 $course = $DB->get_record('course', ['shortname' => 'KP-LTI']);
@@ -103,12 +116,20 @@ if (!$cm) {
         'launchcontainer' => LTI_LAUNCH_CONTAINER_DEFAULT,
         'instructorchoicesendname' => 1,
         'instructorchoicesendemailaddr' => 0,
-        'instructorchoiceacceptgrades' => 0,
-        'grade' => 0,
+        'instructorchoiceacceptgrades' => 1,
+        'grade' => 100,
     ]);
     $cmid = $moduleinfo->coursemodule;
 } else {
     $cmid = $cm->id;
+    $instance = $DB->get_record('lti', ['id' => $DB->get_field('course_modules', 'instance', ['id' => $cmid])]);
+    $hasgradeitem = $DB->record_exists('grade_items', ['itemmodule' => 'lti', 'iteminstance' => $instance->id]);
+    if (!$instance->instructorchoiceacceptgrades || (int)$instance->grade !== 100 || !$hasgradeitem) {
+        $instance->instructorchoiceacceptgrades = 1;
+        $instance->grade = 100;
+        $DB->update_record('lti', $instance);
+        lti_grade_item_update($instance);
+    }
 }
 
 echo json_encode([
