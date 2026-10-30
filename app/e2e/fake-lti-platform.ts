@@ -116,7 +116,7 @@ export class FakePlatform {
     execFileSync(
       "npx",
       [
-        "tsx", "scripts/lti-register.ts",
+        "tsx", "--env-file-if-exists=.env.local", "scripts/lti-register.ts",
         "--issuer", this.issuer,
         "--client-id", this.clientId,
         "--auth-login-url", `${this.url}/auth`,
