@@ -3,10 +3,27 @@
  * https://ce.judge0.com/ (API reference, self-hosted 1.13.x is compatible)
  */
 
-// Judge0 1.13.x language ids.
-export const JUDGE0_LANGUAGE_IDS: Record<string, number> = {
+// Default Judge0 CE 1.13.x language ids. These compilers date from 2020; a custom Judge0
+// image with current versions defines its own ids, set with JUDGE0_LANGUAGE_IDS (ADR 0005).
+export const DEFAULT_JUDGE0_LANGUAGE_IDS: Record<string, number> = {
   python: 71,
+  javascript: 63,
+  typescript: 74,
+  c: 50,
+  cpp: 54,
+  java: 62,
+  rust: 73,
 };
+
+/** Language ids, optionally overridden with JSON in JUDGE0_LANGUAGE_IDS, e.g. {"python":1001}. */
+export function judge0LanguageIds(env: string | undefined = process.env.JUDGE0_LANGUAGE_IDS): Record<string, number> {
+  if (!env) return DEFAULT_JUDGE0_LANGUAGE_IDS;
+  const parsed = JSON.parse(env) as Record<string, unknown>;
+  const overrides = Object.fromEntries(
+    Object.entries(parsed).filter((entry): entry is [string, number] => Number.isInteger(entry[1])),
+  );
+  return { ...DEFAULT_JUDGE0_LANGUAGE_IDS, ...overrides };
+}
 
 // Judge0 status ids we care about.
 export const JUDGE0_STATUS = {
@@ -49,7 +66,7 @@ const b64 = (s: string) => Buffer.from(s, "utf8").toString("base64");
 const unb64 = (s: string | null | undefined) => (s ? Buffer.from(s, "base64").toString("utf8") : "");
 
 export async function runOnJudge0(config: Judge0Config, req: RunRequest): Promise<RunResult> {
-  const languageId = JUDGE0_LANGUAGE_IDS[req.language];
+  const languageId = judge0LanguageIds()[req.language];
   if (!languageId) throw new Error(`No Judge0 language id for "${req.language}"`);
 
   const headers: Record<string, string> = { "Content-Type": "application/json" };

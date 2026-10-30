@@ -6,6 +6,12 @@ import { z } from "zod";
 
 export const LANGUAGE_EXTENSIONS: Record<string, string> = {
   python: ".py",
+  javascript: ".js",
+  typescript: ".ts",
+  c: ".c",
+  cpp: ".cpp",
+  java: ".java",
+  rust: ".rs",
 };
 
 const caseSchema = z.object({

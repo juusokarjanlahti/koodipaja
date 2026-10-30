@@ -1,0 +1,26 @@
+id: javascript-lukujen-summa
+title: Lukujen summa (JavaScript)
+language: javascript
+difficulty: 2
+level: perus
+scaffold: full
+topics: [loops, integers, input]
+time_limit_seconds: 3
+memory_limit_mb: 128
+cases:
+  - name: Kolme lukua
+    stdin: "3\n4\n0\n"
+    expected_stdout: "Summa: 7\n"
+  - name: Yksi luku
+    stdin: "10\n0\n"
+    expected_stdout: "Summa: 10\n"
+  - name: Heti nolla
+    stdin: "0\n"
+    expected_stdout: "Summa: 0\n"
+  - name: Negatiiviset luvut
+    stdin: "-5\n2\n-1\n0\n"
+    expected_stdout: "Summa: -4\n"
+  - name: Pitkä syöte
+    stdin: "100\n200\n300\n400\n500\n0\n"
+    expected_stdout: "Summa: 1500\n"
+    hidden: true

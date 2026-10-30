@@ -12,6 +12,20 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
+      # Compilers for every exercise language (ADR 0005). GCC is preinstalled.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      # TypeScript exercises compile with the app's pinned tsc and @types/node.
+      - run: npm ci
+        working-directory: app
       - run: pip install pyyaml
       - run: python3 scripts/validate.py

@@ -43,6 +43,11 @@ app/                              Next.js application
 - **Auth:** LTI 1.3 launch from Moodle first; a development-only email login (DEV_LOGIN, never in production).
   SAML/HAKA later.
 - **Editor:** CodeMirror 6 (see docs/adr/0001-codemirror-instead-of-monaco.md).
+- **Languages:** python, javascript, typescript, c, cpp, java, rust (see
+  docs/adr/0005-kielet-ja-kaantajaversiot.md). Build and run commands are defined in three
+  places that MUST stay in sync: `scripts/validate.py`, `app/scripts/fake-judge0.mjs` and
+  `infra/judge0-languages/`. Judge0 ids come from `JUDGE0_LANGUAGE_IDS`. The pilot course is
+  Python; other languages have example exercises.
 - **Hosting:** EU only (UpCloud or Hetzner), Docker Compose. GDPR: student data never
   leaves the EU, and no third-party analytics.
 
@@ -64,6 +69,9 @@ app/                              Next.js application
   hardcoded answer), not formatting slips and not random garbage. Put realistic formatting
   slips that should be accepted in `accepted/`.
 - Keep required output minimal: do not demand exact prompt texts unless they matter.
+- In compiled languages the starter code provides the boilerplate (main function, input
+  reading setup) so students focus on the algorithm, not the ceremony. Java's class is `Main`.
+  Exercise ids outside Python are prefixed with the language (`java-lukujen-summa`).
 - Follow the pedagogical principles in `docs/product/visio.md`: exercises target algorithms
   and telling data types apart, not syntax trivia. Student-facing text never shames:
   say what does not work *yet* ("Ei vielä läpi"), not that the student failed.
@@ -75,7 +83,8 @@ app/                              Next.js application
   See `docs/product/oppimispolku.md`.
 - Set `scaffold: full | outline | none` (default `none`, see
   `docs/adr/0004-suunnitelma-kommentteina.md`). Early exercises get `full`: the starter
-  code begins with `# Suunnitelma:` and numbered plan comments (`# 1. ...`) in Finnish.
+  code contains `# Suunnitelma:` (or `// Suunnitelma:` in C-family languages) and numbered
+  plan comments (`# 1. ...` / `// 1. ...`) in Finnish.
   Fade to `outline` and then `none` as the course progresses. The plan describes steps,
   not code, and must not give away the key insight the exercise is meant to teach.
   Never use AI at runtime to check plans or break tasks down.
