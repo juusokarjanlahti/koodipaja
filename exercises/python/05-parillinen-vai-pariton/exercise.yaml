@@ -1,0 +1,27 @@
+id: 05-parillinen-vai-pariton
+title: Parillinen vai pariton
+language: python
+difficulty: 1
+level: perus
+scaffold: full
+concepts: [laskutoimitukset, if]
+topics: [ehdot, laskutoimitukset]
+time_limit_seconds: 2
+memory_limit_mb: 64
+cases:
+  - name: Parillinen
+    stdin: "4\n"
+    expected_stdout: "parillinen\n"
+  - name: Pariton
+    stdin: "7\n"
+    expected_stdout: "pariton\n"
+  - name: Nolla
+    stdin: "0\n"
+    expected_stdout: "parillinen\n"
+  - name: Negatiivinen pariton
+    stdin: "-3\n"
+    expected_stdout: "pariton\n"
+  - name: Suuri parillinen
+    stdin: "1000000\n"
+    expected_stdout: "parillinen\n"
+    hidden: true

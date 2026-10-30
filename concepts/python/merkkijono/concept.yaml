@@ -1,0 +1,6 @@
+id: merkkijono
+title: Merkkijono ja indeksit
+topic: tietotyypit
+order: 10
+example_stdin: ""
+example_stdout: "5\nk\na\nKISSA\n"

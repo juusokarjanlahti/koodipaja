@@ -1,0 +1,27 @@
+id: 10-keskiarvo
+title: Lukujen keskiarvo
+language: python
+difficulty: 3
+level: soveltava
+scaffold: outline
+concepts: [while, tyyppimuunnos, f-merkkijono]
+topics: [silmukat, tietotyypit]
+time_limit_seconds: 2
+memory_limit_mb: 64
+cases:
+  - name: Kolme lukua
+    stdin: "1\n2\n3\n0\n"
+    expected_stdout: "Keskiarvo: 2.00\n"
+  - name: Desimaalitulos
+    stdin: "1\n2\n0\n"
+    expected_stdout: "Keskiarvo: 1.50\n"
+  - name: Yksi luku
+    stdin: "5\n0\n"
+    expected_stdout: "Keskiarvo: 5.00\n"
+  - name: Ei lukuja
+    stdin: "0\n"
+    expected_stdout: "Ei lukuja\n"
+  - name: Negatiivisia
+    stdin: "10\n-5\n4\n0\n"
+    expected_stdout: "Keskiarvo: 3.00\n"
+    hidden: true

@@ -1,0 +1,24 @@
+id: 12-sanan-kirjaimet
+title: Sanan kirjaimet
+language: python
+difficulty: 2
+level: perus
+scaffold: none
+concepts: [merkkijono]
+topics: [merkkijonot]
+time_limit_seconds: 2
+memory_limit_mb: 64
+cases:
+  - name: Kissa
+    stdin: "kissa\n"
+    expected_stdout: "Pituus: 5\nEnsimmäinen kirjain: k\nViimeinen kirjain: a\n"
+  - name: Yksi kirjain
+    stdin: "a\n"
+    expected_stdout: "Pituus: 1\nEnsimmäinen kirjain: a\nViimeinen kirjain: a\n"
+  - name: Ääkköset
+    stdin: "Väinö\n"
+    expected_stdout: "Pituus: 5\nEnsimmäinen kirjain: V\nViimeinen kirjain: ö\n"
+  - name: Pitkä sana
+    stdin: "ohjelmointi\n"
+    expected_stdout: "Pituus: 11\nEnsimmäinen kirjain: o\nViimeinen kirjain: i\n"
+    hidden: true

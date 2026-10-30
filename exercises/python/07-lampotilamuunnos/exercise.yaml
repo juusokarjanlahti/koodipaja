@@ -1,0 +1,27 @@
+id: 07-lampotilamuunnos
+title: Lämpötilamuunnos
+language: python
+difficulty: 2
+level: perus
+scaffold: outline
+concepts: [tyyppimuunnos, f-merkkijono]
+topics: [tietotyypit, tulostus]
+time_limit_seconds: 2
+memory_limit_mb: 64
+cases:
+  - name: Jäätymispiste
+    stdin: "0\n"
+    expected_stdout: "32.0 °F\n"
+  - name: Kiehumispiste
+    stdin: "100\n"
+    expected_stdout: "212.0 °F\n"
+  - name: Ruumiinlämpö
+    stdin: "36.6\n"
+    expected_stdout: "97.9 °F\n"
+  - name: Asteikot kohtaavat
+    stdin: "-40\n"
+    expected_stdout: "-40.0 °F\n"
+  - name: Huoneenlämpö
+    stdin: "21.5\n"
+    expected_stdout: "70.7 °F\n"
+    hidden: true

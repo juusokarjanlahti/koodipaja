@@ -1,0 +1,24 @@
+id: 15-ostoslista
+title: Ostoslista
+language: python
+difficulty: 3
+level: soveltava
+scaffold: none
+concepts: [lista, while]
+topics: [listat, silmukat]
+time_limit_seconds: 2
+memory_limit_mb: 64
+cases:
+  - name: Kaksi ostosta
+    stdin: "maito\nleipä\n\n"
+    expected_stdout: "Ostoksia: 2\n1. maito\n2. leipä\n"
+  - name: Tyhjä lista
+    stdin: "\n"
+    expected_stdout: "Ostoksia: 0\n"
+  - name: Yksi ostos
+    stdin: "omena\n\n"
+    expected_stdout: "Ostoksia: 1\n1. omena\n"
+  - name: Neljä ostosta
+    stdin: "kahvi\nteetä\nsokeri\nhunaja\n\n"
+    expected_stdout: "Ostoksia: 4\n1. kahvi\n2. teetä\n3. sokeri\n4. hunaja\n"
+    hidden: true
