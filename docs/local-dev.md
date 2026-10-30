@@ -46,6 +46,13 @@ Runs every exercise's reference, wrong and accepted solutions through the sandbo
 probes the sandbox: no network, no host files, read-only system directories, process,
 memory and time limits. CI runs the same check on every pull request.
 
+## Moodle (LTI 1.3)
+
+Set `APP_URL` and `LTI_PRIVATE_KEY` (`npm run lti:keygen`), then follow
+[product/moodle-lti.md](product/moodle-lti.md). `tools/moodle/lti-setup.php` prepares a
+local test Moodle in one command. The e2e test `e2e/lti-launch.spec.ts` runs the whole
+flow against a fake platform, so no Moodle is needed for CI.
+
 ## Without any sandbox
 
 `app/scripts/fake-judge0.mjs` implements the small part of the Judge0 API the app uses and

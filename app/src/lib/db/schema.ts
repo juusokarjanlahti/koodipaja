@@ -23,11 +23,84 @@ export const submissionStatus = pgEnum("submission_status", [
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-  email: text("email").notNull().unique(),
+  // Only dev-login users have an email; LTI users are identified by lti_identities.
+  email: text("email").unique(),
   displayName: text("display_name"),
   role: userRole("role").notNull().default("student"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// LTI 1.3 platforms (one row per Moodle registration), see docs/specs/lti-launch.md.
+export const ltiPlatforms = pgTable(
+  "lti_platforms",
+  {
+    id: serial("id").primaryKey(),
+    issuer: text("issuer").notNull(),
+    clientId: text("client_id").notNull(),
+    authLoginUrl: text("auth_login_url").notNull(),
+    authTokenUrl: text("auth_token_url").notNull(),
+    jwksUrl: text("jwks_url").notNull(),
+    deploymentIds: text("deployment_ids").array().notNull().default([]),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("lti_platforms_issuer_client").on(t.issuer, t.clientId)],
+);
+
+// A user as known to a platform: the platform's opaque user id (sub). No email.
+export const ltiIdentities = pgTable(
+  "lti_identities",
+  {
+    platformId: integer("platform_id")
+      .notNull()
+      .references(() => ltiPlatforms.id, { onDelete: "cascade" }),
+    sub: text("sub").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (t) => [primaryKey({ columns: [t.platformId, t.sub] })],
+);
+
+// Single-use OIDC login state and nonce, valid for a few minutes.
+export const ltiLaunchStates = pgTable("lti_launch_states", {
+  state: text("state").primaryKey(),
+  nonce: text("nonce").notNull(),
+  platformId: integer("platform_id")
+    .notNull()
+    .references(() => ltiPlatforms.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
+// A course on a platform (LTI context).
+export const courses = pgTable(
+  "courses",
+  {
+    id: serial("id").primaryKey(),
+    platformId: integer("platform_id")
+      .notNull()
+      .references(() => ltiPlatforms.id, { onDelete: "cascade" }),
+    contextId: text("context_id").notNull(),
+    title: text("title"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("courses_platform_context").on(t.platformId, t.contextId)],
+);
+
+// The user's role on a course, as the platform last reported it.
+export const courseMemberships = pgTable(
+  "course_memberships",
+  {
+    courseId: integer("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: userRole("role").notNull(),
+    lastLaunchAt: timestamp("last_launch_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.courseId, t.userId] })],
+);
 
 export const exercises = pgTable("exercises", {
   // The folder name in exercises/<language>/<id>, e.g. "01-tervehdys".
@@ -145,3 +218,4 @@ export type Submission = typeof submissions.$inferSelect;
 export type SubmissionResult = typeof submissionResults.$inferSelect;
 export type User = typeof users.$inferSelect;
 export type Concept = typeof concepts.$inferSelect;
+export type LtiPlatform = typeof ltiPlatforms.$inferSelect;

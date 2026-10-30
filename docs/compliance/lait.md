@@ -7,8 +7,9 @@ Roolit kaikessa alla olevassa: **AMK** on asiakas ja tietojen rekisterinpitäjä
 
 ## 1. Tietosuoja: GDPR (EU 2016/679) ja tietosuojalaki (1050/2018)
 
-**Koskee:** kyllä. Alusta käsittelee opiskelijoiden henkilötietoja (nimi, sähköposti,
-palautukset ja tulokset).
+**Koskee:** kyllä. Alusta käsittelee opiskelijoiden henkilötietoja (nimi, Moodlen
+käyttäjätunniste, kurssi ja rooli, palautukset ja tulokset). Moodlesta kirjautuvien
+sähköpostia ei tallenneta ([../product/moodle-lti.md](../product/moodle-lti.md)).
 
 **Vaatimukset Koodipajalle**
 - **Käsittelijäsopimus (GDPR 28 art.)** jokaisen AMK:n kanssa: käsittelyn tarkoitus, ohjeet,
