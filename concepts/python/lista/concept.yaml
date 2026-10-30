@@ -1,0 +1,6 @@
+id: lista
+title: Lista
+topic: listat
+order: 8
+example_stdin: ""
+example_stdout: "omena\n3\n['omena', 'banaani', 'kiivi']\n"

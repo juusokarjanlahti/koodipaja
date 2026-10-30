@@ -18,7 +18,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         >
           Siirry sisältöön
         </a>
-        <header className="border-b border-border bg-surface">
+        <header className="border-b border-border bg-surface print:hidden">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <Link href="/" className="text-lg font-semibold tracking-tight">
               Koodipaja

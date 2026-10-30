@@ -1,0 +1,6 @@
+id: print
+title: Tulostaminen print()-funktiolla
+topic: tulostus-ja-syote
+order: 1
+example_stdin: ""
+example_stdout: "Hei maailma!\nSumma on 7\n"

@@ -1,0 +1,6 @@
+id: tyyppimuunnos
+title: Tyyppimuunnos int(), float() ja str()
+topic: tietotyypit
+order: 3
+example_stdin: "3\n4\n"
+example_stdout: "7\n34\n"

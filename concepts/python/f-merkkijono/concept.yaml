@@ -1,0 +1,6 @@
+id: f-merkkijono
+title: Muotoiltu merkkijono (f-merkkijono)
+topic: tulostus-ja-syote
+order: 4
+example_stdin: ""
+example_stdout: "Hei, Aino! Olet 20-vuotias.\nKeskiarvo: 3.50\n"

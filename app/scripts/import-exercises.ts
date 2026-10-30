@@ -1,5 +1,5 @@
 /**
- * Import exercises from ../exercises into the database.
+ * Import exercises from ../exercises and concept cards from ../concepts into the database.
  *
  *   npm run import-exercises
  *
@@ -8,14 +8,36 @@
  * NOT deleted, because students may have submissions for them; they are reported.
  */
 import path from "node:path";
-import { eq, notInArray } from "drizzle-orm";
+import { eq, notInArray, sql } from "drizzle-orm";
 import { closeDb, getDb, schema } from "../src/lib/db";
+import { findConceptFolders, loadConcept } from "../src/lib/concepts/load";
 import { findExerciseFolders, loadExercise } from "../src/lib/exercises/load";
 
 const root = path.resolve(process.cwd(), process.argv[2] ?? "../exercises");
+const conceptsRoot = path.resolve(root, "../concepts");
+
+/** Concept cards are upserted; cards removed from Git stay, as notes may refer to them. */
+async function importConcepts(db: ReturnType<typeof getDb>) {
+  let changed = 0;
+  for (const folder of await findConceptFolders(conceptsRoot)) {
+    const c = await loadConcept(folder);
+    const result = await db
+      .insert(schema.concepts)
+      .values(c)
+      .onConflictDoUpdate({
+        target: [schema.concepts.language, schema.concepts.id],
+        set: c,
+        setWhere: sql`${schema.concepts.contentHash} <> excluded.content_hash`,
+      })
+      .returning({ id: schema.concepts.id });
+    if (result.length > 0) changed++;
+  }
+  console.log(`${changed} concept card(s) created or updated`);
+}
 
 async function main() {
   const db = getDb();
+  await importConcepts(db);
   const folders = await findExerciseFolders(root);
   const ids: string[] = [];
   let created = 0;
@@ -44,6 +66,7 @@ async function main() {
         difficulty: ex.difficulty,
         topics: ex.topics,
         outputMatch: ex.outputMatch,
+        concepts: ex.concepts,
         promptMarkdown: ex.promptMarkdown,
         starterCode: ex.starterCode,
         timeLimitSeconds: ex.timeLimitSeconds,

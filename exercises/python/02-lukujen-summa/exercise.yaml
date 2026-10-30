@@ -4,6 +4,7 @@ language: python
 difficulty: 2
 level: perus
 scaffold: full
+concepts: [tyyppimuunnos, while, if]
 topics: [loops, integers, input]
 time_limit_seconds: 2
 memory_limit_mb: 64

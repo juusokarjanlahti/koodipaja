@@ -4,6 +4,7 @@ language: python
 difficulty: 1
 level: perus
 scaffold: full
+concepts: [print, input, f-merkkijono]
 topics: [input, output, string]
 time_limit_seconds: 2
 memory_limit_mb: 64

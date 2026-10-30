@@ -11,7 +11,10 @@ export async function UserNav() {
     );
   }
   return (
-    <form action="/api/logout" method="post" className="flex items-center gap-3 text-sm">
+    <form action="/api/logout" method="post" className="flex items-center gap-4 text-sm">
+      <Link href="/muistilista" className="font-medium">
+        Muistilista
+      </Link>
       <span className="text-muted">{user.displayName ?? user.email}</span>
       <button type="submit" className="font-medium text-accent">
         Kirjaudu ulos

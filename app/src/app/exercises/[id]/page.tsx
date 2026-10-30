@@ -2,8 +2,10 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Assignment } from "@/components/assignment";
+import { CheatsheetPanel } from "@/components/cheatsheet";
 import { ExerciseWorkspace } from "@/components/exercise-workspace";
 import { getCurrentUser } from "@/lib/auth/session";
+import { getCheatsheet } from "@/lib/concepts/queries";
 import { getDb, schema } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -31,15 +33,19 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
     .where(eq(schema.testCases.exerciseId, id))
     .orderBy(asc(schema.testCases.position));
   const caseCount = cases.length;
+  const cheatsheet = user ? await getCheatsheet(user.id) : [];
   // Prefill "Aja" with the first visible example so the first run works straight away.
   const exampleStdin = cases.find((c) => !c.hidden)?.stdin ?? "";
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-      <article className="prose-exercise self-start rounded-xl border border-border bg-surface p-5">
-        <Assignment markdown={exercise.promptMarkdown} />
-        <p className="mt-4 text-sm text-muted">Testitapauksia: {caseCount}</p>
-      </article>
+      <div className="grid gap-4 self-start">
+        <article className="prose-exercise rounded-xl border border-border bg-surface p-5">
+          <Assignment markdown={exercise.promptMarkdown} />
+          <p className="mt-4 text-sm text-muted">Testitapauksia: {caseCount}</p>
+        </article>
+        {user && <CheatsheetPanel cards={cheatsheet} />}
+      </div>
 
       <section aria-label="Ratkaisu">
         {user ? (
