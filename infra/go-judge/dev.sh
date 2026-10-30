@@ -17,7 +17,8 @@ SHA256="509782f8959987256d99ac6dc8062ec593d776f291401c8e0c28bdc48dcd1880"
 ADDR="${GO_JUDGE_ADDR:-127.0.0.1:5050}"
 TOKEN="${GO_JUDGE_AUTH_TOKEN:-localtoken}"
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-WORK="${GO_JUDGE_DEV_DIR:-${TMPDIR:-/tmp}/koodipaja-go-judge}"
+# Must be world-traversable (e.g. under /tmp): the sandbox reads mount sources from here.
+WORK="${GO_JUDGE_DEV_DIR:-/tmp/koodipaja-go-judge}"
 TOOLBIN="$WORK/toolbin"
 SANDBOX_BIN="/opt/koodipaja/bin"
 
@@ -70,13 +71,33 @@ fi
 # The JDK reads its configuration from /etc at a fixed path.
 [[ -d /etc/java-21-openjdk ]] && EXTRA["/etc/java-21-openjdk"]="/etc/java-21-openjdk"
 
+# Toolchains under home directories (e.g. /home/runner in CI, /root/.rustup) are not
+# readable while go-judge sets up a sandbox. Bind them into a world-readable staging
+# directory first and mount the staging path into the sandbox instead.
+STAGE="$WORK/stage"
+mkdir -p "$STAGE"
+chmod 755 "$WORK" "$STAGE"
+declare -A SOURCE=()
+for dir in "${!EXTRA[@]}"; do
+  case "$dir" in
+    /opt/*|/usr/*|/etc/*) SOURCE["$dir"]="$dir" ;;
+    *)
+      staged="$STAGE/$(basename "${EXTRA[$dir]}")"
+      mkdir -p "$staged"
+      mountpoint -q "$staged" && umount "$staged"
+      mount --bind "$dir" "$staged"
+      SOURCE["$dir"]="$staged"
+      ;;
+  esac
+done
+
 {
   echo "mount:"
   for dir in /bin /lib /lib64 /usr /etc/ld.so.cache /etc/alternatives; do
     [[ -e "$dir" ]] && printf '  - type: bind\n    source: %s\n    target: %s\n    readonly: true\n' "$dir" "$dir"
   done
   for dir in "${!EXTRA[@]}"; do
-    printf '  - type: bind\n    source: %s\n    target: %s\n    readonly: true\n' "$dir" "${EXTRA[$dir]}"
+    printf '  - type: bind\n    source: %s\n    target: %s\n    readonly: true\n' "${SOURCE[$dir]}" "${EXTRA[$dir]}"
   done
   printf '  - type: bind\n    source: %s\n    target: %s\n    readonly: true\n' "$TOOLBIN" "$SANDBOX_BIN"
   for dev in null urandom random zero full; do

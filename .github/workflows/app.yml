@@ -89,7 +89,7 @@ jobs:
       - name: Start go-judge sandbox
         run: |
           sudo env "PATH=$PATH" "RUSTUP_HOME=${RUSTUP_HOME:-$HOME/.rustup}" "CARGO_HOME=${CARGO_HOME:-$HOME/.cargo}" \
-            GO_JUDGE_DEV_DIR="$RUNNER_TEMP/go-judge" ../infra/go-judge/dev.sh > "$RUNNER_TEMP/go-judge.log" 2>&1 &
+            ../infra/go-judge/dev.sh > "$RUNNER_TEMP/go-judge.log" 2>&1 &
           for i in $(seq 1 90); do curl -fs -H "Authorization: Bearer localtoken" localhost:5050/version && break; sleep 1; done
           ../infra/go-judge/dev.sh --print-env >> "$GITHUB_ENV"
       - run: npm run db:migrate
