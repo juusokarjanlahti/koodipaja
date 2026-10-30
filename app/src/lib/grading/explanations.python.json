@@ -1,0 +1,86 @@
+[
+  {
+    "id": "str-int-concat",
+    "match": "TypeError: (can only concatenate str \\(not \"(int|float)\"\\) to str|unsupported operand type\\(s\\) for \\+: '(int|float)' and 'str')",
+    "title": "Merkkijono ja luku eivät yhdisty",
+    "text": "Yritit yhdistää merkkijonon ja luvun +-merkillä. Python ei muuta tietotyyppejä itsestään. Jos haluat laskea, muuta teksti luvuksi int()-funktiolla. Jos haluat tulostaa, muuta luku tekstiksi str()-funktiolla tai käytä f-merkkijonoa, esimerkiksi f\"Summa: {summa}\"."
+  },
+  {
+    "id": "str-int-compare",
+    "match": "TypeError: '(<|>|<=|>=)' not supported between instances of '(str|int)' and '(str|int)'",
+    "title": "Merkkijonoa ja lukua ei voi verrata",
+    "text": "Vertasit merkkijonoa ja lukua toisiinsa. input() palauttaa aina merkkijonon, vaikka käyttäjä kirjoittaisi numeron. Muuta syöte luvuksi int()-funktiolla ennen vertailua."
+  },
+  {
+    "id": "int-invalid-literal",
+    "match": "ValueError: invalid literal for int\\(\\) with base 10: '(?<value>[^']*)'",
+    "title": "Tekstiä ei voi muuttaa kokonaisluvuksi",
+    "text": "int() sai tekstin '{value}', joka ei ole kokonaisluku. Tarkista, että luet oikean rivin syötteestä ja että syötteessä on numero. Jos luku voi olla desimaaliluku, käytä float()-funktiota."
+  },
+  {
+    "id": "float-invalid",
+    "match": "ValueError: could not convert string to float: '(?<value>[^']*)'",
+    "title": "Tekstiä ei voi muuttaa desimaaliluvuksi",
+    "text": "float() sai tekstin '{value}', joka ei ole luku. Huomaa, että Python käyttää desimaalierottimena pistettä (3.5), ei pilkkua (3,5)."
+  },
+  {
+    "id": "name-error",
+    "match": "NameError: name '(?<name>[^']+)' is not defined",
+    "title": "Nimeä ei tunneta",
+    "text": "Pythonille nimi '{name}' on tuntematon. Tavallisia syitä: muuttujaa ei ole vielä luotu tällä rivillä, nimi on kirjoitettu eri tavalla (isot ja pienet kirjaimet ovat eri asia) tai teksti on unohtunut kirjoittaa lainausmerkkeihin."
+  },
+  {
+    "id": "eof",
+    "match": "EOFError: EOF when reading a line",
+    "title": "Syöte loppui kesken",
+    "text": "Ohjelma yritti lukea input()-funktiolla rivin, mutta syötteessä ei ollut enempää rivejä. Luetko syötettä useammin kuin sitä on? Kun ajat koodia itse, lisää tarvittavat rivit Syöte-kenttään."
+  },
+  {
+    "id": "zero-division",
+    "match": "ZeroDivisionError",
+    "title": "Jako nollalla",
+    "text": "Ohjelma jakoi luvun nollalla, mikä ei ole matematiikassa määritelty. Tarkista ennen jakamista, ettei jakaja ole nolla, esimerkiksi if-lauseella."
+  },
+  {
+    "id": "index-error",
+    "match": "IndexError: (list|string|tuple) index out of range",
+    "title": "Kohtaa ei ole olemassa",
+    "text": "Yritit hakea kohtaa, jota ei ole. Indeksit alkavat nollasta, joten viimeinen kohta on len(...) - 1. Tarkista silmukan rajat."
+  },
+  {
+    "id": "key-error",
+    "match": "KeyError: (?<key>.+)",
+    "title": "Avainta ei löydy sanakirjasta",
+    "text": "Sanakirjassa ei ole avainta {key}. Voit tarkistaa ensin in-operaattorilla (if avain in sanakirja) tai käyttää get()-metodia."
+  },
+  {
+    "id": "attribute-error",
+    "match": "AttributeError: '(?<type>[a-z]+)' object has no attribute '(?<attr>[^']+)'",
+    "title": "Tällä tietotyypillä ei ole tätä toimintoa",
+    "text": "Arvo on tyyppiä {type}, eikä sillä ole toimintoa {attr}. Tarkista, onko muuttujassa se tietotyyppi, jota luulet: esimerkiksi luvulla ei ole merkkijonon metodeja."
+  },
+  {
+    "id": "indentation",
+    "match": "(IndentationError|TabError)",
+    "title": "Sisennys ei täsmää",
+    "text": "Pythonissa sisennys kertoo, mitkä rivit kuuluvat yhteen (esimerkiksi silmukan tai if-lauseen sisään). Tarkista, että saman lohkon rivit alkavat samasta kohdasta ja että rivin lopussa olevan kaksoispisteen jälkeen seuraava rivi on sisennetty."
+  },
+  {
+    "id": "syntax-colon",
+    "match": "SyntaxError: expected ':'",
+    "title": "Kaksoispiste puuttuu",
+    "text": "if-, elif-, else-, while-, for- ja def-rivien loppuun tarvitaan kaksoispiste (:)."
+  },
+  {
+    "id": "syntax-unclosed",
+    "match": "SyntaxError: ('\\(' was never closed|unterminated string literal|EOL while scanning string literal|unexpected EOF while parsing)",
+    "title": "Sulku tai lainausmerkki jäi auki",
+    "text": "Jokaiselle avaavalle sululle ja lainausmerkille tarvitaan sulkeva pari. Tarkista virheilmoituksen osoittama rivi ja sitä edeltävä rivi."
+  },
+  {
+    "id": "syntax-generic",
+    "match": "SyntaxError",
+    "title": "Python ei ymmärrä riviä",
+    "text": "Koodissa on kirjoitusvirhe, jonka takia Python ei voi ajaa sitä. Tarkista virheilmoituksen osoittama rivi: sulkeet, lainausmerkit, kaksoispisteet ja yhtäsuuruusmerkit (= asettaa arvon, == vertaa)."
+  }
+]

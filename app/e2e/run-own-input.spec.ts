@@ -41,6 +41,8 @@ test("runtime errors are shown, and Ctrl+Shift+Enter runs from the editor", asyn
   // Focus is in the editor after typing; the shortcut runs without leaving it.
   await page.keyboard.press("ControlOrMeta+Shift+Enter");
 
+  // The original error stays visible, with a Finnish explanation above it (#52).
   await expect(page.getByText(/ValueError/)).toBeVisible();
-  await expect(page.getByText(/Ajonaikainen virhe/)).toBeVisible();
+  await expect(page.getByText("Tekstiä ei voi muuttaa kokonaisluvuksi")).toBeVisible();
+  await expect(page.getByText(/Ohjelma pysähtyi virheeseen/)).toBeVisible();
 });

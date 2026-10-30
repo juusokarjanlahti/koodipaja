@@ -12,7 +12,7 @@ CC BY 4.0-licensed exercise library.
 
 The product itself does **not** call LLMs at runtime. AI agents are used at
 development time: to build the software and to draft exercises, which are then
-validated automatically and reviewed by a human.
+validated automatically. The owner reviews merged work when they choose to.
 
 ## Repository layout
 
@@ -85,9 +85,12 @@ app/                              Next.js application
 2. **Tests are mandatory.** Unit tests for logic, Playwright for user flows. Never mark
    work done with failing or skipped tests. Never weaken a test to make it pass.
 3. **Small PRs.** One concern per PR. Use separate git worktrees for parallel work.
-4. **Human review required** for anything touching: authentication, LTI, the Judge0
-   integration or its sandbox config, personal data, or database migrations.
-   Flag these clearly at the top of the PR.
+4. **Merge when CI is green.** Agents may merge their own PRs, including exercise
+   content, without waiting for a human review; the owner reviews afterwards when they
+   choose to. PRs touching authentication, LTI, the Judge0 integration or its sandbox
+   config, personal data, or database migrations must still be flagged clearly at the top
+   of the PR so the owner can find them later. Never merge with failing or skipped checks,
+   and never weaken a validation rule to get content through.
 5. **No new dependencies** without stating why in the PR. Prefer the standard library.
 6. **Accessibility:** WCAG 2.1 AA. Every interactive element is keyboard-usable and labeled.
 7. **Never** commit secrets, real student data, or material copied from commercial

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PresentedCase, PresentedSubmission } from "@/lib/grading/present";
 import { FORMATTING_DIFFERENCE } from "@/lib/grading/status";
 import type { RunOutput } from "@/lib/runs/output";
+import { ErrorHelp } from "./error-help";
 
 const POLL_MS = 800;
 const PLAN_TEMPLATE = "# Suunnitelma:\n# 1. \n# 2. \n# 3. \n\n";
@@ -16,23 +17,27 @@ const LANGUAGE_EXTENSIONS = { python: () => python() } as const;
 function statusLabel(c: PresentedCase): string {
   if (c.passed === null) return "Odottaa";
   if (c.passed) return c.judgeStatus === FORMATTING_DIFFERENCE ? "Läpi (pieni muotoiluero)" : "Läpi";
+  // Principle 1: say what does not work *yet*, never that the student failed.
   switch (c.judgeStatus) {
     case "Wrong Answer":
-      return "Väärä tuloste";
+      return "Ei vielä läpi: tuloste eroaa";
     case "Time Limit Exceeded":
-      return "Aikaraja ylittyi";
+      return "Ei vielä läpi: aikaraja ylittyi";
     case "Compilation Error":
-      return "Käännösvirhe";
+      return "Ei vielä läpi: koodissa on kirjoitusvirhe";
     default:
-      return c.judgeStatus?.startsWith("Runtime Error") ? "Ajonaikainen virhe" : (c.judgeStatus ?? "Virhe");
+      return c.judgeStatus?.startsWith("Runtime Error")
+        ? "Ei vielä läpi: virhe ajon aikana"
+        : `Ei vielä läpi${c.judgeStatus ? ` (${c.judgeStatus})` : ""}`;
   }
 }
 
 function runStatusLabel(r: RunOutput): string {
   const time = r.timeMs !== null ? ` (${r.timeMs} ms)` : "";
   if (r.ok) return `Ajo valmis${time}`;
-  if (r.statusDescription === "Time Limit Exceeded") return "Aikaraja ylittyi: ohjelma ei päättynyt ajoissa.";
-  if (r.statusDescription.startsWith("Runtime Error")) return `Ajonaikainen virhe${time}`;
+  if (r.statusDescription === "Time Limit Exceeded")
+    return "Aikaraja ylittyi: ohjelma ei päättynyt ajoissa. Onko silmukassa lopetusehto?";
+  if (r.statusDescription.startsWith("Runtime Error")) return `Ohjelma pysähtyi virheeseen${time}`;
   return r.statusDescription;
 }
 
@@ -211,6 +216,7 @@ export function ExerciseWorkspace({
               <pre className="min-h-[5.5rem] overflow-x-auto whitespace-pre-wrap rounded-md border border-border bg-bg p-2 font-mono text-sm">
                 {runOutput.stdout === "" ? <span className="text-muted">(ei tulostetta)</span> : runOutput.stdout}
               </pre>
+              {runOutput.stderr && <ErrorHelp stderr={runOutput.stderr} language={language} />}
               {runOutput.stderr && <Output label="Virheilmoitus" text={runOutput.stderr} />}
               <p className="text-xs text-muted">{runStatusLabel(runOutput)}</p>
             </>
@@ -262,12 +268,12 @@ export function ExerciseWorkspace({
         {submission?.status === "done" && (
           <p
             className={`rounded-lg border p-3 font-medium ${
-              allPassed ? "border-ok bg-ok-bg text-ok" : "border-fail bg-fail-bg text-fail"
+              allPassed ? "border-ok bg-ok-bg text-ok" : "border-border bg-surface"
             }`}
           >
             {allPassed
               ? `Kaikki ${submission.totalCount} testiä meni läpi!`
-              : `${submission.passedCount} / ${submission.totalCount} testiä meni läpi.`}
+              : `${submission.passedCount} / ${submission.totalCount} testiä läpi. Avoinna on ensimmäinen testi, joka ei vielä mene läpi.`}
           </p>
         )}
 
@@ -290,15 +296,16 @@ export function ExerciseWorkspace({
                     </span>
                     <span
                       className={`text-sm font-medium ${
-                        c.passed === null ? "text-muted" : c.passed ? "text-ok" : "text-fail"
+                        c.passed === null ? "text-muted" : c.passed ? "text-ok" : "text-text"
                       }`}
                     >
-                      {c.passed === null ? "…" : c.passed ? "✓ " : "✗ "}
+                      <span aria-hidden="true">{c.passed === null ? "… " : c.passed ? "✓ " : "○ "}</span>
                       {statusLabel(c)}
                     </span>
                   </summary>
                   {!c.hidden ? (
                     <div className="grid gap-2 border-t border-border p-3">
+                      {c.stderr ? <ErrorHelp stderr={c.stderr} language={language} /> : null}
                       <Output label="Syöte" text={c.stdin} />
                       <Output label="Odotettu tuloste" text={c.expectedStdout} />
                       <Output label="Ohjelmasi tuloste" text={c.stdout} />
