@@ -3,7 +3,8 @@ import { createSessionToken, SESSION_COOKIE, sessionCookieOptions } from "@/lib/
 import { requireEnv } from "@/lib/env";
 import { appOrigin, errorRedirect, readParams, STATE_COOKIE_PREFIX, stateCookieOptions } from "@/lib/lti/http";
 import { decodeJwt, JwtError, verifyRs256 } from "@/lib/lti/jwt";
-import { exerciseIdFromPath, redirectPath, validateLaunch } from "@/lib/lti/launch";
+import { createChoiceToken } from "@/lib/lti/deep-link";
+import { exerciseIdFromPath, messageType, redirectPath, validateDeepLinkRequest, validateLaunch } from "@/lib/lti/launch";
 import { platformKey } from "@/lib/lti/keys";
 import { consumeLaunchState, getPlatform, recordLaunch } from "@/lib/lti/store";
 
@@ -24,18 +25,44 @@ export async function POST(request: Request) {
   if (!platform) return errorRedirect("platform");
 
   let launch;
+  let deepLink;
   try {
     const { header } = decodeJwt(idToken);
     const key = await platformKey(platform.jwksUrl, header);
     const { payload } = verifyRs256(idToken, key);
-    launch = validateLaunch(payload, platform, stored.nonce);
+    if (messageType(payload) === "LtiDeepLinkingRequest") {
+      deepLink = validateDeepLinkRequest(payload, platform, stored.nonce);
+    } else {
+      launch = validateLaunch(payload, platform, stored.nonce);
+    }
   } catch (error) {
     if (error instanceof JwtError) {
       console.warn(`LTI launch rejected (${error.code}): ${error.message}`);
-      return errorRedirect("token");
+      return errorRedirect(error.code === "role" ? "role" : "token");
     }
     throw error;
   }
+
+  if (deepLink) {
+    // A teacher choosing exercises for a new activity. Works inside Moodle's iframe too:
+    // the chooser is authorised by the signed choice token, not by the session cookie.
+    const userId = await recordLaunch(platform.id, deepLink);
+    const token = createChoiceToken(
+      {
+        platformId: platform.id,
+        deploymentId: deepLink.deploymentId,
+        userId,
+        returnUrl: deepLink.returnUrl,
+        acceptMultiple: deepLink.acceptMultiple,
+        data: deepLink.data,
+      },
+      requireEnv("SESSION_SECRET"),
+    );
+    const response = NextResponse.redirect(new URL(`/lti-valitse?valinta=${encodeURIComponent(token)}`, appOrigin()), 303);
+    response.cookies.set(cookieName, "", { ...stateCookieOptions, maxAge: 0 });
+    return response;
+  }
+  if (!launch) return errorRedirect("token");
 
   // Inside a cross-site iframe the session cookie would be a blocked third-party cookie.
   if (request.headers.get("sec-fetch-dest") === "iframe") return errorRedirect("iframe");

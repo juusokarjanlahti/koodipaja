@@ -2,21 +2,11 @@ import Link from "next/link";
 import { asc } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
+import { LANGUAGE_LABELS, languageRank } from "@/lib/exercises/languages";
 import { getExerciseStatuses, type ExerciseStatus } from "@/lib/progress";
 
 export const dynamic = "force-dynamic";
 
-const LANGUAGE_LABELS: Record<string, string> = {
-  python: "Python",
-  javascript: "JavaScript",
-  typescript: "TypeScript",
-  c: "C",
-  cpp: "C++",
-  java: "Java",
-  rust: "Rust",
-};
-// Python is the pilot course; other languages follow as examples of the same exercise.
-const LANGUAGE_ORDER = ["python", "javascript", "typescript", "java", "c", "cpp", "rust"];
 
 export default async function HomePage() {
   const exercises = await getDb()
@@ -30,10 +20,7 @@ export default async function HomePage() {
     .from(schema.exercises)
     .orderBy(asc(schema.exercises.language), asc(schema.exercises.id));
 
-  const rank = (language: string) => {
-    const i = LANGUAGE_ORDER.indexOf(language);
-    return i === -1 ? LANGUAGE_ORDER.length : i;
-  };
+  const rank = languageRank;
   const user = await getCurrentUser();
   const statuses: Map<string, ExerciseStatus> = user ? await getExerciseStatuses(user.id) : new Map();
 

@@ -32,7 +32,10 @@ exercises/ (Git) ──> CI validation (scripts/validate.py) ──> imported in
    user id, name, course and course role, and sets the normal session cookie.
 3. Platforms are rows in `lti_platforms` (`npm run lti:register`). See
    `docs/specs/lti-launch.md` and `docs/product/moodle-lti.md`.
-4. After grading, the worker queues a `grades` job when the student launched the exercise
+4. A Deep Linking request (teacher, "Select content") goes to the chooser `/lti-valitse`;
+   the chosen exercises go back as signed resource links with a line item
+   (`docs/specs/lti-deep-linking.md`).
+5. After grading, the worker queues a `grades` job when the student launched the exercise
    from an activity that takes grades; it sends the best score with LTI Assignment and
    Grade Services (`docs/specs/lti-grades.md`).
 

@@ -14,7 +14,15 @@ import { publicJwk } from "../src/lib/lti/keys";
 
 export const APP = process.env.APP_URL ?? "http://localhost:3000";
 
-export type FakeUser = { sub: string; name: string; roles: string[]; target?: string; grades?: boolean };
+export type FakeUser = {
+  sub: string;
+  name: string;
+  roles: string[];
+  target?: string;
+  grades?: boolean;
+  /** Send a Deep Linking request instead of a resource link launch. */
+  deepLink?: { acceptMultiple: boolean };
+};
 export type ReceivedScore = { lineItem: string; score: Record<string, unknown>; token: string };
 
 export class FakePlatform {
@@ -25,6 +33,8 @@ export class FakePlatform {
   readonly issued: { state: string; idToken: string }[] = [];
   readonly scores: ReceivedScore[] = [];
   readonly tokenErrors: string[] = [];
+  /** Verified LtiDeepLinkingResponse payloads posted back to the return URL. */
+  readonly deepLinkResponses: Record<string, unknown>[] = [];
   private readonly key = generateKeyPairSync("rsa", { modulusLength: 2048 }).privateKey;
   private readonly jwk = publicJwk(this.key);
   private server?: Server;
@@ -50,8 +60,21 @@ export class FakePlatform {
         nonce,
         [CLAIM.deploymentId]: "1",
         [CLAIM.version]: "1.3.0",
-        [CLAIM.messageType]: "LtiResourceLinkRequest",
-        [CLAIM.resourceLink]: { id: `rl-${user.sub}` },
+        ...(user.deepLink
+          ? {
+              [CLAIM.messageType]: "LtiDeepLinkingRequest",
+              [CLAIM.deepLinkingSettings]: {
+                deep_link_return_url: `${this.url}/dl-return?course=1`,
+                accept_types: ["ltiResourceLink"],
+                accept_presentation_document_targets: ["window"],
+                accept_multiple: user.deepLink.acceptMultiple,
+                data: `data-${this.run}`,
+              },
+            }
+          : {
+              [CLAIM.messageType]: "LtiResourceLinkRequest",
+              [CLAIM.resourceLink]: { id: `rl-${user.sub}` },
+            }),
         [CLAIM.roles]: user.roles,
         [CLAIM.context]: { id: "course-1", title: "Ohjelmoinnin perusteet (e2e)" },
         [CLAIM.targetLinkUri]: `${APP}${user.target ?? "/exercises/01-tervehdys"}`,
@@ -165,6 +188,15 @@ export class FakePlatform {
       }
       res.setHeader("content-type", "application/json");
       res.end(JSON.stringify({ access_token: `token-${this.run}`, token_type: "Bearer", expires_in: 3600 }));
+      return;
+    }
+    if (url.pathname === "/dl-return" && method === "POST") {
+      const jwt = new URLSearchParams(body).get("JWT") ?? "";
+      const keys = (await (await fetch(`${APP}/api/lti/jwks`)).json()) as { keys: Parameters<typeof verifyRs256>[1][] };
+      const { payload } = verifyRs256(jwt, keys.keys[0]);
+      this.deepLinkResponses.push(payload);
+      res.setHeader("content-type", "text/html; charset=utf-8");
+      res.end(`<!doctype html><title>Moodle</title><h1>Sisältö lisätty</h1>`);
       return;
     }
     const scores = /^\/lineitems\/([^/]+)\/lineitem\/scores$/.exec(url.pathname);

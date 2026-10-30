@@ -15,6 +15,14 @@ const MESSAGES: Record<string, { what: string; todo: string }> = {
     what: "Moodlen lähettämää kirjautumista ei voitu varmistaa.",
     todo: "Palaa Moodleen ja avaa aktiviteetti uudelleen. Jos sama toistuu, kerro opettajalle.",
   },
+  role: {
+    what: "Tehtävien valitseminen Moodlesta on vain kurssin opettajille.",
+    todo: "Jos olet kurssin opettaja, tarkista roolisi Moodlen kurssilla.",
+  },
+  choice: {
+    what: "Tehtävien valinta vanheni tai keskeytyi.",
+    todo: "Palaa Moodleen ja valitse sisältö uudelleen aktiviteetin asetuksista.",
+  },
   iframe: {
     what: "Koodipaja avautui Moodle-sivun sisään upotettuna, jolloin selain estää kirjautumisen.",
     todo: "Opettaja: muuta aktiviteetin asetuksista avautumistavaksi uusi ikkuna (Launch container: New window).",

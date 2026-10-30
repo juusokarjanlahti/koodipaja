@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { and, eq, lt, sql } from "drizzle-orm";
 import { getDb, schema } from "../db";
 import type { LtiPlatform } from "../db/schema";
-import type { Launch } from "./launch";
+import type { Launch, LaunchUser } from "./launch";
 
 const STATE_TTL_MS = 10 * 60 * 1000;
 
@@ -49,7 +49,11 @@ export async function consumeLaunchState(state: string, now = Date.now()) {
  * Creates or updates the user, course, membership and activity (resource link) for a
  * validated launch. `exerciseId` is the exercise the activity opens, if any. Returns the user id.
  */
-export async function recordLaunch(platformId: number, launch: Launch, exerciseId: string | null = null): Promise<string> {
+export async function recordLaunch(
+  platformId: number,
+  launch: LaunchUser & Partial<Pick<Launch, "resourceLinkId" | "ags">>,
+  exerciseId: string | null = null,
+): Promise<string> {
   return getDb().transaction(async (tx) => {
     const [identity] = await tx
       .select({ userId: schema.ltiIdentities.userId })
@@ -106,6 +110,9 @@ export async function recordLaunch(platformId: number, launch: Launch, exerciseI
           set: { role: launch.role, lastLaunchAt: sql`now()` },
         });
     }
+
+    // Deep Linking requests have no activity yet.
+    if (!launch.resourceLinkId) return userId;
 
     const [exercise] = exerciseId
       ? await tx.select({ id: schema.exercises.id }).from(schema.exercises).where(eq(schema.exercises.id, exerciseId))
