@@ -92,11 +92,34 @@ second student with the same output passes without asking; a rejected group stay
 1. `help_requests`, student button, teacher list and reply (#49). No grading change.
 2. `approved_outputs`, the grading check, approval action and re-evaluation (#50).
 3. Grouping and the "already approved or waiting" notices (#51).
+4. "Ehdota kirjastoon" suggestions and the owner's review list.
+
+## Three levels: course, suggestion, library
+
+The library's defaults are maintained by the owner. Teachers shape their own course and
+feed improvements back, so the project improves from the inside out (see also #39):
+
+1. **Course rule (teacher, immediate):** a teacher approves an output for their course.
+   It applies to every student of that course and nowhere else.
+2. **Library suggestion (teacher, optional):** when approving, the teacher can tick
+   "Ehdota kirjastoon". That stores a `library_suggestions` row (exercise, case, the
+   approved output, the reason, the course's teacher) and nothing about the student. It
+   does not change any other course.
+3. **Library default (owner):** the owner reviews suggestions (a list on an owner-only
+   page, or an exported `accepted/<name>.<ext>` candidate with the reason) and merges them
+   through a normal pull request, so CI still checks that the new accepted variant passes
+   and every `wrong/` solution still fails. The course rule can then be dropped as
+   redundant. The owner can also reject a suggestion with a reason, which the suggesting
+   teacher sees.
+
+Open design point for step 4: a suggestion needs a real source file for `accepted/`, and
+we only store an output hash. The suggestion therefore also keeps the **approved output
+text** (not the student's code), and the owner writes the accepted solution, or asks the
+teacher for one. No student code leaves the course.
 
 ## Decisions by the owner
 
 - The teacher's reply is private to the student by default.
 - One open request per student and exercise; the student may withdraw it; no expiry.
-- Approval is scoped to the course. Making it library-wide stays a maintainer action
-  (an `accepted/` pull request), not a teacher power; a "propose to the library" step may
-  follow later.
+- Library defaults are maintained by the owner. Teachers approve course-specific rules and
+  can suggest solutions for the library (see "Three levels").
