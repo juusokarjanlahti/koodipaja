@@ -105,4 +105,8 @@ jobs:
         env:
           APP_URL: http://localhost:3000
       - if: failure()
-        run: sudo tail -n 80 "$RUNNER_TEMP/go-judge.log" || true
+        run: |
+          sudo tail -n 80 "$RUNNER_TEMP/go-judge.log" || true
+          log="$(sudo tail -n 25 "$RUNNER_TEMP/go-judge.log" 2>/dev/null | cut -c1-300 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
+          echo "::warning title=go-judge log::${log:-empty}"
+          echo "::warning title=cgroup::$(stat -fc %T /sys/fs/cgroup) $(uname -r) $(id -u)"

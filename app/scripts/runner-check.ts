@@ -18,9 +18,13 @@ const run = runnerFromEnv();
 const root = path.resolve(process.cwd(), "../exercises");
 let failures = 0;
 
+// In GitHub Actions, failures become annotations so they are visible without the log.
+const annotate = (message: string) =>
+  process.env.GITHUB_ACTIONS === "true" ? `::error title=runner-check::${message.replace(/%/g, "%25").replace(/\r?\n/g, "%0A")}` : `FAIL  ${message}`;
+
 function fail(message: string) {
   failures++;
-  console.error(`FAIL  ${message}`);
+  console.error(annotate(message));
 }
 
 async function passedCases(req: Omit<RunRequest, "stdin">, cases: { stdin: string; expectedStdout: string }[], mode: "lenient" | "exact") {
@@ -108,6 +112,7 @@ async function main() {
 }
 
 main().catch((err) => {
+  console.error(annotate(err instanceof Error ? `${err.name}: ${err.message}` : String(err)));
   console.error(err);
   process.exitCode = 1;
 });
