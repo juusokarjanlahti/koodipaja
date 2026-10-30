@@ -49,5 +49,6 @@ RUN set -eux; \
 COPY mount.yaml /etc/go-judge/mount.yaml
 
 EXPOSE 5050
-# The auth token comes from GO_JUDGE_AUTH_TOKEN (docker-compose.yml).
-CMD ["sh", "-c", "exec go-judge -http-addr 0.0.0.0:5050 -auth-token \"$GO_JUDGE_AUTH_TOKEN\" -mount-conf /etc/go-judge/mount.yaml -release"]
+# The auth token comes from GO_JUDGE_AUTH_TOKEN (docker-compose.yml). -no-fallback makes
+# go-judge refuse to start if it cannot enforce memory limits with cgroups.
+CMD ["sh", "-c", "exec go-judge -http-addr 0.0.0.0:5050 -auth-token \"$GO_JUDGE_AUTH_TOKEN\" -mount-conf /etc/go-judge/mount.yaml -no-fallback -release"]

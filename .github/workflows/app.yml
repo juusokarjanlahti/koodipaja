@@ -107,6 +107,7 @@ jobs:
       - if: failure()
         run: |
           sudo tail -n 80 "$RUNNER_TEMP/go-judge.log" || true
-          log="$(sudo tail -n 25 "$RUNNER_TEMP/go-judge.log" 2>/dev/null | cut -c1-300 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
+          log="$(sudo grep -iE 'cgroup|fallback|error|warn|fatal' "$RUNNER_TEMP/go-judge.log" 2>/dev/null | tail -n 25 | cut -c1-300 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
           echo "::warning title=go-judge log::${log:-empty}"
           echo "::warning title=cgroup::$(stat -fc %T /sys/fs/cgroup) $(uname -r) $(id -u)"
+          echo "::warning title=go-judge config::$(curl -s -H 'Authorization: Bearer localtoken' localhost:5050/config | head -c 400)"

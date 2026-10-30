@@ -142,4 +142,5 @@ YAML
 
 echo "go-judge $VERSION on http://$ADDR (mounts: $WORK/mount.yaml). Set for the app:" >&2
 echo "$ENV_LINES" >&2
-exec "$BIN" -http-addr "$ADDR" -auth-token "$TOKEN" -mount-conf "$WORK/mount.yaml" -silent
+# -no-fallback: refuse to start without cgroups instead of silently dropping memory limits.
+exec "$BIN" -http-addr "$ADDR" -auth-token "$TOKEN" -mount-conf "$WORK/mount.yaml" -no-fallback -release
