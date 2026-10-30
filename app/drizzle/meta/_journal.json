@@ -36,6 +36,13 @@
       "when": 1793348965661,
       "tag": "0004_lti_grades",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793365508319,
+      "tag": "0005_exercise_requires",
+      "breakpoints": true
     }
   ]
 }

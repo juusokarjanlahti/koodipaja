@@ -5,6 +5,7 @@ difficulty: 2
 level: perus
 scaffold: none
 concepts: [merkkijono]
+requires: [print, input, f-merkkijono]
 topics: [merkkijonot]
 time_limit_seconds: 2
 memory_limit_mb: 64

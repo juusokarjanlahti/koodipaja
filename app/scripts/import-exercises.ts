@@ -67,6 +67,7 @@ async function main() {
         topics: ex.topics,
         outputMatch: ex.outputMatch,
         concepts: ex.concepts,
+        requires: ex.requires,
         promptMarkdown: ex.promptMarkdown,
         starterCode: ex.starterCode,
         timeLimitSeconds: ex.timeLimitSeconds,

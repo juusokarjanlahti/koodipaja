@@ -5,6 +5,7 @@ difficulty: 1
 level: perus
 scaffold: full
 concepts: [laskutoimitukset, if]
+requires: [print, input, tyyppimuunnos]
 topics: [ehdot, laskutoimitukset]
 time_limit_seconds: 2
 memory_limit_mb: 64

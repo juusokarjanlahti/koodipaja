@@ -1,0 +1,1 @@
+ALTER TABLE "exercises" ADD COLUMN "requires" text[] DEFAULT '{}' NOT NULL;

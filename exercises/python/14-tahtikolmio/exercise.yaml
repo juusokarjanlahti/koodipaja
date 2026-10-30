@@ -5,6 +5,7 @@ difficulty: 3
 level: soveltava
 scaffold: none
 concepts: [for]
+requires: [print, input, tyyppimuunnos]
 topics: [silmukat, tulostus]
 output_match: exact
 time_limit_seconds: 2

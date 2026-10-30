@@ -91,8 +91,10 @@ app/                              Next.js application
   Fade to `outline` and then `none` as the course progresses. The plan describes steps,
   not code, and must not give away the key insight the exercise is meant to teach.
   Never use AI at runtime to check plans or break tasks down.
-- List the concepts an exercise teaches in `concepts: [...]` (ids of `concepts/<language>/`).
-  They are added to the student's cheat sheet when they submit the exercise. Add a concept
+- List the concepts an exercise teaches in `concepts: [...]` and the ones it uses without
+  teaching in `requires: [...]` (ids of `concepts/<language>/`, never in both). Together
+  they decide which exercises a stuck student can skip to (docs/specs/next-exercise.md).
+  The `concepts` (not `requires`) go to the student's cheat sheet on submission. Add a concept
   card when an exercise introduces something new; keep cards short (2-4 sentences, one
   pitfall, one example).
 - `id` in exercise.yaml must equal the folder name.

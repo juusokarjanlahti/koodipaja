@@ -5,6 +5,7 @@ difficulty: 3
 level: soveltava
 scaffold: outline
 concepts: [while, tyyppimuunnos, f-merkkijono]
+requires: [print, input, if]
 topics: [silmukat, tietotyypit]
 time_limit_seconds: 2
 memory_limit_mb: 64
