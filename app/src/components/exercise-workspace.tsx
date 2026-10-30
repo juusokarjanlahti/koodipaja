@@ -1,6 +1,10 @@
 "use client";
 
+import { cpp } from "@codemirror/lang-cpp";
+import { java } from "@codemirror/lang-java";
+import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
+import { rust } from "@codemirror/lang-rust";
 import CodeMirror from "@uiw/react-codemirror";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PresentedCase, PresentedSubmission } from "@/lib/grading/present";
@@ -9,10 +13,23 @@ import type { RunOutput } from "@/lib/runs/output";
 import { ErrorHelp } from "./error-help";
 
 const POLL_MS = 800;
-const PLAN_TEMPLATE = "# Suunnitelma:\n# 1. \n# 2. \n# 3. \n\n";
+// Line comment per language for the plan template (ADR 0004).
+const COMMENT: Record<string, string> = { python: "#" };
+const planTemplate = (language: string) => {
+  const c = COMMENT[language] ?? "//";
+  return `${c} Suunnitelma:\n${c} 1. \n${c} 2. \n${c} 3. \n\n`;
+};
 const POLL_TIMEOUT_MS = 90_000;
 
-const LANGUAGE_EXTENSIONS = { python: () => python() } as const;
+const LANGUAGE_EXTENSIONS = {
+  python: () => python(),
+  javascript: () => javascript(),
+  typescript: () => javascript({ typescript: true }),
+  c: () => cpp(),
+  cpp: () => cpp(),
+  java: () => java(),
+  rust: () => rust(),
+} as const;
 
 function statusLabel(c: PresentedCase): string {
   if (c.passed === null) return "Odottaa";
@@ -151,9 +168,9 @@ export function ExerciseWorkspace({
   }, [running, exerciseId, code, stdin]);
 
   // ADR 0004: the student may break the task down themselves with numbered plan comments.
-  const hasPlan = /^\s*#\s*Suunnitelma/m.test(code);
+  const hasPlan = /^\s*(?:#|\/\/)\s*Suunnitelma/m.test(code);
   const addPlan = () => {
-    if (!hasPlan) setCode(`${PLAN_TEMPLATE}${code}`);
+    if (!hasPlan) setCode(`${planTemplate(language)}${code}`);
   };
 
   const reset = () => {

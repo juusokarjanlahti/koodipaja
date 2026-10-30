@@ -21,9 +21,12 @@ Usage:
 from __future__ import annotations
 
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
@@ -36,15 +39,26 @@ CONCEPTS = ROOT / "concepts"
 CONCEPT_TOPICS = {"tulostus-ja-syote", "tietotyypit", "ehdot", "silmukat", "listat", "funktiot", "sanakirjat", "tiedostot"}
 MATCH_CASES = Path(__file__).resolve().parent / "output-match-cases.json"
 
-RUNNERS = {
-    "python": {"ext": ".py", "cmd": [sys.executable, "-I"]},
+APP_BIN = ROOT / "app" / "node_modules" / ".bin"
+APP_TYPES = ROOT / "app" / "node_modules" / "@types"
+
+# Each language: file extension, canonical file name in the build dir, optional build
+# command and the run command. Mirrors the Judge0 language definitions (ADR 0005).
+RUNNERS: dict[str, dict] = {
+    "python": {"ext": ".py", "file": "main.py", "build": None, "run": [sys.executable, "-I", "main.py"]},
+    "javascript": {"ext": ".js", "file": "main.js", "build": None, "run": ["node", "main.js"]},
+    "typescript": {"ext": ".ts", "file": "main.ts", "build": "typescript", "run": ["node", "out/main.js"]},
+    "c": {"ext": ".c", "file": "main.c", "build": ["gcc", "-O2", "-std=c17", "-Wall", "-o", "prog", "main.c", "-lm"], "run": ["./prog"]},
+    "cpp": {"ext": ".cpp", "file": "main.cpp", "build": ["g++", "-O2", "-std=c++20", "-Wall", "-o", "prog", "main.cpp"], "run": ["./prog"]},
+    "java": {"ext": ".java", "file": "Main.java", "build": ["javac", "-encoding", "UTF-8", "Main.java"], "run": ["java", "-cp", ".", "Main"]},
+    "rust": {"ext": ".rs", "file": "main.rs", "build": ["rustc", "-O", "--edition", "2021", "-o", "prog", "main.rs"], "run": ["./prog"]},
 }
 
 REQUIRED_FIELDS = {"id", "title", "language", "difficulty", "cases"}
 OUTPUT_MATCH_MODES = {"lenient", "exact"}
 LEVELS = {"perus", "soveltava", "haaste"}
 SCAFFOLDS = {"full", "outline", "none"}
-PLAN_LINE_RE = re.compile(r"^\s*#\s*\d+\.\s*\S", re.MULTILINE)
+PLAN_LINE_RE = re.compile(r"^\s*(?:#|//)\s*\d+\.\s*\S", re.MULTILINE)
 MIN_CASES = 3
 MIN_WRONG = 2
 
@@ -93,16 +107,65 @@ class CaseResult:
     detail: str = ""
 
 
-def run_case(cmd: list[str], source: Path, case: dict, timeout: float, mode: str) -> CaseResult:
+@dataclass
+class Program:
+    workdir: Path
+    run: list[str] | None
+    error: str = ""
+
+
+def tsc_command() -> list[str]:
+    local = APP_BIN / "tsc"
+    return [str(local)] if local.exists() else ["tsc"]
+
+
+def build_program(language: str, source: Path) -> Program:
+    """Copy the source into a fresh build dir under its canonical name and compile it."""
+    runner = RUNNERS[language]
+    workdir = Path(tempfile.mkdtemp(prefix="koodipaja-"))
+    shutil.copy(source, workdir / runner["file"])
+    build = runner["build"]
+    if build == "typescript":
+        tsconfig = {
+            "compilerOptions": {
+                "target": "es2022",
+                "module": "commonjs",
+                "strict": True,
+                "outDir": "out",
+                "types": ["node"],
+                "typeRoots": [str(APP_TYPES)],
+                "skipLibCheck": True,
+            },
+            "files": ["main.ts"],
+        }
+        (workdir / "tsconfig.json").write_text(json.dumps(tsconfig), encoding="utf-8")
+        build = [*tsc_command(), "-p", "tsconfig.json"]
+    if build:
+        try:
+            proc = subprocess.run(build, cwd=workdir, capture_output=True, text=True, timeout=120)
+        except FileNotFoundError:
+            return Program(workdir, None, f"build tool not found: {build[0]}")
+        except subprocess.TimeoutExpired:
+            return Program(workdir, None, "build timed out")
+        if proc.returncode != 0:
+            out = (proc.stdout + proc.stderr).strip().splitlines()
+            return Program(workdir, None, "compile error: " + (out[0] if out else "(no output)"))
+    return Program(workdir, runner["run"])
+
+
+def run_case(program: Program, case: dict, timeout: float, mode: str) -> CaseResult:
     name = case.get("name", "?")
+    if program.run is None:
+        return CaseResult(name, "fail", program.error)
     try:
         proc = subprocess.run(
-            [*cmd, str(source)],
+            program.run,
             input=case.get("stdin", ""),
             capture_output=True,
             text=True,
             timeout=timeout,
-            cwd=source.parent,
+            cwd=program.workdir,
+            env={**os.environ, "JAVA_TOOL_OPTIONS": ""},
         )
     except subprocess.TimeoutExpired:
         return CaseResult(name, "fail", "timeout")
@@ -175,8 +238,15 @@ def validate(folder: Path) -> list[str]:
 
     timeout = float(meta.get("time_limit_seconds", 2))
 
+    # Compiled languages need more headroom than the per-case limit used in Judge0.
+    timeout = max(timeout, 5.0)
+
     def run_all(source: Path, run_mode: str) -> list[CaseResult]:
-        return [run_case(runner["cmd"], source, c, timeout, run_mode) for c in cases]
+        program = build_program(meta["language"], source)
+        try:
+            return [run_case(program, c, timeout, run_mode) for c in cases]
+        finally:
+            shutil.rmtree(program.workdir, ignore_errors=True)
 
     solution = folder / f"solution{runner['ext']}"
     if not solution.exists():
@@ -239,7 +309,11 @@ def validate_concept(folder: Path) -> list[str]:
         return errors + [f"{folder}: missing {example.name}"]
     # The example is shown to students as a correct pattern, so it must run exactly as stated.
     case = {"name": "example", "stdin": meta.get("example_stdin", ""), "expected_stdout": meta["example_stdout"]}
-    result = run_case(runner["cmd"], example, case, 2.0, "exact")
+    program = build_program(language, example)
+    try:
+        result = run_case(program, case, 5.0, "exact")
+    finally:
+        shutil.rmtree(program.workdir, ignore_errors=True)
     if result.outcome != "exact":
         errors.append(f"{example}: output does not match example_stdout exactly: {result.detail}")
     return errors

@@ -81,7 +81,10 @@ Epicit: #9
 **Tavoite:** muut kielet ja kurssit sekä yhteisö, joka tuottaa sisältöä.
 
 **Laajuus**
-- Muut kielet: Java, TypeScript ja C. Validointi, editorituki ja Judge0-kieliasetukset kielikohtaisesti.
+- Muut kielet: JavaScript, TypeScript, Java, C, C++ ja Rust. **Moottori on jo valmis**
+  ([ADR 0005](../adr/0005-kielet-ja-kaantajaversiot.md)): validointi, editorituki, arviointi ja
+  esimerkkitehtävä jokaiselle kielelle. Jäljellä: oma Judge0-kuva nykyisillä versioilla
+  tuotantoon, kurssisisällöt sekä virheselitykset ja käsitekortit muille kielille.
 - Jatkokurssit Python-peruskurssin päälle.
 - Yhteisön tehtäväkirjasto: kontribuutio-ohje, katselmointiprosessi, opettajan oma fork.
 - Mahdollisesti HAKA/SAML-kirjautuminen muille kuin Moodle-käyttäjille.
