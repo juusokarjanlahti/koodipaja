@@ -1,0 +1,24 @@
+id: 13-salasana
+title: Salasana
+language: python
+difficulty: 2
+level: perus
+scaffold: none
+concepts: [while, if]
+topics: [silmukat, ehdot]
+time_limit_seconds: 2
+memory_limit_mb: 64
+cases:
+  - name: Heti oikein
+    stdin: "avaa\n"
+    expected_stdout: "Tervetuloa!\n"
+  - name: Yksi väärä
+    stdin: "kissa\navaa\n"
+    expected_stdout: "Väärin, yritä uudelleen\nTervetuloa!\n"
+  - name: Monta väärää
+    stdin: "a\nb\nc\navaa\n"
+    expected_stdout: "Väärin, yritä uudelleen\nVäärin, yritä uudelleen\nVäärin, yritä uudelleen\nTervetuloa!\n"
+  - name: Iso alkukirjain
+    stdin: "Avaa\navaa\n"
+    expected_stdout: "Väärin, yritä uudelleen\nTervetuloa!\n"
+    hidden: true

@@ -1,0 +1,27 @@
+id: 11-suurin-luku
+title: Suurin luku
+language: python
+difficulty: 3
+level: soveltava
+scaffold: outline
+concepts: [lista, for]
+topics: [listat, silmukat]
+time_limit_seconds: 2
+memory_limit_mb: 64
+cases:
+  - name: Kolme lukua
+    stdin: "3\n4\n9\n2\n"
+    expected_stdout: "Suurin: 9\n"
+  - name: Vain negatiivinen
+    stdin: "1\n-5\n"
+    expected_stdout: "Suurin: -5\n"
+  - name: Kaksinumeroinen
+    stdin: "3\n9\n10\n2\n"
+    expected_stdout: "Suurin: 10\n"
+  - name: Samat suurimmat
+    stdin: "4\n7\n7\n3\n1\n"
+    expected_stdout: "Suurin: 7\n"
+  - name: Kaikki negatiivisia
+    stdin: "3\n-8\n-2\n-9\n"
+    expected_stdout: "Suurin: -2\n"
+    hidden: true

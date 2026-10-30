@@ -1,0 +1,30 @@
+id: 06-ikaryhma
+title: Ikäryhmä
+language: python
+difficulty: 2
+level: perus
+scaffold: full
+concepts: [if]
+topics: [ehdot]
+time_limit_seconds: 2
+memory_limit_mb: 64
+cases:
+  - name: Lapsi
+    stdin: "10\n"
+    expected_stdout: "alaikäinen\n"
+  - name: Raja 18
+    stdin: "18\n"
+    expected_stdout: "aikuinen\n"
+  - name: Aikuinen
+    stdin: "40\n"
+    expected_stdout: "aikuinen\n"
+  - name: Raja 64
+    stdin: "64\n"
+    expected_stdout: "aikuinen\n"
+  - name: Raja 65
+    stdin: "65\n"
+    expected_stdout: "eläkeikäinen\n"
+  - name: Vauva
+    stdin: "0\n"
+    expected_stdout: "alaikäinen\n"
+    hidden: true

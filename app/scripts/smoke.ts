@@ -73,11 +73,14 @@ async function main() {
   for (const folder of await findExerciseFolders(exercisesRoot)) {
     const ex = await loadExercise(folder);
     const ext = LANGUAGE_EXTENSIONS[ex.language];
-    const hiddenSecrets = ex.cases.filter((c) => c.hidden).map((c) => c.expectedStdout.trim());
+
 
     const solution = await readFile(path.join(folder, `solution${ext}`), "utf8");
     const good = await submitAndWait(cookie, ex.id, solution);
-    const leaked = hiddenSecrets.some((s) => s && JSON.stringify(good).includes(s));
+    // Hidden cases must reveal only their name and pass/fail, never input or output.
+    const leaked = good.cases.some(
+      (c) => c.hidden && ("stdin" in c || "expectedStdout" in c || "stdout" in c || "stderr" in c),
+    );
     if (good.status !== "done" || good.passedCount !== good.totalCount || leaked) {
       console.error(`FAIL  ${ex.id} solution: ${good.status} ${good.passedCount}/${good.totalCount}${leaked ? " (hidden data leaked)" : ""}`);
       failures++;

@@ -1,0 +1,6 @@
+# Käsitteellinen virhe: silmukka jatkuu nollaan asti (>= eikä >).
+n = int(input())
+while n >= 0:
+    print(n)
+    n -= 1
+print("Lähtö!")
