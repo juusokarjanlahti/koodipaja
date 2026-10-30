@@ -7,8 +7,15 @@ name: quickstart
 
 on:
   pull_request:
+    paths-ignore: ["docs/**", "README.md", "CLAUDE.md"]
   push:
     branches: [main]
+    paths-ignore: ["docs/**", "README.md", "CLAUDE.md"]
+
+# A newer push to the same PR replaces the run still in progress.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   docker:
