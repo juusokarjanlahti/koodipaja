@@ -11,15 +11,16 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "import-exercises": "tsx scripts/import-exercises.ts",
-    "worker": "tsx scripts/worker.ts",
+    "import-exercises": "tsx --env-file-if-exists=.env.local scripts/import-exercises.ts",
+    "worker": "tsx --env-file-if-exists=.env.local scripts/worker.ts",
     "fake-judge0": "node scripts/fake-judge0.mjs",
-    "smoke": "tsx scripts/smoke.ts",
+    "smoke": "tsx --env-file-if-exists=.env.local scripts/smoke.ts",
     "e2e": "playwright test",
-    "runner-check": "tsx scripts/runner-check.ts",
+    "runner-check": "tsx --env-file-if-exists=.env.local scripts/runner-check.ts",
     "lti:keygen": "tsx scripts/lti-keygen.ts",
-    "lti:register": "tsx scripts/lti-register.ts",
-    "lti:grades": "tsx scripts/lti-grades.ts"
+    "lti:register": "tsx --env-file-if-exists=.env.local scripts/lti-register.ts",
+    "lti:grades": "tsx --env-file-if-exists=.env.local scripts/lti-grades.ts",
+    "dev:all": "node scripts/dev-all.mjs"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",

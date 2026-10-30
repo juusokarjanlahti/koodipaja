@@ -1,0 +1,51 @@
+# The local quickstart, exactly as a developer runs it (docs/local-dev.md):
+# scripts/dev-setup.sh builds the go-judge Docker image and starts Postgres, Redis and
+# go-judge with Docker Compose; then the app runs with `npm run dev:all`. Every exercise,
+# the sandbox probes, the smoke test and the Playwright flows run against that sandbox,
+# so this also tests infra/go-judge/Dockerfile (the image production uses).
+name: quickstart
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Setup (scripts/dev-setup.sh)
+        run: ./scripts/dev-setup.sh
+      - name: Every exercise and the sandbox probes in the Docker image
+        working-directory: app
+        run: npm run runner-check
+      - name: Start the app (npm run dev:all)
+        working-directory: app
+        run: |
+          npm run dev:all > "$RUNNER_TEMP/dev-all.log" 2>&1 &
+          for i in $(seq 1 120); do curl -fs localhost:3000/login >/dev/null && break; sleep 1; done
+          curl -fs localhost:3000/login >/dev/null
+      - name: Smoke test
+        working-directory: app
+        run: npm run smoke
+      - run: npx playwright install --with-deps chromium
+        working-directory: app
+      - name: Playwright
+        working-directory: app
+        run: npm run e2e -- --reporter=github,list
+      - if: failure()
+        run: |
+          tail -n 60 "$RUNNER_TEMP/dev-all.log" || true
+          docker compose ps || true
+          docker compose logs --tail 60 go-judge || true
+          log="$(docker compose logs --no-color --tail 25 go-judge 2>&1 | cut -c1-300 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
+          echo "::error title=go-judge container log::$log"
+          log="$(grep -iE 'error|fail' "$RUNNER_TEMP/dev-all.log" 2>/dev/null | tail -n 20 | cut -c1-300 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
+          echo "::error title=dev:all log::$log"

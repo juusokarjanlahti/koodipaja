@@ -4,22 +4,11 @@ Next.js (App Router) + TypeScript + PostgreSQL (Drizzle).
 
 ## Setup
 
-```bash
-# 1. Infrastructure (from the repo root): see ../docs/local-dev.md
-docker compose up -d
+From the repo root: `./scripts/dev-setup.sh`, then `npm run dev:all` here. See
+[../docs/local-dev.md](../docs/local-dev.md).
 
-# 2. App
-cd app
-cp ../.env.example .env.local      # adjust passwords to match ../.env
-npm install
-npm run db:migrate
-npm run import-exercises
-npm run worker                     # in a second terminal
-npm run dev                        # http://localhost:3000, log in at /login
-```
-
-Scripts read `DATABASE_URL` from the environment; `next dev` also reads `.env.local`.
-For the CLI scripts, export the variables first (`set -a; source .env.local; set +a`).
+Every npm script reads `.env.local` (created by the setup script); variables already set
+in the environment win.
 
 ## Scripts
 
