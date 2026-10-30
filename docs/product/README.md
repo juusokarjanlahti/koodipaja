@@ -10,6 +10,7 @@ tekniset speksit kansiossa `docs/specs/`.
 | [kayttajat.md](kayttajat.md) | Persoonat: opiskelija, opettaja, AMK:n hankinta/IT, sisällöntuottaja |
 | [oppimispolku.md](oppimispolku.md) | Kurssin vaiheet ensikertalaisesta tiimityöhön, näkymätasot, tehtävätyypit, arvosanatavoitteet |
 | [roadmap.md](roadmap.md) | Milestonet M1–M4, laajuus, poistumiskriteerit ja tila |
+| [coderunner.md](coderunner.md) | Vertailu Moodle CodeRunneriin ja tehtävien vienti CodeRunner-kysymyksiksi |
 | [riskit.md](riskit.md) | Keskeiset riskit, todennäköisyys, vaikutus ja lievennys |
 
 ## Speksit ja GitHub-issuet

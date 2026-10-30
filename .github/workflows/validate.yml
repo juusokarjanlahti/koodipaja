@@ -29,3 +29,13 @@ jobs:
         working-directory: app
       - run: pip install pyyaml
       - run: python3 scripts/validate.py
+      # The CodeRunner export must produce well-formed Moodle XML for every exportable exercise.
+      - run: |
+          python3 scripts/export_coderunner.py -o "$RUNNER_TEMP/koodipaja.xml" --answers "$RUNNER_TEMP/answers.json"
+          python3 - "$RUNNER_TEMP/koodipaja.xml" <<'PY'
+          import sys, xml.dom.minidom
+          doc = xml.dom.minidom.parse(sys.argv[1])
+          n = sum(q.getAttribute("type") == "coderunner" for q in doc.getElementsByTagName("question"))
+          assert n > 0, "no CodeRunner questions exported"
+          print(f"{n} CodeRunner questions, XML well-formed")
+          PY
