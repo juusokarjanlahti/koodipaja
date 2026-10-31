@@ -338,10 +338,19 @@ export function ExerciseWorkspace({
           basicSetup={{ autocompletion: false }}
           theme={editorTheme}
         />
-        <p id="editor-help" className="border-t border-border px-3 py-1.5 text-xs text-muted">
-          <kbd>Tab</kbd> sisentää. Pois editorista: <kbd>Esc</kbd> ja sitten <kbd>Tab</kbd>.{" "}
-          <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd> ajaa, <kbd>Ctrl</kbd> + <kbd>Enter</kbd> palauttaa.
-        </p>
+        <div className="border-t border-border px-3 py-1.5 text-xs text-muted">
+          {/* Always visible and the editor's description: how to leave it (WCAG 2.1.2). */}
+          <p id="editor-help">
+            Pois editorista: <kbd>Esc</kbd> ja sitten <kbd>Tab</kbd>.
+          </p>
+          <details className="mt-1">
+            <summary className="cursor-pointer">Näppäinohjeet</summary>
+            <p className="mt-1">
+              <kbd>Tab</kbd> sisentää. <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd> ajaa, <kbd>Ctrl</kbd> +{" "}
+              <kbd>Enter</kbd> palauttaa.
+            </p>
+          </details>
+        </div>
       </div>
 
       <div className="grid gap-3 rounded-xl border border-border bg-surface p-3 sm:grid-cols-2">
@@ -373,8 +382,7 @@ export function ExerciseWorkspace({
             </>
           ) : (
             <p className="min-h-[5.5rem] rounded-md border border-dashed border-border p-2 text-sm text-muted">
-              Kokeile koodiasi painamalla Aja. Jos syöte on tehtävänannon esimerkki, näet heti, vastaako tuloste
-              esimerkkiä.
+              Paina Aja nähdäksesi tulosteen.
             </p>
           )}
         </div>
