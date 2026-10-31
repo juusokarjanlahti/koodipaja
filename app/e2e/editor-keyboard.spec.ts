@@ -17,12 +17,16 @@ test("the editor is named, explains its keys, and Esc then Tab leaves it", async
   await expect(editor).toBeFocused();
   expect((await editor.textContent())!.length).toBeGreaterThan(before!.length);
 
-  // Escape, then Tab, moves on to the next control.
+  // Escape, then Tab, moves on to the next control: the key help right under the editor,
+  // then the input field.
   await page.keyboard.press("Escape");
+  await page.keyboard.press("Tab");
+  await expect(page.getByText("Näppäinohjeet")).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(page.getByLabel(/^Syöte/)).toBeFocused();
 
   // And Shift+Tab comes back.
+  await page.keyboard.press("Shift+Tab");
   await page.keyboard.press("Shift+Tab");
   await expect(editor).toBeFocused();
 });
