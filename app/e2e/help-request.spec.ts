@@ -29,6 +29,8 @@ test("a student asks for help, the teacher answers, and only that student sees t
   const teacher = await launch(browser, { sub: `ht-${run}`, name: `Opettaja ${run}`, roles: TEACHER });
   await teacher.getByRole("link", { name: "Opettajan näkymä" }).click();
   await teacher.getByRole("link", { name: /Ohjelmoinnin perusteet \(e2e\)/ }).click();
+  // Wait for the course page itself: the first visit compiles it on the dev server.
+  await expect(teacher).toHaveURL(/\/opettaja\/kurssit\/\d+$/, { timeout: 30_000 });
   const request = teacher.getByRole("listitem").filter({ hasText: `Hanna ${run}` });
   await expect(request).toContainText("En ymmärrä testiä 1");
   await request.getByLabel(/Vastaus opiskelijalle/).fill("Katso rivin 1 tulostus.");

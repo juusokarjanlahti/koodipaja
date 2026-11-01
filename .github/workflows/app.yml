@@ -6,6 +6,10 @@ on:
     paths-ignore: ["docs/**", "README.md", "CLAUDE.md"]
   pull_request:
     paths-ignore: ["docs/**", "README.md", "CLAUDE.md"]
+  # The full check every night, so a regression a fast PR run skipped is found by morning.
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
 
 # A newer push to the same PR replaces the run still in progress.
 concurrency:
@@ -50,8 +54,8 @@ jobs:
   smoke:
     # End-to-end against a real go-judge sandbox (ADR 0006): every exercise in every
     # language, sandbox security probes, smoke test and Playwright user flows.
+    # Runs alongside "test" instead of after it: a PR waits for the slower job only.
     runs-on: ubuntu-latest
-    needs: test
     defaults:
       run:
         working-directory: app
@@ -79,6 +83,23 @@ jobs:
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Fast mode for pull requests that touch neither exercises nor the code that runs and
+      # grades them: runner-check and smoke take one exercise per language instead of all
+      # (CHECK_SCOPE=sample). Sandbox security probes and Playwright always run in full.
+      # main and the nightly run always check everything.
+      - name: Choose check scope
+        working-directory: .
+        run: |
+          scope=full
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            changed="$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")"
+            heavy='^(exercises/|concepts/|infra/|docker-compose\.yml|scripts/|app/src/lib/(runner|grading|runs|exercises)/|app/scripts/|app/package-lock\.json|\.github/workflows/)'
+            if ! printf '%s\n' "$changed" | grep -Eq "$heavy"; then scope=sample; fi
+          fi
+          echo "CHECK_SCOPE=$scope" >> "$GITHUB_ENV"
+          echo "::notice title=check scope::$scope"
       # Toolchains for every exercise language; go-judge mounts them read-only (ADR 0006).
       - uses: actions/setup-python@v5
         with:
@@ -111,9 +132,16 @@ jobs:
           npm run worker &
           npx next dev -p 3000 &
           for i in $(seq 1 90); do curl -fs localhost:3000/login >/dev/null && break; sleep 1; done
+      # next dev compiles each page on its first request; doing it now keeps that time out of
+      # the Playwright timeouts (it was the main source of flaky runs).
+      - name: Warm up pages
+        run: |
+          for p in / /exercises/01-tervehdys /muistilista /ohje /opettaja /lti-virhe /lti-valitse /login; do
+            curl -s -o /dev/null -w "%{http_code} $p\n" "localhost:3000$p" || true
+          done
       - run: npm run smoke
       - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
+      - run: npm run e2e -- --reporter=github,list
       - if: failure()
         run: |
           sudo tail -n 80 "$RUNNER_TEMP/go-judge.log" || true

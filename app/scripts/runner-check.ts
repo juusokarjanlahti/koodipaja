@@ -11,7 +11,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { evaluateCase } from "../src/lib/grading/evaluate";
-import { findExerciseFolders, LANGUAGE_EXTENSIONS, loadExercise } from "../src/lib/exercises/load";
+import { findExerciseFolders, inCheckScope, LANGUAGE_EXTENSIONS, loadExercise } from "../src/lib/exercises/load";
 import { RUN_STATUS, runnerFromEnv, runnerKind, type RunRequest } from "../src/lib/runner";
 
 const run = runnerFromEnv();
@@ -40,7 +40,8 @@ async function passedCases(req: Omit<RunRequest, "stdin">, cases: { stdin: strin
 }
 
 async function checkExercises() {
-  for (const folder of await findExerciseFolders(root)) {
+  if (process.env.CHECK_SCOPE === "sample") console.log("note  CHECK_SCOPE=sample: one exercise per language");
+  for (const folder of inCheckScope(await findExerciseFolders(root))) {
     const ex = await loadExercise(folder);
     const ext = LANGUAGE_EXTENSIONS[ex.language];
     const base = { language: ex.language, cpuTimeLimitSeconds: ex.timeLimitSeconds, memoryLimitMb: ex.memoryLimitMb };

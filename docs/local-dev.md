@@ -30,6 +30,22 @@ environment win.
 | `npm run e2e` | Playwright flows against the running app |
 | `docker compose stop` (repo root) | Stop the containers; data stays in Docker volumes |
 
+## Fast iteration
+
+The full suite takes minutes; while working, run only what the change touches:
+
+| Command (in `app/`) | Time | When |
+|---|---|---|
+| `npm run check` | ~15 s | Always: types, lint, unit tests |
+| `npx playwright test e2e/<file>.spec.ts` | seconds per file | The user flow you changed |
+| `CHECK_SCOPE=sample npm run runner-check` | ~15 s | One exercise per language plus every sandbox probe |
+| `npm run e2e`, `npm run runner-check` | minutes | Before a PR that touches exercises, the runner or grading |
+
+CI does the same split: a pull request that touches neither exercises nor the code that runs
+and grades them gets `CHECK_SCOPE=sample` (sandbox probes and Playwright still run in full),
+and the Docker quickstart job runs only when the Docker path changes. `main` and a nightly
+run always check everything, so a regression a fast run skipped shows up by the next morning.
+
 ## The code sandbox: go-judge (ADR 0006)
 
 Student code runs in [go-judge](https://github.com/criyle/go-judge). Every run gets its own

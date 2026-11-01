@@ -100,6 +100,22 @@ export async function loadExercise(folder: string): Promise<LoadedExercise> {
   };
 }
 
+/**
+ * CHECK_SCOPE=sample keeps the first exercise of each language: the fast CI mode for pull
+ * requests that change neither exercises nor the runner (.github/workflows/app.yml). Any
+ * other value keeps every exercise.
+ */
+export function inCheckScope(folders: string[], scope = process.env.CHECK_SCOPE): string[] {
+  if (scope !== "sample") return folders;
+  const seen = new Set<string>();
+  return folders.filter((f) => {
+    const language = path.basename(path.dirname(f));
+    if (seen.has(language)) return false;
+    seen.add(language);
+    return true;
+  });
+}
+
 /** Find every exercise folder under exercises/<language>/<id>. */
 export async function findExerciseFolders(root: string): Promise<string[]> {
   const folders: string[] = [];
