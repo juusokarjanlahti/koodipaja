@@ -216,7 +216,8 @@ export const approvedOutputs = pgTable(
   (t) => [uniqueIndex("approved_outputs_unique").on(t.courseId, t.exerciseId, t.casePosition, t.outputHash)],
 );
 
-export const approvalAction = pgEnum("approval_action", ["approve", "revoke"]);
+// reject: the teacher looked at a "my answer is right" output and kept it failing (#51).
+export const approvalAction = pgEnum("approval_action", ["approve", "revoke", "reject"]);
 
 // Log of every approval and revocation: who, when, which submission, why (#50). Kept when an
 // approval is revoked, so the decision history stays visible.

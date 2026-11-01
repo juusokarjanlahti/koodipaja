@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth/session";
+import { sameAnswerStatus } from "@/lib/approvals/store";
 import { MAX_HELP_MESSAGE, courseForStudentExercise, saveHelpRequest, withdrawHelpRequest } from "@/lib/help/requests";
 
 const bodySchema = z.object({
@@ -26,6 +27,21 @@ export async function POST(request: Request) {
   }
   await saveHelpRequest({ userId: user.id, exerciseId, courseId, kind, message: message?.trim() || null });
   return NextResponse.json({ ok: true });
+}
+
+/**
+ * Before asking "my answer is right" (#51): is the teacher already looking at the same answer
+ * from another student, or did they already keep it failing (and why)? Says nothing about
+ * who else asked.
+ */
+export async function GET(request: Request) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Kirjaudu sisään." }, { status: 401 });
+  const exerciseId = new URL(request.url).searchParams.get("exerciseId");
+  if (!exerciseId) return NextResponse.json({ error: "Virheellinen pyyntö." }, { status: 400 });
+  const courseId = await courseForStudentExercise(user.id, exerciseId);
+  if (courseId === null) return NextResponse.json({ pending: false, rejectedReason: null });
+  return NextResponse.json(await sameAnswerStatus(user.id, courseId, exerciseId), { headers: { "Cache-Control": "no-store" } });
 }
 
 /** The student withdraws their open request for an exercise. */

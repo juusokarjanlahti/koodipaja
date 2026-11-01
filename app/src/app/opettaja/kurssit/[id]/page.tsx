@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { openHelpRequests } from "@/lib/help/requests";
-import { answerHelpAction, approveHelpAction, retryGradesAction, revokeApprovalAction } from "./actions";
-import { approvableOutputs, courseApprovals } from "@/lib/approvals/store";
+import { answerHelpAction, approveGroupAction, rejectGroupAction, retryGradesAction, revokeApprovalAction } from "./actions";
+import { groupByKey } from "@/lib/approvals/key";
+import { approvableOutputs, courseApprovals, submissionKey } from "@/lib/approvals/store";
 import { LANGUAGE_LABELS } from "@/lib/exercises/languages";
 import { courseExercises, courseGradeSyncCounts, courseForTeacher, courseProgressRows, courseStudents } from "@/lib/teacher/course";
 import { buildProgress, cellLabel, percent, type CellState, type SortOrder } from "@/lib/teacher/progress";
@@ -42,8 +43,15 @@ export default async function CourseProgressPage({
   const helpRequests = await Promise.all(
     (await openHelpRequests(course.id)).map(async (r) => ({
       ...r,
-      // For "my answer is right": the outputs a teacher could accept for the whole course (#50).
-      approvable: r.kind === "kiista" && r.submissionId ? await approvableOutputs(r.submissionId) : [],
+      // "My answer is right" with plain wrong outputs: the same key means the same answer (#51).
+      key: r.kind === "kiista" && r.submissionId ? await submissionKey(r.submissionId) : null,
+    })),
+  );
+  // One entry per answer: identical "my answer is right" requests share one decision.
+  const requestGroups = await Promise.all(
+    groupByKey(helpRequests, (r) => (r.key ? `${r.exerciseId}\u0000${r.key}` : null)).map(async (group) => ({
+      group,
+      approvable: group[0].key && group[0].submissionId ? await approvableOutputs(group[0].submissionId) : [],
     })),
   );
   const approvals = await courseApprovals(course.id);
@@ -77,24 +85,39 @@ export default async function CourseProgressPage({
             Avunpyynnöt ({helpRequests.length})
           </h2>
           <ul className="grid gap-4">
-            {helpRequests.map((r) => (
-              <li key={r.id} className="grid gap-2">
-                <p>
-                  <Link href={`/opettaja/kurssit/${course.id}/opiskelijat/${r.userId}`} className="font-medium text-accent">
-                    {r.studentName ?? r.studentEmail ?? "Nimetön opiskelija"}
-                  </Link>{" "}
-                  · {r.exerciseTitle} ·{" "}
-                  {r.kind === "kiista" ? "Mielestään vastaus on oikein" : "Ei ymmärrä, miksi ei mene läpi"}
-                </p>
-                {r.message && <p className="text-sm">&ldquo;{r.message}&rdquo;</p>}
-                {r.approvable.length > 0 && (
-                  <details className="rounded-lg border border-border p-3 text-sm">
-                    <summary className="cursor-pointer font-medium">
-                      Hyväksy tämä tuloste koko kurssille ({r.approvable.length}{" "}
-                      {r.approvable.length === 1 ? "testi" : "testiä"})
-                    </summary>
-                    <div className="mt-3 grid gap-3">
-                      {r.approvable.map((o) => (
+            {requestGroups.map(({ group, approvable }) => {
+              const first = group[0];
+              const ids = group.map((r) => r.id).join(",");
+              return (
+                <li key={first.id} className="grid gap-2 border-b border-border pb-4 last:border-b-0 last:pb-0">
+                  <p>
+                    {group.length > 1 && (
+                      <span className="mr-1 rounded bg-bg px-1.5 py-0.5 text-xs font-medium">
+                        {group.length} opiskelijaa, sama vastaus
+                      </span>
+                    )}
+                    {group.map((r, i) => (
+                      <span key={r.id}>
+                        {i > 0 && ", "}
+                        <Link href={`/opettaja/kurssit/${course.id}/opiskelijat/${r.userId}`} className="font-medium text-accent">
+                          {r.studentName ?? r.studentEmail ?? "Nimetön opiskelija"}
+                        </Link>
+                      </span>
+                    ))}{" "}
+                    · {first.exerciseTitle} ·{" "}
+                    {first.kind === "kiista" ? "Mielestään vastaus on oikein" : "Ei ymmärrä, miksi ei mene läpi"}
+                  </p>
+                  {group
+                    .filter((r) => r.message)
+                    .map((r) => (
+                      <p key={r.id} className="text-sm">
+                        {group.length > 1 && <span className="text-muted">{r.studentName ?? "Opiskelija"}: </span>}
+                        &ldquo;{r.message}&rdquo;
+                      </p>
+                    ))}
+                  {approvable.length > 0 ? (
+                    <div className="grid gap-3 rounded-lg border border-border p-3 text-sm">
+                      {approvable.map((o) => (
                         <div key={o.position} className="grid gap-2 sm:grid-cols-2">
                           <div>
                             <div className="text-xs font-medium text-muted">
@@ -109,36 +132,58 @@ export default async function CourseProgressPage({
                           </div>
                         </div>
                       ))}
-                      <form action={approveHelpAction.bind(null, course.id)} className="grid gap-2">
-                        <input type="hidden" name="requestId" value={r.id} />
-                        <label className="grid gap-1">
-                          <span className="font-medium">Perustelu (pakollinen, näkyy opiskelijoille)</span>
-                          <span className="text-xs text-muted">Älä lainaa opiskelijan koodia.</span>
-                          <textarea name="reason" required maxLength={500} rows={2} className="rounded border border-border bg-bg p-2" />
-                        </label>
-                        <p className="text-xs text-muted">
-                          Sama tuloste hyväksytään kaikille kurssin opiskelijoille, myös aiemmin palautetuista ratkaisuista.
-                          Arvosanat päivittyvät Moodleen. Hyväksynnän voi perua.
-                        </p>
-                        <button type="submit" className="w-fit rounded bg-accent px-3 py-1.5 font-medium text-accent-text">
-                          Hyväksy kurssilla
-                        </button>
-                      </form>
+                      <details>
+                        <summary className="cursor-pointer font-medium">Hyväksy tämä tuloste koko kurssille</summary>
+                        <form action={approveGroupAction.bind(null, course.id)} className="mt-2 grid gap-2">
+                          <input type="hidden" name="requestIds" value={ids} />
+                          <label className="grid gap-1">
+                            <span className="font-medium">Perustelu (pakollinen, näkyy opiskelijoille)</span>
+                            <span className="text-xs text-muted">Älä lainaa opiskelijan koodia.</span>
+                            <textarea name="reason" required maxLength={500} rows={2} className="rounded border border-border bg-bg p-2" />
+                          </label>
+                          <p className="text-xs text-muted">
+                            Sama tuloste hyväksytään kaikille kurssin opiskelijoille, myös aiemmin palautetuista
+                            ratkaisuista. Arvosanat päivittyvät Moodleen. Hyväksynnän voi perua.
+                          </p>
+                          <button type="submit" className="w-fit rounded bg-accent px-3 py-1.5 font-medium text-accent-text">
+                            Hyväksy kurssilla
+                          </button>
+                        </form>
+                      </details>
+                      <details>
+                        <summary className="cursor-pointer font-medium">Älä hyväksy</summary>
+                        <form action={rejectGroupAction.bind(null, course.id)} className="mt-2 grid gap-2">
+                          <input type="hidden" name="requestIds" value={ids} />
+                          <label className="grid gap-1">
+                            <span className="font-medium">
+                              Vastaus {group.length > 1 ? `kaikille ${group.length} opiskelijalle` : "opiskelijalle"}
+                            </span>
+                            <span className="text-xs text-muted">
+                              Vastaus näytetään myös myöhemmin samaa vastausta kysyville. Älä lainaa opiskelijan koodia.
+                            </span>
+                            <textarea name="reply" required maxLength={1000} rows={2} className="rounded border border-border bg-bg p-2" />
+                          </label>
+                          <button type="submit" className="w-fit rounded border border-border px-3 py-1.5 font-medium">
+                            Lähetä vastaus
+                          </button>
+                        </form>
+                      </details>
                     </div>
-                  </details>
-                )}
-                <form action={answerHelpAction.bind(null, course.id)} className="grid gap-2">
-                  <input type="hidden" name="requestId" value={r.id} />
-                  <label className="grid gap-1 text-sm">
-                    <span className="font-medium">Vastaus opiskelijalle (näkyy vain hänelle)</span>
-                    <textarea name="reply" required maxLength={1000} rows={2} className="rounded border border-border bg-bg p-2" />
-                  </label>
-                  <button type="submit" className="w-fit rounded border border-border px-3 py-1.5 text-sm font-medium">
-                    Lähetä vastaus
-                  </button>
-                </form>
-              </li>
-            ))}
+                  ) : (
+                    <form action={answerHelpAction.bind(null, course.id)} className="grid gap-2">
+                      <input type="hidden" name="requestId" value={first.id} />
+                      <label className="grid gap-1 text-sm">
+                        <span className="font-medium">Vastaus opiskelijalle (näkyy vain hänelle)</span>
+                        <textarea name="reply" required maxLength={1000} rows={2} className="rounded border border-border bg-bg p-2" />
+                      </label>
+                      <button type="submit" className="w-fit rounded border border-border px-3 py-1.5 text-sm font-medium">
+                        Lähetä vastaus
+                      </button>
+                    </form>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
