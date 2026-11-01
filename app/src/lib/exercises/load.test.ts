@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { findExerciseFolders, loadExercise } from "./load";
+import { findExerciseFolders, inCheckScope, loadExercise } from "./load";
 
 const repoExercises = path.resolve(__dirname, "../../../../exercises");
 
@@ -70,5 +70,14 @@ describe("loadExercise", () => {
   it("rejects too few cases with a readable message", async () => {
     const yaml = validYaml.split("\n").slice(0, 6).join("\n");
     await expect(loadExercise(await makeExercise(yaml))).rejects.toThrow(/cases/);
+  });
+});
+
+describe("inCheckScope", () => {
+  const folders = ["/r/exercises/java/java-a", "/r/exercises/python/01-a", "/r/exercises/python/02-b", "/r/exercises/rust/rust-a"];
+  it("keeps the first exercise of each language in sample mode and everything otherwise", () => {
+    expect(inCheckScope(folders, "sample")).toEqual(["/r/exercises/java/java-a", "/r/exercises/python/01-a", "/r/exercises/rust/rust-a"]);
+    expect(inCheckScope(folders, undefined)).toEqual(folders);
+    expect(inCheckScope(folders, "full")).toEqual(folders);
   });
 });

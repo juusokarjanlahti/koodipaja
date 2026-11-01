@@ -10,7 +10,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import type { PresentedSubmission } from "../src/lib/grading/present";
-import { findExerciseFolders, LANGUAGE_EXTENSIONS, loadExercise } from "../src/lib/exercises/load";
+import { findExerciseFolders, inCheckScope, LANGUAGE_EXTENSIONS, loadExercise } from "../src/lib/exercises/load";
 
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 const exercisesRoot = path.resolve(process.cwd(), "../exercises");
@@ -70,7 +70,8 @@ async function main() {
     console.log("ok    run with own input returns output");
   }
 
-  for (const folder of await findExerciseFolders(exercisesRoot)) {
+  if (process.env.CHECK_SCOPE === "sample") console.log("note  CHECK_SCOPE=sample: one exercise per language");
+  for (const folder of inCheckScope(await findExerciseFolders(exercisesRoot))) {
     const ex = await loadExercise(folder);
     const ext = LANGUAGE_EXTENSIONS[ex.language];
 

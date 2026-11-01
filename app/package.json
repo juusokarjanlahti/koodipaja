@@ -20,7 +20,8 @@
     "lti:keygen": "tsx scripts/lti-keygen.ts",
     "lti:register": "tsx --env-file-if-exists=.env.local scripts/lti-register.ts",
     "lti:grades": "tsx --env-file-if-exists=.env.local scripts/lti-grades.ts",
-    "dev:all": "node scripts/dev-all.mjs"
+    "dev:all": "node scripts/dev-all.mjs",
+    "check": "npm run typecheck && npm run lint && npm test"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",
