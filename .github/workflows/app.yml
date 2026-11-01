@@ -141,7 +141,7 @@ jobs:
           done
       - run: npm run smoke
       - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
+      - run: npm run e2e -- --reporter=github,list
       - if: failure()
         run: |
           sudo tail -n 80 "$RUNNER_TEMP/go-judge.log" || true
