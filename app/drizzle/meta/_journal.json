@@ -57,6 +57,13 @@
       "when": 1793401770649,
       "tag": "0007_course_guides",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793566407187,
+      "tag": "0008_teacher_approvals",
+      "breakpoints": true
     }
   ]
 }

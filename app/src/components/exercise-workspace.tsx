@@ -8,7 +8,7 @@ import { rust } from "@codemirror/lang-rust";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PresentedCase, PresentedSubmission } from "@/lib/grading/present";
-import { FORMATTING_DIFFERENCE } from "@/lib/grading/status";
+import { FORMATTING_DIFFERENCE, TEACHER_APPROVED } from "@/lib/grading/status";
 import type { SubmissionSummary } from "@/lib/progress";
 import type { OutputMatchMode } from "@/lib/grading/normalise";
 import type { RunOutput } from "@/lib/runs/output";
@@ -40,6 +40,7 @@ const LANGUAGE_EXTENSIONS = {
 
 function statusLabel(c: PresentedCase): string {
   if (c.passed === null) return "Odottaa";
+  if (c.passed && c.judgeStatus === TEACHER_APPROVED) return "Läpi (opettajan hyväksymä)";
   if (c.passed) return c.judgeStatus === FORMATTING_DIFFERENCE ? "Läpi (pieni muotoiluero)" : "Läpi";
   // Principle 1: say what does not work *yet*, never that the student failed.
   switch (c.judgeStatus) {
@@ -478,6 +479,11 @@ export function ExerciseWorkspace({
                       {statusLabel(c)}
                     </span>
                   </summary>
+                  {c.approvalReason && (
+                    <p className="border-t border-border px-3 py-2 text-sm">
+                      <span className="font-medium">Opettajan hyväksymä:</span> {c.approvalReason}
+                    </p>
+                  )}
                   {!c.hidden ? (
                     <div className="grid gap-2 border-t border-border p-3">
                       {c.stderr ? <ErrorHelp stderr={c.stderr} language={language} /> : null}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { RunResult } from "../runner/types";
-import { evaluateCase, FORMATTING_DIFFERENCE, MAX_STORED_OUTPUT } from "./evaluate";
+import { applyApproval, evaluateCase, FORMATTING_DIFFERENCE, MAX_STORED_OUTPUT, TEACHER_APPROVED } from "./evaluate";
+import { outputHash } from "./output-hash";
 
 function run(partial: Partial<RunResult>): RunResult {
   return {
@@ -57,5 +58,39 @@ describe("evaluateCase", () => {
   it("truncates very long output", () => {
     const outcome = evaluateCase(run({ stdout: "a".repeat(MAX_STORED_OUTPUT * 2) }), "b");
     expect(outcome.stdout.length).toBeLessThan(MAX_STORED_OUTPUT + 50);
+  });
+});
+
+describe("teacher approval (#50)", () => {
+  const approve = (stdout: string, mode: "lenient" | "exact" = "lenient") => new Set([outputHash(stdout, mode)]);
+
+  it("passes exactly the approved wrong answer", () => {
+    const wrong = evaluateCase(run({ stdout: "Mikä on nimesi?\nTerve, Aino!\n" }), "Mikä on nimesi?\nHei, Aino!\n");
+    expect(wrong.passed).toBe(false);
+    const approved = applyApproval(wrong, approve("Mikä on nimesi?\nTerve, Aino!\n"));
+    expect(approved).toMatchObject({ passed: true, judgeStatus: TEACHER_APPROVED });
+    // A different wrong answer is not covered by that approval.
+    const other = evaluateCase(run({ stdout: "Mikä on nimesi?\nMoi, Aino!\n" }), "Mikä on nimesi?\nHei, Aino!\n");
+    expect(applyApproval(other, approve("Mikä on nimesi?\nTerve, Aino!\n")).passed).toBe(false);
+  });
+
+  it("follows the exercise's comparison: lenient ignores case and punctuation, exact does not", () => {
+    expect(outputHash("Terve, Aino!", "lenient")).toBe(outputHash("terve aino", "lenient"));
+    expect(outputHash("Terve, Aino!", "exact")).not.toBe(outputHash("terve aino", "exact"));
+    expect(outputHash("Terve, Aino!\n\n", "exact")).toBe(outputHash("Terve, Aino!", "exact"));
+    expect(outputHash("x", "lenient")).not.toBe(outputHash("x", "exact"));
+  });
+
+  it("never relaxes errors, timeouts or passing cases", () => {
+    const timeout = evaluateCase(run({ statusId: 5, statusDescription: "Time Limit Exceeded", stdout: "x" }), "y");
+    expect(timeout.outputHash).toBeNull();
+    expect(applyApproval(timeout, approve("x"))).toBe(timeout);
+    const ok = evaluateCase(run({ stdout: "y" }), "y");
+    expect(applyApproval(ok, approve("y"))).toBe(ok);
+  });
+
+  it("hashes the full output even when the stored output is truncated", () => {
+    const long = "a".repeat(MAX_STORED_OUTPUT * 2);
+    expect(evaluateCase(run({ stdout: long }), "b").outputHash).toBe(outputHash(long, "lenient"));
   });
 });
