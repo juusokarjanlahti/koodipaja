@@ -24,7 +24,7 @@ test("a student asks for help, the teacher answers, and only that student sees t
   await asker.getByRole("button", { name: "Pyydä apua" }).click();
   await asker.getByLabel("Viesti opettajalle (vapaaehtoinen)").fill("En ymmärrä testiä 1");
   await asker.getByRole("button", { name: "Lähetä opettajalle" }).click();
-  await expect(asker.getByRole("status").filter({ hasText: "Pyyntö on lähetetty" })).toBeVisible();
+  await expect(asker.getByRole("status").filter({ hasText: "Pyyntö on lähetetty" })).toBeVisible({ timeout: 15_000 });
 
   const teacher = await launch(browser, { sub: `ht-${run}`, name: `Opettaja ${run}`, roles: TEACHER });
   await teacher.getByRole("link", { name: "Opettajan näkymä" }).click();

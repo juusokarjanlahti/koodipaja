@@ -97,7 +97,13 @@ second student with the same output passes without asking; a rejected group stay
    text (`output_sample`, program output only) so the teacher sees what they approved; the
    spec's step 4 needed it anyway. Every approve and revoke goes to `approval_events`
    (who, when, which submission, why), which is kept when an approval is revoked.
-3. Grouping and the "already approved or waiting" notices (#51).
+3. Grouping and the "already approved or waiting" notices (#51). ✅
+   Implementation notes: the "same answer" key is the set of (case, output hash) of the
+   failing cases, only when every failure is a plain wrong output (`lib/approvals/key.ts`);
+   errors and timeouts have no key and are answered one by one. "Älä hyväksy" replies to
+   the whole group and logs a `reject` event per output in `approval_events`; a later
+   student sees the latest reply when every output of their answer was last rejected.
+   An approved answer needs no notice: re-evaluation already made it pass.
 4. "Ehdota kirjastoon" suggestions and the owner's review list.
 
 ## Three levels: course, suggestion, library

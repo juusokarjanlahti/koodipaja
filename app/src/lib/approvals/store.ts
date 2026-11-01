@@ -2,6 +2,7 @@ import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { getDb, schema } from "../db";
 import { TEACHER_APPROVED, WRONG_ANSWER } from "../grading/status";
 import { enqueueGradeSyncForSubmission } from "../lti/grade-sync";
+import { answerKey, keyParts } from "./key";
 
 /**
  * Teacher approval of an output for a course (#50, docs/specs/help-requests.md, step 2).
@@ -229,4 +230,133 @@ export async function approvalReasons(userId: string, exerciseId: string, hashes
     if (row) map.set(h.position, row.reason);
   }
   return map;
+}
+
+// ---- Same answers, one decision (#51) ----
+
+/** The "same answer" key of a submission (see key.ts), or null. */
+export async function submissionKey(submissionId: string): Promise<string | null> {
+  const failed = await getDb()
+    .select({
+      position: schema.testCases.position,
+      judgeStatus: schema.submissionResults.judgeStatus,
+      outputHash: schema.submissionResults.outputHash,
+    })
+    .from(schema.submissionResults)
+    .innerJoin(schema.testCases, eq(schema.testCases.id, schema.submissionResults.testCaseId))
+    .where(and(eq(schema.submissionResults.submissionId, submissionId), eq(schema.submissionResults.passed, false)));
+  return answerKey(failed, WRONG_ANSWER);
+}
+
+/** Approves the same answer for every request in the group (each is answered and logged). */
+export async function approveGroup(input: { courseId: number; requestIds: string[]; teacherId: string; reason: string }) {
+  let approved = 0;
+  for (const requestId of input.requestIds) {
+    approved += (await approveRequest({ courseId: input.courseId, requestId, teacherId: input.teacherId, reason: input.reason })) ?? 0;
+  }
+  return approved;
+}
+
+/**
+ * Keeps the answer failing and replies to every request in the group with the same text.
+ * The decision is logged per output, so later students with the same answer see the reply
+ * before they ask again.
+ */
+export async function rejectGroup(input: { courseId: number; requestIds: string[]; teacherId: string; reply: string }) {
+  const db = getDb();
+  const requests = await db
+    .select()
+    .from(schema.helpRequests)
+    .where(
+      and(
+        inArray(schema.helpRequests.id, input.requestIds),
+        eq(schema.helpRequests.courseId, input.courseId),
+        eq(schema.helpRequests.status, "open"),
+      ),
+    );
+  if (requests.length === 0) return 0;
+  const first = requests.find((r) => r.submissionId);
+  const key = first?.submissionId ? await submissionKey(first.submissionId) : null;
+  await db.transaction(async (tx) => {
+    await tx
+      .update(schema.helpRequests)
+      .set({ status: "answered", reply: input.reply, answeredAt: new Date() })
+      .where(inArray(schema.helpRequests.id, requests.map((r) => r.id)));
+    if (key && first) {
+      for (const part of keyParts(key)) {
+        await tx.insert(schema.approvalEvents).values({
+          courseId: input.courseId,
+          exerciseId: first.exerciseId,
+          casePosition: part.position,
+          outputHash: part.hash,
+          action: "reject",
+          actorId: input.teacherId,
+          submissionId: first.submissionId,
+          reason: input.reply,
+        });
+      }
+    }
+  });
+  return requests.length;
+}
+
+export type SameAnswerStatus = { pending: boolean; rejectedReason: string | null };
+
+/**
+ * Before a student sends "my answer is right": is the teacher already looking at the same
+ * answer from someone else, or did they already decide to keep it failing (and why)?
+ */
+export async function sameAnswerStatus(userId: string, courseId: number, exerciseId: string): Promise<SameAnswerStatus> {
+  const db = getDb();
+  const [latest] = await db
+    .select({ id: schema.submissions.id })
+    .from(schema.submissions)
+    .where(and(eq(schema.submissions.userId, userId), eq(schema.submissions.exerciseId, exerciseId), eq(schema.submissions.status, "done")))
+    .orderBy(desc(schema.submissions.createdAt))
+    .limit(1);
+  const key = latest ? await submissionKey(latest.id) : null;
+  if (!key) return { pending: false, rejectedReason: null };
+
+  const open = await db
+    .select({ userId: schema.helpRequests.userId, submissionId: schema.helpRequests.submissionId })
+    .from(schema.helpRequests)
+    .where(
+      and(
+        eq(schema.helpRequests.courseId, courseId),
+        eq(schema.helpRequests.exerciseId, exerciseId),
+        eq(schema.helpRequests.status, "open"),
+        eq(schema.helpRequests.kind, "kiista"),
+      ),
+    );
+  let pending = false;
+  for (const r of open) {
+    if (r.userId !== userId && r.submissionId && (await submissionKey(r.submissionId)) === key) {
+      pending = true;
+      break;
+    }
+  }
+
+  // Rejected when the latest decision on every output of the answer is a rejection.
+  let rejectedReason: string | null = null;
+  for (const part of keyParts(key)) {
+    const [last] = await db
+      .select({ action: schema.approvalEvents.action, reason: schema.approvalEvents.reason })
+      .from(schema.approvalEvents)
+      .where(
+        and(
+          eq(schema.approvalEvents.courseId, courseId),
+          eq(schema.approvalEvents.exerciseId, exerciseId),
+          eq(schema.approvalEvents.casePosition, part.position),
+          eq(schema.approvalEvents.outputHash, part.hash),
+        ),
+      )
+      .orderBy(desc(schema.approvalEvents.createdAt), desc(schema.approvalEvents.id))
+      .limit(1);
+    if (last?.action !== "reject") {
+      rejectedReason = null;
+      break;
+    }
+    rejectedReason = last.reason;
+  }
+  return { pending, rejectedReason };
 }

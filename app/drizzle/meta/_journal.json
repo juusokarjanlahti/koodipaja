@@ -64,6 +64,13 @@
       "when": 1793566407187,
       "tag": "0008_teacher_approvals",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793570402270,
+      "tag": "0009_approval_reject",
+      "breakpoints": true
     }
   ]
 }

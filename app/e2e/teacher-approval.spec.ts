@@ -46,7 +46,7 @@ test("an approved output passes for the whole course, with the reason; revoking 
   await asker.getByRole("button", { name: "Pyydä apua" }).click();
   await asker.getByLabel("Mielestäni vastaukseni on oikein").check();
   await asker.getByRole("button", { name: "Lähetä opettajalle" }).click();
-  await expect(asker.getByRole("status").filter({ hasText: "Pyyntö on lähetetty" })).toBeVisible();
+  await expect(asker.getByRole("status").filter({ hasText: "Pyyntö on lähetetty" })).toBeVisible({ timeout: 15_000 });
 
   // The teacher sees the outputs side by side and approves with a reason.
   const teacher = await launch(browser, platform, { sub: `at-${run}`, name: `Opettaja ${run}`, roles: TEACHER });

@@ -19,6 +19,16 @@ export function HelpRequest({
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Whether the same answer is already with the teacher, or already decided (#51).
+  const [same, setSame] = useState<{ pending: boolean; rejectedReason: string | null } | null>(null);
+
+  async function openForm() {
+    setOpen(true);
+    const res = await fetch(`/api/help-requests?exerciseId=${encodeURIComponent(exerciseId)}`, { cache: "no-store" }).catch(
+      () => null,
+    );
+    if (res?.ok) setSame(await res.json());
+  }
 
   async function send(event: React.FormEvent) {
     event.preventDefault();
@@ -88,7 +98,7 @@ export function HelpRequest({
           <div className="mt-2 flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => setOpen(true)}
+              onClick={() => void openForm()}
               aria-expanded={false}
               className="rounded border border-border px-3 py-1.5 text-sm font-medium"
             >
@@ -130,6 +140,18 @@ export function HelpRequest({
               Mielestäni vastaukseni on oikein
             </label>
           </fieldset>
+          {kind === "kiista" && same?.pending && (
+            <p role="status" className="rounded border border-border bg-bg p-2 text-sm">
+              Opettaja katsoo jo täsmälleen samaa vastausta toiselta opiskelijalta. Sinun ei tarvitse lähettää omaa
+              pyyntöä: jos opettaja hyväksyy vastauksen, se hyväksytään myös sinulle.
+            </p>
+          )}
+          {kind === "kiista" && same?.rejectedReason && (
+            <p role="status" className="rounded border border-border bg-bg p-2 text-sm">
+              <span className="font-medium">Opettaja on jo katsonut saman vastauksen ja vastasi:</span>{" "}
+              {same.rejectedReason}
+            </p>
+          )}
           <label className="grid gap-1 text-sm">
             <span className="font-medium">
               Viesti opettajalle (vapaaehtoinen)
