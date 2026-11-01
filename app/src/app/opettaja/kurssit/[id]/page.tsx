@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { openHelpRequests } from "@/lib/help/requests";
-import { answerHelpAction, retryGradesAction } from "./actions";
+import { answerHelpAction, approveHelpAction, retryGradesAction, revokeApprovalAction } from "./actions";
+import { approvableOutputs, courseApprovals } from "@/lib/approvals/store";
 import { LANGUAGE_LABELS } from "@/lib/exercises/languages";
 import { courseExercises, courseGradeSyncCounts, courseForTeacher, courseProgressRows, courseStudents } from "@/lib/teacher/course";
 import { buildProgress, cellLabel, percent, type CellState, type SortOrder } from "@/lib/teacher/progress";
@@ -38,7 +39,14 @@ export default async function CourseProgressPage({
     students.map((s) => s.id),
     exercises.map((e) => e.id),
   );
-  const helpRequests = await openHelpRequests(course.id);
+  const helpRequests = await Promise.all(
+    (await openHelpRequests(course.id)).map(async (r) => ({
+      ...r,
+      // For "my answer is right": the outputs a teacher could accept for the whole course (#50).
+      approvable: r.kind === "kiista" && r.submissionId ? await approvableOutputs(r.submissionId) : [],
+    })),
+  );
+  const approvals = await courseApprovals(course.id);
   const gradeCounts = await courseGradeSyncCounts(course.id);
   const totalFailed = [...gradeCounts.values()].reduce((sum, g) => sum + g.failed, 0);
   const progress = buildProgress(students, exercises, rows, sort);
@@ -79,6 +87,46 @@ export default async function CourseProgressPage({
                   {r.kind === "kiista" ? "Mielestään vastaus on oikein" : "Ei ymmärrä, miksi ei mene läpi"}
                 </p>
                 {r.message && <p className="text-sm">&ldquo;{r.message}&rdquo;</p>}
+                {r.approvable.length > 0 && (
+                  <details className="rounded-lg border border-border p-3 text-sm">
+                    <summary className="cursor-pointer font-medium">
+                      Hyväksy tämä tuloste koko kurssille ({r.approvable.length}{" "}
+                      {r.approvable.length === 1 ? "testi" : "testiä"})
+                    </summary>
+                    <div className="mt-3 grid gap-3">
+                      {r.approvable.map((o) => (
+                        <div key={o.position} className="grid gap-2 sm:grid-cols-2">
+                          <div>
+                            <div className="text-xs font-medium text-muted">
+                              {o.name}
+                              {o.hidden ? " (piilotettu)" : ""}: odotettu tuloste
+                            </div>
+                            <pre className="overflow-x-auto whitespace-pre-wrap rounded border border-border bg-bg p-2 font-mono text-xs">{o.expected}</pre>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-muted">Opiskelijan tuloste</div>
+                            <pre className="overflow-x-auto whitespace-pre-wrap rounded border border-border bg-bg p-2 font-mono text-xs">{o.stdout}</pre>
+                          </div>
+                        </div>
+                      ))}
+                      <form action={approveHelpAction.bind(null, course.id)} className="grid gap-2">
+                        <input type="hidden" name="requestId" value={r.id} />
+                        <label className="grid gap-1">
+                          <span className="font-medium">Perustelu (pakollinen, näkyy opiskelijoille)</span>
+                          <span className="text-xs text-muted">Älä lainaa opiskelijan koodia.</span>
+                          <textarea name="reason" required maxLength={500} rows={2} className="rounded border border-border bg-bg p-2" />
+                        </label>
+                        <p className="text-xs text-muted">
+                          Sama tuloste hyväksytään kaikille kurssin opiskelijoille, myös aiemmin palautetuista ratkaisuista.
+                          Arvosanat päivittyvät Moodleen. Hyväksynnän voi perua.
+                        </p>
+                        <button type="submit" className="w-fit rounded bg-accent px-3 py-1.5 font-medium text-accent-text">
+                          Hyväksy kurssilla
+                        </button>
+                      </form>
+                    </div>
+                  </details>
+                )}
                 <form action={answerHelpAction.bind(null, course.id)} className="grid gap-2">
                   <input type="hidden" name="requestId" value={r.id} />
                   <label className="grid gap-1 text-sm">
@@ -89,6 +137,39 @@ export default async function CourseProgressPage({
                     Lähetä vastaus
                   </button>
                 </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {approvals.length > 0 && (
+        <section aria-labelledby="approvals" className="grid gap-3 rounded-xl border border-border bg-surface p-4">
+          <h2 id="approvals" className="text-lg font-semibold">
+            Hyväksytyt vastaukset ({approvals.length})
+          </h2>
+          <p className="text-sm text-muted">Nämä tulosteet hyväksytään kaikille kurssin opiskelijoille.</p>
+          <ul className="grid gap-4">
+            {approvals.map((a) => (
+              <li key={a.id} className="grid gap-2 text-sm">
+                <p>
+                  <span className="font-medium">{a.exerciseTitle}</span>, testi {a.casePosition + 1} · {a.approvedBy ?? "opettaja"}
+                </p>
+                <pre className="overflow-x-auto whitespace-pre-wrap rounded border border-border bg-bg p-2 font-mono text-xs">{a.outputSample}</pre>
+                <p>Perustelu: {a.reason}</p>
+                <details>
+                  <summary className="cursor-pointer text-accent">Peru hyväksyntä</summary>
+                  <form action={revokeApprovalAction.bind(null, course.id)} className="mt-2 grid gap-2">
+                    <input type="hidden" name="approvalId" value={a.id} />
+                    <label className="grid gap-1">
+                      <span className="font-medium">Miksi perut? (pakollinen)</span>
+                      <textarea name="reason" required maxLength={500} rows={2} className="rounded border border-border bg-bg p-2" />
+                    </label>
+                    <button type="submit" className="w-fit rounded border border-border px-3 py-1.5 font-medium">
+                      Peru hyväksyntä
+                    </button>
+                  </form>
+                </details>
               </li>
             ))}
           </ul>

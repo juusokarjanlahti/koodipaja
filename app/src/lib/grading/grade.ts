@@ -2,7 +2,8 @@ import { asc, eq } from "drizzle-orm";
 import { getDb, schema } from "../db";
 import type { RunResult, Runner } from "../runner/types";
 import type { TestCase } from "../db/schema";
-import { evaluateCase, type CaseOutcome } from "./evaluate";
+import { approvedHashesFor } from "../approvals/store";
+import { applyApproval, evaluateCase, type CaseOutcome } from "./evaluate";
 
 export type { Runner };
 
@@ -37,6 +38,8 @@ export async function gradeSubmission(submissionId: string, run: Runner): Promis
     .set({ status: "running", totalCount: cases.length })
     .where(eq(schema.submissions.id, submissionId));
 
+  // Outputs the student's course teacher approved for this exercise (#50).
+  const approved = await approvedHashesFor(submission.userId, exercise.id);
   const outcomes: { testCase: TestCase; result: RunResult; outcome: CaseOutcome }[] = [];
   for (const testCase of cases) {
     const result = await run({
@@ -49,7 +52,10 @@ export async function gradeSubmission(submissionId: string, run: Runner): Promis
     outcomes.push({
       testCase,
       result,
-      outcome: evaluateCase(result, testCase.expectedStdout, exercise.outputMatch),
+      outcome: applyApproval(
+        evaluateCase(result, testCase.expectedStdout, exercise.outputMatch),
+        approved.get(testCase.position) ?? new Set(),
+      ),
     });
   }
 
@@ -66,6 +72,7 @@ export async function gradeSubmission(submissionId: string, run: Runner): Promis
           stderr: outcome.stderr,
           timeMs: result.timeMs,
           memoryKb: result.memoryKb,
+          outputHash: outcome.outputHash,
         })),
       );
     }

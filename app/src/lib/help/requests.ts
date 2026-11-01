@@ -84,6 +84,7 @@ export async function openHelpRequests(courseId: number) {
       exerciseTitle: schema.exercises.title,
       kind: schema.helpRequests.kind,
       message: schema.helpRequests.message,
+      submissionId: schema.helpRequests.submissionId,
       createdAt: schema.helpRequests.createdAt,
     })
     .from(schema.helpRequests)

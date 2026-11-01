@@ -6,6 +6,32 @@ import { MAX_GUIDE_LENGTH, saveCourseGuide } from "@/lib/guides";
 import { MAX_HELP_REPLY, answerHelpRequest } from "@/lib/help/requests";
 import { retryFailedGrades } from "@/lib/lti/grade-sync";
 import { isTeacherOf } from "@/lib/teacher/course";
+import { MAX_APPROVAL_REASON, approveRequest, revokeApproval } from "@/lib/approvals/store";
+
+/**
+ * Teacher-only: accept the student's output(s) for the whole course (#50). The reason is
+ * required and logged; earlier submissions are re-evaluated and grades sent to Moodle.
+ */
+export async function approveHelpAction(courseId: number, formData: FormData): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user || !(await isTeacherOf(user.id, courseId))) throw new Error("Forbidden");
+  const requestId = String(formData.get("requestId") ?? "");
+  const reason = String(formData.get("reason") ?? "").trim().slice(0, MAX_APPROVAL_REASON);
+  if (!requestId || !reason) return;
+  await approveRequest({ courseId, requestId, teacherId: user.id, reason });
+  revalidatePath(`/opettaja/kurssit/${courseId}`);
+}
+
+/** Teacher-only: revoke an approval of this course. The reason is required and logged. */
+export async function revokeApprovalAction(courseId: number, formData: FormData): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user || !(await isTeacherOf(user.id, courseId))) throw new Error("Forbidden");
+  const approvalId = Number(formData.get("approvalId"));
+  const reason = String(formData.get("reason") ?? "").trim().slice(0, MAX_APPROVAL_REASON);
+  if (!Number.isSafeInteger(approvalId) || !reason) return;
+  await revokeApproval({ courseId, approvalId, teacherId: user.id, reason });
+  revalidatePath(`/opettaja/kurssit/${courseId}`);
+}
 
 /** Teacher-only: send the failed grade transfers of this course to Moodle again. */
 export async function retryGradesAction(courseId: number): Promise<void> {

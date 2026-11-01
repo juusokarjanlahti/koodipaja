@@ -1,4 +1,5 @@
 import type { Submission, SubmissionResult, TestCase } from "../db/schema";
+import { TEACHER_APPROVED } from "./status";
 
 export interface PresentedCase {
   position: number;
@@ -6,6 +7,8 @@ export interface PresentedCase {
   hidden: boolean;
   passed: boolean | null;
   judgeStatus: string | null;
+  /** Why the course teacher approved this output (#50); only on approved cases. */
+  approvalReason?: string;
   // Only included for visible cases:
   stdin?: string;
   expectedStdout?: string;
@@ -31,6 +34,7 @@ export function presentSubmission(
   submission: Submission,
   cases: TestCase[],
   results: SubmissionResult[],
+  approvalReasons: ReadonlyMap<number, string> = new Map(),
 ): PresentedSubmission {
   const byCase = new Map(results.map((r) => [r.testCaseId, r]));
   return {
@@ -49,6 +53,9 @@ export function presentSubmission(
           hidden: c.hidden,
           passed: r ? r.passed : null,
           judgeStatus: r ? r.judgeStatus : null,
+          ...(r?.judgeStatus === TEACHER_APPROVED && approvalReasons.has(c.position)
+            ? { approvalReason: approvalReasons.get(c.position) }
+            : {}),
         };
         if (c.hidden) return base;
         return { ...base, stdin: c.stdin, expectedStdout: c.expectedStdout, stdout: r?.stdout ?? null, stderr: r?.stderr ?? null };

@@ -21,8 +21,8 @@ const cases: TestCase[] = [
 ];
 
 const results: SubmissionResult[] = [
-  { id: 1, submissionId: "s1", testCaseId: 10, passed: true, judgeStatus: "Accepted", stdout: "Summa: 3\n", stderr: "", timeMs: 5, memoryKb: 1 },
-  { id: 2, submissionId: "s1", testCaseId: 11, passed: false, judgeStatus: "Wrong Answer", stdout: "SECRET_ECHO", stderr: "", timeMs: 5, memoryKb: 1 },
+  { id: 1, submissionId: "s1", testCaseId: 10, passed: true, judgeStatus: "Accepted", stdout: "Summa: 3\n", stderr: "", timeMs: 5, memoryKb: 1, outputHash: null },
+  { id: 2, submissionId: "s1", testCaseId: 11, passed: false, judgeStatus: "Wrong Answer", stdout: "SECRET_ECHO", stderr: "", timeMs: 5, memoryKb: 1, outputHash: null },
 ];
 
 describe("presentSubmission", () => {

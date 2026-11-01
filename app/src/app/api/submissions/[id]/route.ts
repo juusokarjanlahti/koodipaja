@@ -2,7 +2,9 @@ import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
+import { approvalReasons } from "@/lib/approvals/store";
 import { presentSubmission } from "@/lib/grading/present";
+import { TEACHER_APPROVED } from "@/lib/grading/status";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -28,7 +30,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   // The student's own code is included on request, for reopening an earlier submission.
   const includeSource = new URL(request.url).searchParams.get("includeSource") === "1";
-  const body = presentSubmission(submission, cases, results);
+  const positions = new Map(cases.map((c) => [c.id, c.position]));
+  const reasons = await approvalReasons(
+    user.id,
+    submission.exerciseId,
+    results
+      .filter((r) => r.judgeStatus === TEACHER_APPROVED && r.outputHash)
+      .map((r) => ({ position: positions.get(r.testCaseId)!, hash: r.outputHash! })),
+  );
+  const body = presentSubmission(submission, cases, results, reasons);
   return NextResponse.json(includeSource ? { ...body, sourceCode: submission.sourceCode } : body, {
     headers: { "Cache-Control": "no-store" },
   });

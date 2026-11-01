@@ -191,6 +191,57 @@ export const helpRequests = pgTable(
   ],
 );
 
+// An output the course teacher accepted for one test case of an exercise (#50). It applies
+// to every student of the course whose program prints the same thing (same output hash,
+// lib/grading/output-hash.ts). Holds no student data: only the hash, who approved and why.
+export const approvedOutputs = pgTable(
+  "approved_outputs",
+  {
+    id: serial("id").primaryKey(),
+    courseId: integer("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    exerciseId: text("exercise_id")
+      .notNull()
+      .references(() => exercises.id, { onDelete: "cascade" }),
+    casePosition: integer("case_position").notNull(),
+    outputHash: text("output_hash").notNull(),
+    // The approved output as the student's program printed it, so the teacher can see what
+    // they approved. Program output only, never source code.
+    outputSample: text("output_sample").notNull(),
+    approvedBy: uuid("approved_by").references(() => users.id, { onDelete: "set null" }),
+    reason: text("reason").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("approved_outputs_unique").on(t.courseId, t.exerciseId, t.casePosition, t.outputHash)],
+);
+
+export const approvalAction = pgEnum("approval_action", ["approve", "revoke"]);
+
+// Log of every approval and revocation: who, when, which submission, why (#50). Kept when an
+// approval is revoked, so the decision history stays visible.
+export const approvalEvents = pgTable(
+  "approval_events",
+  {
+    id: serial("id").primaryKey(),
+    courseId: integer("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    exerciseId: text("exercise_id")
+      .notNull()
+      .references(() => exercises.id, { onDelete: "cascade" }),
+    casePosition: integer("case_position").notNull(),
+    outputHash: text("output_hash").notNull(),
+    action: approvalAction("action").notNull(),
+    actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),
+    // The submission the decision was made on (approve), if any.
+    submissionId: uuid("submission_id").references(() => submissions.id, { onDelete: "set null" }),
+    reason: text("reason").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("approval_events_course").on(t.courseId, t.createdAt)],
+);
+
 export const exercises = pgTable("exercises", {
   // The folder name in exercises/<language>/<id>, e.g. "01-tervehdys".
   id: text("id").primaryKey(),
@@ -299,6 +350,9 @@ export const submissionResults = pgTable(
     stderr: text("stderr"),
     timeMs: integer("time_ms"),
     memoryKb: integer("memory_kb"),
+    // Hash of the full output when the program ran cleanly (lib/grading/output-hash.ts), so a
+    // teacher's approval can be matched against earlier submissions (#50).
+    outputHash: text("output_hash"),
   },
   (t) => [index("submission_results_submission").on(t.submissionId)],
 );

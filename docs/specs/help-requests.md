@@ -89,8 +89,14 @@ second student with the same output passes without asking; a rejected group stay
 
 ## Order of work
 
-1. `help_requests`, student button, teacher list and reply (#49). No grading change.
-2. `approved_outputs`, the grading check, approval action and re-evaluation (#50).
+1. `help_requests`, student button, teacher list and reply (#49). No grading change. ✅
+2. `approved_outputs`, the grading check, approval action and re-evaluation (#50). ✅
+   Implementation notes: the output hash is computed at grading time from the **full**
+   output and stored in `submission_results.output_hash` (stored outputs are truncated, so a
+   hash computed later could differ). `approved_outputs` also keeps the approved output
+   text (`output_sample`, program output only) so the teacher sees what they approved; the
+   spec's step 4 needed it anyway. Every approve and revoke goes to `approval_events`
+   (who, when, which submission, why), which is kept when an approval is revoked.
 3. Grouping and the "already approved or waiting" notices (#51).
 4. "Ehdota kirjastoon" suggestions and the owner's review list.
 
