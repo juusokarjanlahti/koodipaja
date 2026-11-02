@@ -24,12 +24,16 @@ export const submissionStatus = pgEnum("submission_status", [
   "error",
 ]);
 
+export const accentColor = pgEnum("accent_color", ["turkoosi", "violetti", "pullonvihrea", "viininpunainen", "grafiitti"]);
+
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   // Only dev-login users have an email; LTI users are identified by lti_identities.
   email: text("email").unique(),
   displayName: text("display_name"),
   role: userRole("role").notNull().default("student"),
+  // Theme accent picked in Asetukset (#92); values from lib/theme/accents.ts.
+  accent: accentColor("accent").notNull().default("turkoosi"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
