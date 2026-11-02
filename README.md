@@ -4,8 +4,11 @@ Avoin ja maksuton ohjelmointitehtäväalusta ammattikorkeakouluille. Opiskelija 
 koodia selaimessa ja saa automaattisen palautteen testitapauksista. Opettaja kokoaa
 kurssin avoimesta tehtäväkirjastosta.
 
-> Tila: varhainen vaihe. Opiskelijan tehtävänäkymä, palaute, Moodle-kirjautuminen (LTI 1.3),
-> arvosanat Moodleen ja opettajan etenemisnäkymä toimivat; pilottia valmistellaan.
+> **Tila: portfolioprojekti, ei ylläpidetty palvelu.** Tuotetyö lopetettiin 2.11.2026, koska
+> Helsingin yliopiston maksuton mooc.fi-kurssi (TMC) on jo käytössä AMK:iden
+> Python-peruskursseilla. Perustelut: [ADR 0007](docs/adr/0007-tuotetyo-lopetetaan.md).
+> Opiskelijan tehtävänäkymä, palaute, Moodle-kirjautuminen (LTI 1.3), arvosanat Moodleen ja
+> opettajan etenemisnäkymä toimivat. Julkinen demo on tulossa, ja sen jälkeen repo arkistoidaan.
 
 ## Kokeile omalla koneella
 

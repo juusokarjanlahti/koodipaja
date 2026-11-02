@@ -1,5 +1,10 @@
 # Roadmap
 
+> **Lopetettu 2.11.2026.** Milestonet M1–M4 eivät jatku: Helsingin yliopiston mooc.fi on jo
+> käytössä AMK:iden Python-peruskursseilla ([ADR 0007](../adr/0007-tuotetyo-lopetetaan.md)).
+> Projekti viimeistellään portfolioksi milestonessa **Demo ja paketointi** (epic #125).
+> Alla oleva suunnitelma on jätetty ennalleen historiaksi.
+
 Milestonet vastaavat GitHubin milestoneja `M1 MVP` … `M4 Laajentuminen` ja labeleita
 `M1-mvp` … `M4-laajentuminen`. Ajoitus on suuntaa-antava; milestone on valmis, kun sen
 poistumiskriteerit täyttyvät, ei päivämäärän perusteella.

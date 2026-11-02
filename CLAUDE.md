@@ -3,6 +3,16 @@
 Guidance for AI coding agents (Claude Code and others) working in this repository.
 Read this file fully before making changes.
 
+## Status: portfolio only (read first)
+
+Product work stopped on 2026-11-02, see `docs/adr/0007-tuotetyo-lopetetaan.md`. The
+project is being finished as a portfolio piece (epic #125) and archived afterwards.
+
+- Work only on open issues in the milestone **Demo ja paketointi**. Do not start pilot,
+  compliance, exam-mode, new exercise types or expansion work, even if older docs describe it.
+- No real student data, ever: the public demo uses invented data only (#127).
+- The rest of this file still applies to how work is done.
+
 ## What this project is
 
 Koodipaja is an open, free programming-exercise platform for Finnish universities of
