@@ -32,6 +32,8 @@ export class FakePlatform {
   nextUser: FakeUser = { sub: "", name: "", roles: [] };
   readonly issued: { state: string; idToken: string }[] = [];
   readonly scores: ReceivedScore[] = [];
+  /** While true, the score service answers 503, as Moodle does during maintenance. */
+  failScores = false;
   readonly tokenErrors: string[] = [];
   /** Verified LtiDeepLinkingResponse payloads posted back to the return URL. */
   readonly deepLinkResponses: Record<string, unknown>[] = [];
@@ -203,6 +205,11 @@ export class FakePlatform {
     if (scores && method === "POST") {
       if (authorization !== `Bearer token-${this.run}` || url.searchParams.get("type_id") !== "1") {
         res.statusCode = 401;
+        res.end();
+        return;
+      }
+      if (this.failScores) {
+        res.statusCode = 503;
         res.end();
         return;
       }
