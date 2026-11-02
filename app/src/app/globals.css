@@ -398,3 +398,11 @@ a.kp-square:hover {
     background: var(--swatch-dark);
   }
 }
+
+/* Confirm dialogs (components/confirm-dialog.tsx): a card lifted off the page. */
+.kp-dialog {
+  box-shadow: 6px 6px 0 var(--fill);
+}
+.kp-dialog::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}

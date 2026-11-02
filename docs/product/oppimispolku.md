@@ -57,7 +57,7 @@ näkymää itse milloin vain.
 - **Suunnitelma ennen koodia:** ensimmäisten viikkojen pohjakoodissa on valmis
   suunnitelmarunko kommentteina (`scaffold: full`). Runko kevenee kurssin edetessä
   (`outline`) ja jää lopulta pois (`none`). Opiskelija voi aina lisätä oman tyhjän
-  suunnitelmapohjan Suunnittele-painikkeella ([ADR 0004](../adr/0004-suunnitelma-kommentteina.md)).
+  suunnitelmapohjan Lisää suunnitelma -painikkeella ([ADR 0004](../adr/0004-suunnitelma-kommentteina.md)).
 
 ## Kertaus ilman etsimistä
 

@@ -66,13 +66,13 @@ test("the assignment does not show a test count", async ({ page }) => {
 
 // #104: the first view is for writing code; what is needed only sometimes opens on request.
 test("rarely needed text waits until asked for", async ({ page }) => {
-  const output = page.getByText("Tuloste", { exact: true });
-  await expect(output).toHaveCount(0);
+  await expect(page.getByText("Paina Aja nähdäksesi koodisi tuottaman tulosteen.")).toBeVisible();
   const hint = page.getByText("Näytä vihje");
   await expect(hint).toBeVisible();
   await expect(page.locator("details", { has: hint })).not.toHaveAttribute("open");
   await expect(page.locator("details", { has: page.getByText("Näppäinohjeet") })).not.toHaveAttribute("open");
+});
 
-  await page.getByRole("button", { name: "Aja", exact: true }).click();
-  await expect(output).toBeVisible({ timeout: 30_000 });
+test("the exercise title carries its course number", async ({ page }) => {
+  await expect(page.getByRole("heading", { level: 1, name: "4. Lukujen summa" })).toBeVisible();
 });

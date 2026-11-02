@@ -47,8 +47,8 @@ test("progress shows on the exercise list and earlier submissions can be reopene
   await expect(items.first()).toContainText("Kaikki 4 testiä läpi");
   await items.nth(1).getByRole("button", { name: "Näytä" }).click();
   await expect(page.getByText(/Näytät aiempaa palautusta/)).toBeVisible();
-  page.once("dialog", (d) => void d.accept());
   await page.getByRole("button", { name: "Palauta tämä koodi editoriin" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Korvaa koodi" }).click();
   await expect(page.locator(".cm-content")).toContainText('print("Hei")');
 
   await page.goto("/");
