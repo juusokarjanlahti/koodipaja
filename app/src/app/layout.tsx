@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { UserNav } from "@/components/user-nav";
+import { getCurrentUser } from "@/lib/auth/session";
+import { DEFAULT_ACCENT } from "@/lib/theme/accents";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,9 +10,11 @@ export const metadata: Metadata = {
   description: "Avoin ohjelmointitehtäväalusta",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // Rendered on the server so the chosen accent is there on first paint, without a flash.
+  const accent = (await getCurrentUser())?.accent ?? DEFAULT_ACCENT;
   return (
-    <html lang="fi">
+    <html lang="fi" data-accent={accent}>
       <body className="min-h-screen antialiased">
         <a
           href="#main"

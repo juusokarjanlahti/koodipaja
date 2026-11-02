@@ -25,6 +25,9 @@ export async function UserNav() {
       <Link href="/muistilista" className="font-medium">
         Muistilista
       </Link>
+      <Link href="/asetukset" className="font-medium">
+        Asetukset
+      </Link>
       <span className="text-muted">{user.displayName ?? user.email}</span>
       <button type="submit" className="font-medium text-accent">
         Kirjaudu ulos

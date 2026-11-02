@@ -77,6 +77,46 @@
   }
 }
 
+/* Accent chosen in Asetukset (lib/theme/accents.ts, kept in sync by accents.test.ts). */
+:root[data-accent="violetti"] {
+  --fill: #5b3fbf;
+  --fill-text: #ffffff;
+}
+:root[data-accent="pullonvihrea"] {
+  --fill: #1d6b47;
+  --fill-text: #ffffff;
+}
+:root[data-accent="viininpunainen"] {
+  --fill: #8c2f5a;
+  --fill-text: #ffffff;
+}
+:root[data-accent="grafiitti"] {
+  --fill: #2f343c;
+  --fill-text: #ffffff;
+  --action: #5b3fbf;
+  --action-text: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-accent="violetti"] {
+    --fill: #b9a7ff;
+    --fill-text: #13201c;
+  }
+  :root[data-accent="pullonvihrea"] {
+    --fill: #8fd6b0;
+    --fill-text: #13201c;
+  }
+  :root[data-accent="viininpunainen"] {
+    --fill: #f2a7c8;
+    --fill-text: #13201c;
+  }
+  :root[data-accent="grafiitti"] {
+    --fill: #e6ebe4;
+    --fill-text: #13201c;
+    --action: #b9a7ff;
+    --action-text: #13201c;
+  }
+}
+
 @theme {
   --radius-sm: 2px;
   --radius: 2px;
@@ -343,4 +383,18 @@ a.kp-square:hover {
 /* Focus inside a note: blue ink on yellow paper is too faint, the note's text colour is not. */
 .kp-note :focus-visible {
   outline-color: var(--note-text);
+}
+
+/* Settings: each option previews its own accent in the current mode. */
+.kp-swatch {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: var(--swatch-light);
+  outline: 1.5px solid var(--text);
+}
+@media (prefers-color-scheme: dark) {
+  .kp-swatch {
+    background: var(--swatch-dark);
+  }
 }
