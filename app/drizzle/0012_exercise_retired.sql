@@ -1,0 +1,1 @@
+ALTER TABLE "exercises" ADD COLUMN "retired_at" timestamp with time zone;

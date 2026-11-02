@@ -4,11 +4,12 @@
  *   npm run import-exercises
  *
  * Idempotent: unchanged exercises (same content hash) are skipped. A changed exercise
- * has its test cases replaced inside one transaction. Exercises removed from Git are
- * NOT deleted, because students may have submissions for them; they are reported.
+ * has its test cases replaced inside one transaction. Exercises removed from Git (or
+ * renamed) are NOT deleted, because students may have submissions for them: they are
+ * retired, which takes them off the lists, and restored if they come back.
  */
 import path from "node:path";
-import { eq, notInArray, sql } from "drizzle-orm";
+import { and, eq, isNull, notInArray, sql } from "drizzle-orm";
 import { closeDb, getDb, schema } from "../src/lib/db";
 import { findConceptFolders, loadConcept } from "../src/lib/concepts/load";
 import { findExerciseFolders, loadExercise } from "../src/lib/exercises/load";
@@ -49,11 +50,11 @@ async function main() {
     ids.push(ex.id);
 
     const [existing] = await db
-      .select({ contentHash: schema.exercises.contentHash })
+      .select({ contentHash: schema.exercises.contentHash, retiredAt: schema.exercises.retiredAt })
       .from(schema.exercises)
       .where(eq(schema.exercises.id, ex.id));
 
-    if (existing?.contentHash === ex.contentHash) {
+    if (existing?.contentHash === ex.contentHash && existing.retiredAt === null) {
       unchanged++;
       continue;
     }
@@ -74,6 +75,7 @@ async function main() {
         timeLimitSeconds: ex.timeLimitSeconds,
         memoryLimitMb: ex.memoryLimitMb,
         contentHash: ex.contentHash,
+        retiredAt: null,
         updatedAt: new Date(),
       };
       await tx
@@ -91,15 +93,16 @@ async function main() {
     console.log(`${existing ? "updated" : "created"}  ${ex.id}`);
   }
 
-  const orphans = ids.length
+  const retired = ids.length
     ? await db
-        .select({ id: schema.exercises.id })
-        .from(schema.exercises)
-        .where(notInArray(schema.exercises.id, ids))
+        .update(schema.exercises)
+        .set({ retiredAt: new Date() })
+        .where(and(notInArray(schema.exercises.id, ids), isNull(schema.exercises.retiredAt)))
+        .returning({ id: schema.exercises.id })
     : [];
-  for (const o of orphans) console.warn(`warning: ${o.id} is in the database but not in Git`);
+  for (const r of retired) console.log(`retired  ${r.id} (no longer in Git; submissions are kept)`);
 
-  console.log(`\n${created} created, ${updated} updated, ${unchanged} unchanged`);
+  console.log(`\n${created} created, ${updated} updated, ${unchanged} unchanged, ${retired.length} retired`);
 }
 
 main()
