@@ -17,6 +17,7 @@ import { editorTheme } from "./editor-theme";
 import { NextStepsBox } from "./next-steps";
 import { nextSteps, type ExerciseState, type PathExercise } from "@/lib/exercises/next-steps";
 import { improvementNote, isSolved } from "@/lib/submission-state";
+import { useConfirm } from "./confirm-dialog";
 import { ErrorHelp } from "./error-help";
 
 const POLL_MS = 800;
@@ -278,9 +279,14 @@ export function ExerciseWorkspace({
     }
   };
 
-  const restoreViewedCode = () => {
+  const [confirmDialog, confirm] = useConfirm();
+
+  const restoreViewedCode = async () => {
     if (!viewing) return;
-    if (code === viewing.sourceCode || window.confirm("Korvataanko editorin koodi tämän palautuksen koodilla?")) {
+    if (
+      code === viewing.sourceCode ||
+      (await confirm("Korvataanko editorin koodi tämän palautuksen koodilla?", "Korvaa koodi"))
+    ) {
       setCode(viewing.sourceCode);
     }
   };
@@ -291,8 +297,11 @@ export function ExerciseWorkspace({
     if (!hasPlan) setCode(`${planTemplate(language)}${code}`);
   };
 
-  const reset = () => {
-    if (code === starterCode || window.confirm("Palautetaanko pohjakoodi? Nykyinen koodi häviää editorista.")) {
+  const reset = async () => {
+    if (
+      code === starterCode ||
+      (await confirm("Aloitetaanko alusta? Editoriin palaa tehtävän alkuperäinen koodi, ja nykyinen koodisi häviää.", "Aloita alusta"))
+    ) {
       setCode(starterCode);
     }
   };
@@ -355,8 +364,7 @@ export function ExerciseWorkspace({
         </div>
       </div>
 
-      {/* The output column appears with the first run; before that there is nothing to read (#104). */}
-      <div className={`grid gap-3 rounded-xl border border-border bg-surface p-3 ${runOutput ? "sm:grid-cols-2" : ""}`}>
+      <div className="grid gap-3 rounded-xl border border-border bg-surface p-3 sm:grid-cols-2">
         <div className="grid content-start gap-1">
           <label htmlFor="run-stdin" className="text-sm font-medium">
             Syöte <span className="font-normal text-muted">(rivi kerrallaan)</span>
@@ -370,6 +378,14 @@ export function ExerciseWorkspace({
             className="rounded-md border border-field bg-surface p-2 font-mono text-sm"
           />
         </div>
+        {!runOutput && (
+          <div className="grid content-start gap-1">
+            <div className="text-sm font-medium">Tuloste</div>
+            <p className="min-h-[4.5rem] rounded-md border border-dashed border-field p-2 text-sm text-muted">
+              Paina Aja nähdäksesi koodisi tuottaman tulosteen.
+            </p>
+          </div>
+        )}
         {runOutput && (
           <div className="grid content-start gap-1">
             <div className="text-sm font-medium">Tuloste</div>
@@ -414,18 +430,27 @@ export function ExerciseWorkspace({
         >
           {busy ? "Arvioidaan…" : "Palauta"}
         </button>
+        {/* Only when the code has no plan yet: early exercises come with one (ADR 0004). */}
+        {!hasPlan && (
+          <button
+            type="button"
+            onClick={addPlan}
+            title="Lisää koodin alkuun numeroitu suunnitelmapohja"
+            className="rounded border border-text bg-surface px-4 py-2 font-medium"
+          >
+            Lisää suunnitelma
+          </button>
+        )}
         <button
           type="button"
-          onClick={addPlan}
-          disabled={hasPlan}
-          title={hasPlan ? "Koodissa on jo suunnitelma" : "Lisää koodin alkuun numeroitu suunnitelmapohja"}
-          className="rounded border border-text bg-surface px-4 py-2 font-medium disabled:opacity-50"
+          onClick={() => void reset()}
+          disabled={busy}
+          title="Palauttaa editoriin tehtävän alkuperäisen koodin"
+          className="rounded border border-text bg-surface px-4 py-2 font-medium"
         >
-          Suunnittele
+          Aloita alusta
         </button>
-        <button type="button" onClick={reset} disabled={busy} className="rounded border border-text bg-surface px-4 py-2 font-medium">
-          Pohjakoodi
-        </button>
+        {confirmDialog}
       </div>
 
       <div aria-live="polite" className="grid gap-3">
@@ -514,7 +539,7 @@ export function ExerciseWorkspace({
       {viewing && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-3 text-sm" role="status">
           <span>Näytät aiempaa palautusta ({formatTime(viewing.createdAt)}).</span>
-          <button type="button" onClick={restoreViewedCode} className="rounded-md border border-field bg-surface px-3 py-1">
+          <button type="button" onClick={() => void restoreViewedCode()} className="rounded-md border border-field bg-surface px-3 py-1">
             Palauta tämä koodi editoriin
           </button>
         </div>

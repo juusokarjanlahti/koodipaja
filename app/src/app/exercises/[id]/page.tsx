@@ -95,7 +95,8 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
           <p className="not-prose mb-2">
             <LevelBadge level={exercise.level} />
           </p>
-          <Assignment markdown={exercise.promptMarkdown} />
+          {/* The title carries the course number, like the list: "1. Tervehdys". */}
+          <Assignment markdown={exercise.promptMarkdown.replace(/^# (.+)$/m, (_, title: string) => `# ${numberedTitle(exercise.id, title)}`)} />
         </article>
         {sentGrade && (
           <p role="status" className="rounded-lg border border-border bg-surface p-3 text-sm">

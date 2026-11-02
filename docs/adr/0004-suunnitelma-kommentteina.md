@@ -23,7 +23,7 @@ näyttöä ohjelmoinnin opetuksessa.
    - `none` (oletus): ei runkoa
 3. **Laatijalla on ensisijainen päätäntävalta** siihen, miten tehtävä pilkotaan ja kuinka
    paljon tukea annetaan.
-4. **Opiskelija voi halutessaan pilkkoa tehtävän itse:** "Suunnittele"-painike lisää
+4. **Opiskelija voi halutessaan pilkkoa tehtävän itse:** "Lisää suunnitelma" -painike (näkyy, kun koodissa ei vielä ole suunnitelmaa) lisää
    editoriin tyhjän numeroidun suunnitelmapohjan. Sen käyttö on vapaaehtoista eikä
    vaikuta arviointiin.
 5. **Ei tekoälyä:** suunnitelmaa ei tarkisteta eikä tehtävää pilkota tekoälyllä
