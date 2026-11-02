@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Assignment } from "@/components/assignment";
 import { CheatsheetPanel } from "@/components/cheatsheet";
 import { LevelBadge } from "@/components/level-badge";
+import { Tour } from "@/components/tour";
 import { ExerciseWorkspace } from "@/components/exercise-workspace";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCheatsheet } from "@/lib/concepts/queries";
@@ -84,13 +85,14 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
             )}
           </nav>
         )}
+        {user?.showTour && <Tour />}
         {exercise.retiredAt && (
           <p role="status" className="border border-border bg-surface p-3 text-sm">
             Tämä tehtävä ei ole enää tehtävälistalla (se on siirretty tai poistettu). Aiemmat palautuksesi ovat
             tallessa, ja voit yhä jatkaa sitä. <Link href="/" className="text-accent underline">Tehtävälistaan</Link>
           </p>
         )}
-        <article className="prose-exercise kp-margin py-1 pl-5">
+        <article data-tour="assignment" className="prose-exercise kp-margin py-1 pl-5">
           {/* Just the level word; its meaning is explained on the exercise list (#104). */}
           <p className="not-prose mb-2">
             <LevelBadge level={exercise.level} />

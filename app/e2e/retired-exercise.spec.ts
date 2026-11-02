@@ -17,13 +17,15 @@ function importFrom(exercisesRoot: string) {
 
 test("an exercise removed from Git leaves the list but keeps its page", async ({ page }) => {
   test.setTimeout(120_000);
-  const id = `99-e2e-poistuva-${Date.now()}`;
+  // A JavaScript exercise, so the Python list that other tests count stays the same
+  // while this test runs in parallel with them.
+  const id = `javascript-e2e-poistuva-${Date.now()}`;
   const tmp = mkdtempSync(join(tmpdir(), "kp-retire-"));
   try {
     cpSync(join(repo, "exercises"), join(tmp, "exercises"), { recursive: true });
     cpSync(join(repo, "concepts"), join(tmp, "concepts"), { recursive: true });
-    const folder = join(tmp, "exercises/python", id);
-    cpSync(join(repo, "exercises/python/01-tervehdys"), folder, { recursive: true });
+    const folder = join(tmp, "exercises/javascript", id);
+    cpSync(join(repo, "exercises/javascript/javascript-lukujen-summa"), folder, { recursive: true });
     const yaml = join(folder, "exercise.yaml");
     writeFileSync(
       yaml,

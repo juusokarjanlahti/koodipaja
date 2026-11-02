@@ -406,3 +406,17 @@ a.kp-square:hover {
 .kp-dialog::backdrop {
   background: rgb(0 0 0 / 0.45);
 }
+
+/* Tour (components/tour.tsx): the part being explained gets a thick ink outline. */
+.kp-tour {
+  box-shadow: 6px 6px 0 var(--fill);
+}
+.kp-tour-target {
+  outline: 4px solid var(--accent) !important;
+  outline-offset: 4px;
+  position: relative;
+  z-index: 1;
+}
+.cm-gutters.kp-tour-target {
+  outline-offset: -4px;
+}

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { ACCENTS, ACCENT_IDS, DEFAULT_ACCENT } from "@/lib/theme/accents";
-import { saveAccentAction } from "./actions";
+import { saveSettingsAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +39,7 @@ export default async function SettingsPage({
           Tallennettu.
         </p>
       )}
-      <form action={saveAccentAction} className="grid max-w-xl gap-5">
+      <form action={saveSettingsAction} className="grid max-w-xl gap-5">
         <fieldset className="grid gap-3">
           <legend className="mb-1 text-xl font-bold">Korostusväri</legend>
           <p className="text-sm text-muted">
@@ -76,6 +76,13 @@ export default async function SettingsPage({
               </span>
             </label>
           ))}
+        </fieldset>
+        <fieldset className="grid gap-2">
+          <legend className="mb-1 text-xl font-bold">Esittely</legend>
+          <label className="flex w-fit cursor-pointer items-center gap-3">
+            <input type="checkbox" name="showTour" defaultChecked={user.showTour} className="size-4" />
+            <span>Näytä tehtäväsivulla Esittely-painike, joka opastaa tehtävän tekemisessä</span>
+          </label>
         </fieldset>
         <button
           type="submit"

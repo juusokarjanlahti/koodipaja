@@ -333,6 +333,7 @@ export function ExerciseWorkspace({
   return (
     <div className="grid gap-4">
       <div
+        data-tour="editor"
         className="overflow-hidden rounded-xl border border-border bg-surface"
         onKeyDown={(e) => {
           if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
@@ -428,6 +429,7 @@ export function ExerciseWorkspace({
           onClick={() => void submit()}
           disabled={busy}
           aria-keyshortcuts="Control+Enter"
+          data-tour="submit"
           className="rounded-lg bg-action px-5 py-2 font-bold text-action-text disabled:opacity-60"
         >
           {busy ? "Arvioidaan…" : "Palauta"}
@@ -455,7 +457,7 @@ export function ExerciseWorkspace({
         {confirmDialog}
       </div>
 
-      <div aria-live="polite" className="grid gap-3">
+      <div aria-live="polite" data-tour="results" className="grid min-h-8 gap-3">
         {error && <p className="rounded-lg border border-fail bg-fail-bg p-3 text-fail">{error}</p>}
 
         {submission?.status === "done" && submission.cases.length > 0 && (

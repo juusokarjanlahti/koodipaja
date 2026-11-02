@@ -34,6 +34,8 @@ export const users = pgTable("users", {
   role: userRole("role").notNull().default("student"),
   // Theme accent picked in Asetukset (#92); values from lib/theme/accents.ts.
   accent: accentColor("accent").notNull().default("turkoosi"),
+  // Whether the exercise page offers the walk-through (components/tour.tsx); off in Asetukset.
+  showTour: boolean("show_tour").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
