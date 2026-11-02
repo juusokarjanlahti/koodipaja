@@ -51,7 +51,7 @@ function NoteEditor({ card }: { card: CheatsheetCard }) {
         }}
         maxLength={500}
         rows={2}
-        className="rounded-md border border-border bg-bg p-2 text-sm"
+        className="rounded-md border border-field bg-surface p-2 text-sm"
         placeholder="Esim. muista int() ennen laskemista"
       />
       <div className="flex items-center gap-2">
@@ -59,7 +59,7 @@ function NoteEditor({ card }: { card: CheatsheetCard }) {
           type="button"
           onClick={() => void save()}
           disabled={note === saved}
-          className="rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
+          className="rounded-md border border-field bg-surface px-3 py-1 text-sm disabled:opacity-50"
         >
           Tallenna
         </button>
@@ -71,7 +71,24 @@ function NoteEditor({ card }: { card: CheatsheetCard }) {
   );
 }
 
-function Card({ card, open, onToggle }: { card: CheatsheetCard; open: boolean; onToggle: (open: boolean) => void }) {
+/** On the full cheat sheet each topic gets its own post-it colour, 1-5 by topic order. */
+const toneOf = (topicIndex: number) => (topicIndex % 5) + 1;
+
+function Card({
+  card,
+  open,
+  onToggle,
+  note,
+}: {
+  card: CheatsheetCard;
+  open: boolean;
+  onToggle: (open: boolean) => void;
+  /** Post-it look: topic colour and a small tilt while closed. */
+  note?: { tone: number; index: number };
+}) {
+  const look = note
+    ? `kp-note kp-note-${note.tone} break-inside-avoid ${open ? "col-span-full" : `kp-tilt-${(note.index % 3) + 1} min-h-[7.5rem]`}`
+    : "rounded-xl border border-border bg-surface break-inside-avoid";
   return (
     <details
       open={open}
@@ -79,11 +96,13 @@ function Card({ card, open, onToggle }: { card: CheatsheetCard; open: boolean; o
         const next = (e.currentTarget as HTMLDetailsElement).open;
         if (next !== open) onToggle(next);
       }}
-      className="rounded-xl border border-border bg-surface break-inside-avoid"
+      className={look}
       data-concept={card.id}
     >
-      <summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-2.5 font-medium">
-        <span>{card.title}</span>
+      <summary
+        className={`flex cursor-pointer justify-between gap-3 ${note ? "items-start p-4 text-[1.05rem] font-bold" : "items-center px-4 py-2.5 font-medium"}`}
+      >
+        <span className="[text-wrap:balance]">{card.title}</span>
         {card.note && (
           <span className="shrink-0 text-xs font-normal text-muted" title="Kortissa on oma muistiinpano">
             ✎ <span className="sr-only">oma muistiinpano</span>
@@ -206,20 +225,20 @@ export function CheatsheetView({ cards, full = false }: { cards: CheatsheetCard[
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Hae, esim. print tai silmukka"
-          className="min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+          className="min-w-0 flex-1 rounded-lg border border-field bg-surface px-3 py-2 text-sm"
         />
         {full && (
           <>
-            <button type="button" onClick={() => setAll(true)} className="rounded-lg border border-border px-3 py-2 text-sm">
+            <button type="button" onClick={() => setAll(true)} className="rounded-lg border border-field bg-surface px-3 py-2 text-sm">
               Avaa kaikki
             </button>
-            <button type="button" onClick={() => setAll(false)} className="rounded-lg border border-border px-3 py-2 text-sm">
+            <button type="button" onClick={() => setAll(false)} className="rounded-lg border border-field bg-surface px-3 py-2 text-sm">
               Sulje kaikki
             </button>
-            <button type="button" onClick={print} className="rounded-lg border border-border px-3 py-2 text-sm">
+            <button type="button" onClick={print} className="rounded-lg border border-field bg-surface px-3 py-2 text-sm">
               Tulosta
             </button>
-            <button type="button" onClick={download} className="rounded-lg border border-border px-3 py-2 text-sm">
+            <button type="button" onClick={download} className="rounded-lg border border-field bg-surface px-3 py-2 text-sm">
               Lataa Markdownina
             </button>
           </>
@@ -227,11 +246,12 @@ export function CheatsheetView({ cards, full = false }: { cards: CheatsheetCard[
       </div>
       {full && !searching && (
         <nav aria-label="Aiheet" className="print:hidden">
-          <ul className="flex flex-wrap gap-2 text-sm">
-            {groups.map(([topic, group]) => (
+          {/* Folder tabs in the same colours as the topic's notes. */}
+          <ul className="kp-tabs text-sm">
+            {groups.map(([topic, group], i) => (
               <li key={topic}>
-                <a href={`#${topicAnchor(topic)}`} className="inline-block rounded-full border border-border px-3 py-1 hover:border-accent">
-                  {topic} <span className="text-muted">({group.length})</span>
+                <a href={`#${topicAnchor(topic)}`} className={`kp-tab kp-note-${toneOf(i)}`}>
+                  {topic} <span className="font-normal">({group.length})</span>
                 </a>
               </li>
             ))}
@@ -242,14 +262,20 @@ export function CheatsheetView({ cards, full = false }: { cards: CheatsheetCard[
         {searching ? `${visible.length} korttia` : ""}
       </p>
       {visible.length === 0 && <p className="text-sm text-muted">Ei osumia haulle.</p>}
-      {groups.map(([topic, group]) => (
+      {groups.map(([topic, group], topicIndex) => (
         <section key={topic} aria-labelledby={topicAnchor(topic)} className="grid gap-2">
           <Heading id={topicAnchor(topic)} className={`scroll-mt-4 font-semibold ${full ? "text-lg" : "text-sm text-muted"}`}>
             {topic}
           </Heading>
-          <div className="grid gap-2">
-            {group.map((card) => (
-              <Card key={cardKey(card)} card={card} open={isOpen(card)} onToggle={(open) => toggle(card, open)} />
+          <div className={full ? "grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] items-start gap-4" : "grid gap-2"}>
+            {group.map((card, i) => (
+              <Card
+                key={cardKey(card)}
+                card={card}
+                open={isOpen(card)}
+                onToggle={(open) => toggle(card, open)}
+                note={full ? { tone: toneOf(topicIndex), index: i } : undefined}
+              />
             ))}
           </div>
         </section>

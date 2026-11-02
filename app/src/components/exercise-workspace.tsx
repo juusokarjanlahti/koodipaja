@@ -365,7 +365,7 @@ export function ExerciseWorkspace({
             onChange={(e) => setStdin(e.target.value)}
             rows={4}
             spellCheck={false}
-            className="rounded-md border border-border bg-bg p-2 font-mono text-sm"
+            className="rounded-md border border-field bg-surface p-2 font-mono text-sm"
           />
         </div>
         <div className="grid content-start gap-1">
@@ -405,7 +405,7 @@ export function ExerciseWorkspace({
           onClick={() => void run()}
           disabled={running}
           aria-keyshortcuts="Control+Shift+Enter"
-          className="rounded-lg border border-accent px-5 py-2 font-medium text-accent disabled:opacity-60"
+          className="rounded border-2 border-action bg-surface px-5 py-2 font-bold text-action disabled:opacity-60"
         >
           {running ? "Ajetaan…" : "Aja"}
         </button>
@@ -414,7 +414,7 @@ export function ExerciseWorkspace({
           onClick={() => void submit()}
           disabled={busy}
           aria-keyshortcuts="Control+Enter"
-          className="rounded-lg bg-accent px-5 py-2 font-medium text-accent-text disabled:opacity-60"
+          className="rounded-lg bg-action px-5 py-2 font-bold text-action-text disabled:opacity-60"
         >
           {busy ? "Arvioidaan…" : "Palauta"}
         </button>
@@ -423,17 +423,28 @@ export function ExerciseWorkspace({
           onClick={addPlan}
           disabled={hasPlan}
           title={hasPlan ? "Koodissa on jo suunnitelma" : "Lisää koodin alkuun numeroitu suunnitelmapohja"}
-          className="rounded-lg border border-border px-4 py-2 disabled:opacity-50"
+          className="rounded border border-text bg-surface px-4 py-2 font-medium disabled:opacity-50"
         >
           Suunnittele
         </button>
-        <button type="button" onClick={reset} disabled={busy} className="rounded-lg border border-border px-4 py-2">
+        <button type="button" onClick={reset} disabled={busy} className="rounded border border-text bg-surface px-4 py-2 font-medium">
           Pohjakoodi
         </button>
       </div>
 
       <div aria-live="polite" className="grid gap-3">
         {error && <p className="rounded-lg border border-fail bg-fail-bg p-3 text-fail">{error}</p>}
+
+        {submission?.status === "done" && submission.cases.length > 0 && (
+          // The same information as the list below, as squares; hidden from screen readers.
+          <div className="kp-squares" aria-hidden="true">
+            {submission.cases.map((c, i) => (
+              <span key={c.position} className="kp-square" data-state={c.passed ? "pass" : "fail"}>
+                {i + 1}
+              </span>
+            ))}
+          </div>
+        )}
 
         {submission?.status === "done" && (
           <p
@@ -507,7 +518,7 @@ export function ExerciseWorkspace({
       {viewing && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-3 text-sm" role="status">
           <span>Näytät aiempaa palautusta ({formatTime(viewing.createdAt)}).</span>
-          <button type="button" onClick={restoreViewedCode} className="rounded-md border border-border px-3 py-1">
+          <button type="button" onClick={restoreViewedCode} className="rounded-md border border-field bg-surface px-3 py-1">
             Palauta tämä koodi editoriin
           </button>
         </div>
@@ -537,7 +548,7 @@ export function ExerciseWorkspace({
                     type="button"
                     onClick={() => void openSubmission(item)}
                     disabled={item.status === "queued" || item.status === "running"}
-                    className="rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
+                    className="rounded-md border border-field bg-surface px-3 py-1 text-sm disabled:opacity-50"
                   >
                     Näytä
                   </button>

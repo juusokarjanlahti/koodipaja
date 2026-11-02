@@ -11,7 +11,7 @@ export default async function CheatsheetPage() {
     return (
       <div className="rounded-xl border border-border bg-surface p-5">
         <p className="mb-3">Kirjaudu sisään nähdäksesi oman muistilistasi.</p>
-        <Link href="/login?next=/muistilista" className="inline-block rounded-lg bg-accent px-4 py-2 font-medium text-accent-text">
+        <Link href="/login?next=/muistilista" className="inline-block rounded-lg bg-action px-4 py-2 font-bold text-action-text">
           Kirjaudu
         </Link>
       </div>
@@ -20,7 +20,7 @@ export default async function CheatsheetPage() {
   const cards = await getCheatsheet(user.id);
   return (
     <>
-      <h1 className="mb-1 text-2xl font-semibold">Oma muistilista</h1>
+      <h1 className="mb-1 kp-display">Oma muistilista</h1>
       <p className="mb-6 text-muted print:hidden">
         Kaikki tähän mennessä oppimasi asiat yhdessä paikassa. Lista kasvaa jokaisesta palauttamastasi tehtävästä.
       </p>

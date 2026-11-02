@@ -22,9 +22,9 @@ export function NextStepsBox({
         {steps.next ? (
           <Link
             href={`/exercises/${steps.next.id}`}
-            className="justify-self-start rounded-lg bg-accent px-4 py-2 font-medium text-accent-text"
+            className="justify-self-start rounded-lg bg-action px-4 py-2 font-bold text-action-text"
           >
-            Seuraava tehtävä: {steps.next.title} →
+            Seuraava tehtävä: {steps.next.title}
           </Link>
         ) : (
           <p className="font-medium">Olet ratkaissut kaikki tämän kielen tehtävät.</p>

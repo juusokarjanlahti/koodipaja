@@ -9,6 +9,7 @@ import { EditorView } from "@uiw/react-codemirror";
  */
 const base = EditorView.theme({
   "&": { backgroundColor: "var(--surface)", color: "var(--text)" },
+  ".cm-scroller": { fontFamily: "var(--font-mono)" },
   ".cm-content": { caretColor: "var(--text)" },
   ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--text)" },
   "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {

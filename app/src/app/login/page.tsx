@@ -41,7 +41,7 @@ export default async function LoginPage({
             Tarkista sähköpostiosoite.
           </p>
         )}
-        <button type="submit" className="rounded-lg bg-accent px-4 py-2 font-medium text-accent-text">
+        <button type="submit" className="rounded-lg bg-action px-4 py-2 font-bold text-action-text">
           Kirjaudu
         </button>
       </form>

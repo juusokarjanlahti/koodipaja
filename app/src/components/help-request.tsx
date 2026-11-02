@@ -169,7 +169,7 @@ export function HelpRequest({
             <button
               type="submit"
               disabled={busy}
-              className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white"
+              className="rounded bg-action px-3 py-1.5 text-sm font-bold text-action-text"
             >
               Lähetä opettajalle
             </button>

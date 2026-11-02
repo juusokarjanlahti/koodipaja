@@ -21,7 +21,7 @@ test("solved: go on; stuck: skip to an exercise that does not need this one, the
   await page.goto("/exercises/01-tervehdys");
   await submit(page, solution("01-tervehdys"));
   const next = page.getByRole("navigation", { name: "Seuraava tehtävä" }).getByRole("link");
-  await expect(next).toHaveText(/Seuraava tehtävä: .+ →/);
+  await expect(next).toHaveText(/^Seuraava tehtävä: .+$/);
   await next.click();
   await expect(page).toHaveURL(/\/exercises\/02-lukujen-summa$/);
 

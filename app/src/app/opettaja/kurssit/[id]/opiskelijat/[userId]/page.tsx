@@ -45,7 +45,7 @@ export default async function StudentSubmissionsPage({ params }: { params: Promi
           ← {course.title ?? "Kurssi"}
         </Link>
       </p>
-      <h1 className="text-2xl font-semibold">{student.name}: palautukset</h1>
+      <h1 className="kp-display">{student.name}: palautukset</h1>
       {submissions.length === 0 && <p className="text-muted">Ei vielä palautuksia tämän kurssin tehtäviin.</p>}
       {exercises
         .filter((e) => byExercise.has(e.id))

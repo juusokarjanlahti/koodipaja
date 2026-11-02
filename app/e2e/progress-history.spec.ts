@@ -19,6 +19,10 @@ test("progress shows on the exercise list and earlier submissions can be reopene
   await expect(progress).toHaveText(/^Ratkaistu 0 \/ \d+$/);
   const total = Number((await progress.textContent())?.match(/\/ (\d+)/)?.[1]);
   expect(total).toBeGreaterThan(0);
+  // One square per exercise; the state is in the square's name, not only its colour.
+  const squares = python.getByRole("list", { name: "Tehtävät ruutuina" }).getByRole("link");
+  await expect(squares).toHaveCount(total);
+  await expect(squares.first()).toHaveAccessibleName("1. Tervehdys: ei aloitettu, seuraavana");
 
   // First attempt does not pass yet.
   await page.goto("/exercises/01-tervehdys");
@@ -28,6 +32,7 @@ test("progress shows on the exercise list and earlier submissions can be reopene
 
   await page.goto("/");
   await expect(python.getByText("Kesken")).toBeVisible();
+  await expect(squares.first()).toHaveAccessibleName("1. Tervehdys: kesken, seuraavana");
 
   // Second attempt solves it.
   await page.goto("/exercises/01-tervehdys");
@@ -49,4 +54,5 @@ test("progress shows on the exercise list and earlier submissions can be reopene
   await page.goto("/");
   await expect(progress).toHaveText(`Ratkaistu 1 / ${total}`);
   await expect(python.getByText("✓ Ratkaistu")).toBeVisible();
+  await expect(squares.first()).toHaveAccessibleName("1. Tervehdys: ratkaistu");
 });

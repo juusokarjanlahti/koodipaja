@@ -15,7 +15,7 @@ export default async function TeacherHomePage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="mb-2 text-2xl font-semibold">Opettajan näkymä</h1>
+      <h1 className="mb-2 kp-display">Opettajan näkymä</h1>
       <p className="mb-6 text-muted">Kurssit, joilla olet Moodlessa opettajana.</p>
       <ul className="grid gap-3">
         {courses.map((c) => (

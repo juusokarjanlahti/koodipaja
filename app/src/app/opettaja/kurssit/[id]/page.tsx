@@ -68,7 +68,7 @@ export default async function CourseProgressPage({
           ← Opettajan näkymä
         </Link>
       </p>
-      <h1 className="text-2xl font-semibold">{title}</h1>
+      <h1 className="kp-display">{title}</h1>
       <p className="text-sm">
         <Link href={`/opettaja/kurssit/${course.id}/ohje`} className="text-accent">
           Muokkaa kurssin ohjetta opiskelijoille
@@ -145,7 +145,7 @@ export default async function CourseProgressPage({
                             Sama tuloste hyväksytään kaikille kurssin opiskelijoille, myös aiemmin palautetuista
                             ratkaisuista. Arvosanat päivittyvät Moodleen. Hyväksynnän voi perua.
                           </p>
-                          <button type="submit" className="w-fit rounded bg-accent px-3 py-1.5 font-medium text-accent-text">
+                          <button type="submit" className="w-fit rounded bg-action px-3 py-1.5 font-bold text-action-text">
                             Hyväksy kurssilla
                           </button>
                         </form>
