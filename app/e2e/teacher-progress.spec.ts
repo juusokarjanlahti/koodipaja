@@ -41,7 +41,7 @@ test("the teacher sees the course's progress and a student's submissions; others
   await expect(solver.getByText(/Kaikki \d+ testiä meni läpi/)).toBeVisible({ timeout: 30_000 });
   const trier = await launch(browser, platform, { sub: `b-${run}`, name: `Bertta ${run}`, roles: LEARNER });
   await submit(trier, 'print("Hei")\n');
-  await expect(trier.getByText(/testiä läpi\. Avoinna/)).toBeVisible({ timeout: 30_000 });
+  await expect(trier.getByText(/testiä läpi\. Seuraava tavoite/)).toBeVisible({ timeout: 30_000 });
   await launch(browser, platform, { sub: `c-${run}`, name: `Cecilia ${run}`, roles: LEARNER });
 
   // The teacher finds the course from the header link.

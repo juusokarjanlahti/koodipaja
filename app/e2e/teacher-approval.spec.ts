@@ -41,7 +41,7 @@ test("an approved output passes for the whole course, with the reason; revoking 
   const run = platform.run;
   const asker = await launch(browser, platform, { sub: `a1-${run}`, name: `Aada ${run}`, roles: LEARNER });
   await submit(asker, VARIANT);
-  await expect(asker.getByText(/testiä läpi\. Avoinna/)).toBeVisible();
+  await expect(asker.getByText(/testiä läpi\. Seuraava tavoite/)).toBeVisible();
 
   await asker.getByRole("button", { name: "Pyydä apua" }).click();
   await asker.getByLabel("Mielestäni vastaukseni on oikein").check();
@@ -81,7 +81,7 @@ test("an approved output passes for the whole course, with the reason; revoking 
   // A student of another course is not affected.
   const outsider = await launch(browser, otherCourse, { sub: `o1-${run}`, name: `Olli ${run}`, roles: LEARNER });
   await submit(outsider, VARIANT);
-  await expect(outsider.getByText(/testiä läpi\. Avoinna/)).toBeVisible();
+  await expect(outsider.getByText(/testiä läpi\. Seuraava tavoite/)).toBeVisible();
 
   // Revoking (with a reason) makes the same output fail again, also for earlier submissions.
   await teacher.goto(courseUrl);
@@ -97,5 +97,5 @@ test("an approved output passes for the whole course, with the reason; revoking 
   }
   await second.reload();
   await submit(second, VARIANT);
-  await expect(second.getByText(/testiä läpi\. Avoinna/)).toBeVisible();
+  await expect(second.getByText(/testiä läpi\. Seuraava tavoite/)).toBeVisible();
 });

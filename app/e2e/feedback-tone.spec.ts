@@ -14,7 +14,7 @@ test("a failing submission says what does not work yet and explains the error", 
 
   await page.getByRole("button", { name: "Palauta" }).click();
 
-  await expect(page.getByText(/testiä läpi\. Avoinna on ensimmäinen testi/)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText("0 / 5 testiä läpi. Seuraava tavoite: Kolme lukua (avattu alla).")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText("Ei vielä läpi: virhe ajon aikana").first()).toBeVisible();
   await expect(page.getByText("Merkkijono ja luku eivät yhdisty").first()).toBeVisible();
   await expect(page.getByText(/TypeError/).first()).toBeVisible();

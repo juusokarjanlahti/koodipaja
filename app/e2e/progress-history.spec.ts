@@ -28,7 +28,7 @@ test("progress shows on the exercise list and earlier submissions can be reopene
   await page.goto("/exercises/01-tervehdys");
   await setCode(page, 'print("Hei")\n');
   await page.getByRole("button", { name: "Palauta" }).click();
-  await expect(page.getByText(/testiä läpi\. Avoinna/)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/testiä läpi\. Seuraava tavoite/)).toBeVisible({ timeout: 30_000 });
 
   await page.goto("/");
   await expect(python.getByText("Kesken")).toBeVisible();

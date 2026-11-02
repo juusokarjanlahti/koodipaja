@@ -34,7 +34,7 @@ test("the best score goes to the platform gradebook and a worse attempt does not
 
   await page.reload();
   await submit(page, 'print("ei vielä")\n');
-  await expect(page.getByText(/testiä läpi\. Avoinna/)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/testiä läpi\. Seuraava tavoite/)).toBeVisible({ timeout: 30_000 });
   await expect.poll(() => platform.scores.length, { timeout: 30_000 }).toBe(2);
   expect(platform.scores[1].score.scoreGiven).toBe(first.score.scoreMaximum);
   expect(platform.tokenErrors).toEqual([]);

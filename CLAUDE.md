@@ -71,6 +71,8 @@ app/                              Next.js application
   that represent *conceptual* student mistakes (off-by-one, wrong type, missing edge case,
   hardcoded answer), not formatting slips and not random garbage. Put realistic formatting
   slips that should be accepted in `accepted/`.
+- Order test cases from simplest to hardest. The first visible case is the example run from the
+  assignment; the first failing case is shown to the student as their next goal (#95).
 - Keep required output minimal: do not demand exact prompt texts unless they matter.
 - In compiled languages the starter code provides the boilerplate (main function, input
   reading setup) so students focus on the algorithm, not the ceremony. Java's class is `Main`.
