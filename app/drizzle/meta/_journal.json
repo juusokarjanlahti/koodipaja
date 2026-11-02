@@ -92,6 +92,13 @@
       "when": 1793605658399,
       "tag": "0012_exercise_retired",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793606652825,
+      "tag": "0013_user_show_tour",
+      "breakpoints": true
     }
   ]
 }
