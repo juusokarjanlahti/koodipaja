@@ -1,4 +1,4 @@
-import { inArray } from "drizzle-orm";
+import { and, inArray, isNull } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getDb, schema } from "@/lib/db";
 import { requireEnv } from "@/lib/env";
@@ -21,7 +21,12 @@ export async function POST(request: Request) {
   const chosen = await getDb()
     .select({ id: schema.exercises.id, title: schema.exercises.title })
     .from(schema.exercises)
-    .where(inArray(schema.exercises.id, choice.acceptMultiple ? ids : ids.slice(0, 1)));
+    .where(
+      and(
+        inArray(schema.exercises.id, choice.acceptMultiple ? ids : ids.slice(0, 1)),
+        isNull(schema.exercises.retiredAt),
+      ),
+    );
   // Keep the teacher's order (the order on the page).
   chosen.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
 

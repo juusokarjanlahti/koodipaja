@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { asc } from "drizzle-orm";
+import { asc, isNull } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { getDb, schema } from "@/lib/db";
 import { requireEnv } from "@/lib/env";
@@ -18,6 +18,7 @@ export default async function ChooseExercisesPage({ searchParams }: { searchPara
   const exercises = await getDb()
     .select({ id: schema.exercises.id, title: schema.exercises.title, language: schema.exercises.language, topics: schema.exercises.topics })
     .from(schema.exercises)
+    .where(isNull(schema.exercises.retiredAt))
     .orderBy(asc(schema.exercises.language), asc(schema.exercises.id));
   const groups = [...Map.groupBy(exercises, (e) => e.language).entries()].sort((a, b) => languageRank(a[0]) - languageRank(b[0]));
   const inputType = choice.acceptMultiple ? "checkbox" : "radio";

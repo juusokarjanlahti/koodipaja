@@ -268,6 +268,9 @@ export const exercises = pgTable("exercises", {
   timeLimitSeconds: integer("time_limit_seconds").notNull(),
   memoryLimitMb: integer("memory_limit_mb").notNull(),
   contentHash: text("content_hash").notNull(),
+  // Set by the importer when the exercise is no longer in Git (renamed or removed). Retired
+  // exercises leave the lists but keep their page and submissions.
+  retiredAt: timestamp("retired_at", { withTimezone: true }),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

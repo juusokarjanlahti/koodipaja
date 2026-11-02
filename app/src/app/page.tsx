@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { asc } from "drizzle-orm";
+import { asc, isNull } from "drizzle-orm";
 import { LevelBadge } from "@/components/level-badge";
 import { ProgressSquares } from "@/components/progress-squares";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -21,6 +21,7 @@ export default async function HomePage() {
       topics: schema.exercises.topics,
     })
     .from(schema.exercises)
+    .where(isNull(schema.exercises.retiredAt))
     .orderBy(asc(schema.exercises.language), asc(schema.exercises.id));
 
   const user = await getCurrentUser();
