@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("a failing submission says what does not work yet and explains the error", async ({ page }) => {
   const res = await page.request.post("/api/dev-login", { data: { email: `e2e-tone-${Date.now()}@example.test` } });
   expect(res.ok()).toBe(true);
-  await page.goto("/exercises/02-lukujen-summa");
+  await page.goto("/exercises/04-lukujen-summa");
 
   const editor = page.locator(".cm-content");
   await editor.click();

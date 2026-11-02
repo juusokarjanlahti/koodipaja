@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.beforeEach(async ({ page }) => {
   const res = await page.request.post("/api/dev-login", { data: { email: `e2e-run-${Date.now()}@example.test` } });
   expect(res.ok()).toBe(true);
-  await page.goto("/exercises/02-lukujen-summa");
+  await page.goto("/exercises/04-lukujen-summa");
 });
 
 async function setCode(page: import("@playwright/test").Page, code: string) {

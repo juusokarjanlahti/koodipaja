@@ -23,7 +23,10 @@ test("solved: go on; stuck: skip to an exercise that does not need this one, the
   const next = page.getByRole("navigation", { name: "Seuraava tehtävä" }).getByRole("link");
   await expect(next).toHaveText(/^Seuraava tehtävä: .+$/);
   await next.click();
-  await expect(page).toHaveURL(/\/exercises\/02-lukujen-summa$/);
+  await expect(page).toHaveURL(/\/exercises\/02-kahden-luvun-summa$/);
+
+  // Lukujen summa is the first exercise with a while loop: getting stuck there is common.
+  await page.goto("/exercises/04-lukujen-summa");
 
   // Two failed tries: no detour yet. The third one offers other ways forward.
   const ways = page.getByRole("navigation", { name: "Muita tapoja edetä" });
@@ -31,19 +34,19 @@ test("solved: go on; stuck: skip to an exercise that does not need this one, the
   await expect(ways).toHaveCount(0);
   await submit(page, 'print("Summa: 0")\n');
   await expect(ways).toContainText("Jumiin jääminen kuuluu oppimiseen");
-  // 12 is the first later exercise that needs nothing 02 is the first to teach.
-  await expect(ways.getByRole("link", { name: "Sanan kirjaimet" })).toBeVisible();
+  // 05 is the first later exercise that needs nothing 04 is the first to teach (while).
+  await expect(ways.getByRole("link", { name: "Parillinen vai pariton" })).toBeVisible();
   await expect(ways).toContainText("Kertaa tehtävä Tervehdys");
 
   // Skip, solve, and be pointed back to the unfinished exercise.
-  await ways.getByRole("link", { name: "Sanan kirjaimet" }).click();
-  await expect(page).toHaveURL(/\/exercises\/12-sanan-kirjaimet$/);
-  await submit(page, solution("12-sanan-kirjaimet"));
+  await ways.getByRole("link", { name: "Parillinen vai pariton" }).click();
+  await expect(page).toHaveURL(/\/exercises\/05-parillinen-vai-pariton$/);
+  await submit(page, solution("05-parillinen-vai-pariton"));
   const after = page.getByRole("navigation", { name: "Seuraava tehtävä" });
   await expect(after).toContainText("jäi aiemmin kesken");
   await after.getByRole("link", { name: "Lukujen summa" }).click();
-  await expect(page).toHaveURL(/\/exercises\/02-lukujen-summa$/);
+  await expect(page).toHaveURL(/\/exercises\/04-lukujen-summa$/);
 
   // Previous / next links between exercises.
-  await expect(page.getByRole("navigation", { name: "Tehtävien välillä" }).getByRole("link", { name: /← 1\. Tervehdys/ })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Tehtävien välillä" }).getByRole("link", { name: /← 3\. Suurempi luku/ })).toBeVisible();
 });

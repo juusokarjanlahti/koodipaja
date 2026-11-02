@@ -21,7 +21,7 @@ test("the cheat sheet fills up from submitted exercises and keeps the student's 
   // The panel on the next exercise is collapsed by default and lists the cards by title.
   // Tall enough that the cheat sheet and the editor are on screen together for the drag.
   await page.setViewportSize({ width: 1280, height: 1400 });
-  await page.goto("/exercises/02-lukujen-summa");
+  await page.goto("/exercises/04-lukujen-summa");
   const toggle = page.getByRole("button", { name: /Muistilista \(3\)/ });
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await toggle.click();

@@ -97,6 +97,8 @@ app/                              Next.js application
   The `concepts` (not `requires`) go to the student's cheat sheet on submission. Add a concept
   card when an exercise introduces something new; keep cards short (2-4 sentences, one
   pitfall, one example).
+- The `NN-` folder prefix is the course order: easier first, and an exercise only `requires`
+  concepts that an earlier exercise teaches (#94). `validate.py` checks the numbers are gapless.
 - `id` in exercise.yaml must equal the folder name. Renaming or removing a folder retires the old id
   on import: it leaves the lists, but its page and submissions stay (they are not moved to the new id).
 - Run `python3 scripts/validate.py` before committing. CI runs the same script.
