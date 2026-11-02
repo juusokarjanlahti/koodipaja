@@ -15,6 +15,8 @@ import {
 
 export const userRole = pgEnum("user_role", ["student", "teacher"]);
 export const outputMatchMode = pgEnum("output_match_mode", ["lenient", "exact"]);
+// Shown to students instead of the 1-5 difficulty (#93): what the exercise is for.
+export const exerciseLevel = pgEnum("exercise_level", ["perus", "soveltava", "haaste"]);
 export const submissionStatus = pgEnum("submission_status", [
   "queued",
   "running",
@@ -256,6 +258,7 @@ export const exercises = pgTable("exercises", {
   outputMatch: outputMatchMode("output_match").notNull().default("lenient"),
   // Concept cards this exercise teaches (concepts/<language>/<id>), for the cheat sheet (#69).
   concepts: text("concepts").array().notNull().default([]),
+  level: exerciseLevel("level").notNull().default("perus"),
   // Concepts the exercise uses but does not teach (docs/specs/next-exercise.md).
   requires: text("requires").array().notNull().default([]),
   timeLimitSeconds: integer("time_limit_seconds").notNull(),

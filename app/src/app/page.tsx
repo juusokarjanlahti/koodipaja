@@ -3,6 +3,14 @@ import { asc } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
 import { LANGUAGE_LABELS, languageRank } from "@/lib/exercises/languages";
+import { LEVELS, type Level } from "@/lib/exercises/levels";
+
+// The level word carries the meaning; the colour only helps scanning (WCAG 1.4.1).
+const LEVEL_STYLE: Record<Level, string> = {
+  perus: "border border-border text-text",
+  soveltava: "bg-bg text-text border border-border",
+  haaste: "bg-accent text-accent-text",
+};
 import { firstUnsolved, numberedTitle } from "@/lib/exercises/order";
 import { getExerciseStatuses, type ExerciseStatus } from "@/lib/progress";
 
@@ -15,7 +23,7 @@ export default async function HomePage() {
       id: schema.exercises.id,
       title: schema.exercises.title,
       language: schema.exercises.language,
-      difficulty: schema.exercises.difficulty,
+      level: schema.exercises.level,
       topics: schema.exercises.topics,
     })
     .from(schema.exercises)
@@ -30,7 +38,16 @@ export default async function HomePage() {
   return (
     <>
       <h1 className="mb-2 text-2xl font-semibold">Tehtävät</h1>
-      <p className="mb-6 text-muted">Valitse tehtävä, kirjoita ratkaisu ja saat heti palautteen.</p>
+      <p className="mb-2 text-muted">Valitse tehtävä, kirjoita ratkaisu ja saat heti palautteen.</p>
+      <p className="mb-6 text-sm text-muted">
+        {(Object.keys(LEVELS) as Level[]).map((level, i) => (
+          <span key={level}>
+            {i > 0 && " · "}
+            <span className={`rounded px-1.5 text-xs font-medium ${LEVEL_STYLE[level]}`}>{LEVELS[level].label}</span>{" "}
+            {LEVELS[level].meaning}
+          </span>
+        ))}
+      </p>
 
       {exercises.length === 0 ? (
         <p className="rounded-lg border border-border bg-surface p-4">
@@ -79,9 +96,8 @@ export default async function HomePage() {
                         )}
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
-                        <span aria-label={`Vaikeustaso ${ex.difficulty} / 5`}>
-                          {"●".repeat(ex.difficulty)}
-                          <span className="opacity-30">{"●".repeat(5 - ex.difficulty)}</span>
+                        <span className={`rounded px-1.5 text-xs font-medium ${LEVEL_STYLE[ex.level]}`}>
+                          {LEVELS[ex.level].label}
                         </span>
                         {ex.topics.map((t) => (
                           <span key={t} className="rounded border border-border px-1.5 text-xs">

@@ -21,11 +21,15 @@ const caseSchema = z.object({
   hidden: z.boolean().default(false),
 });
 
+/** Version of what the importer stores; see contentHash below. 2: level (#93). */
+const IMPORT_FORMAT = "2";
+
 export const exerciseMetaSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/, "id must be lowercase letters, digits and dashes"),
   title: z.string().min(1),
   language: z.enum(Object.keys(LANGUAGE_EXTENSIONS) as [string, ...string[]]),
   difficulty: z.number().int().min(1).max(5),
+  level: z.enum(["perus", "soveltava", "haaste"]).default("perus"),
   topics: z.array(z.string()).default([]),
   output_match: z.enum(["lenient", "exact"]).default("lenient"),
   concepts: z.array(z.string()).default([]),
@@ -44,6 +48,7 @@ export interface LoadedExercise {
   outputMatch: "lenient" | "exact";
   concepts: string[];
   requires: string[];
+  level: "perus" | "soveltava" | "haaste";
   promptMarkdown: string;
   starterCode: string;
   timeLimitSeconds: number;
@@ -69,7 +74,11 @@ export async function loadExercise(folder: string): Promise<LoadedExercise> {
   const promptMarkdown = await readFile(path.join(folder, "README.md"), "utf8");
   const starterCode = await readFile(path.join(folder, `starter${ext}`), "utf8");
 
+  // IMPORT_FORMAT changes the hash of every exercise, so the importer rewrites them all once:
+  // bump it whenever a new exercise field is stored in the database.
   const contentHash = createHash("sha256")
+    .update(IMPORT_FORMAT)
+    .update("\0")
     .update(rawYaml)
     .update("\0")
     .update(promptMarkdown)
@@ -86,6 +95,7 @@ export async function loadExercise(folder: string): Promise<LoadedExercise> {
     outputMatch: meta.output_match,
     concepts: meta.concepts,
     requires: meta.requires,
+    level: meta.level,
     promptMarkdown,
     starterCode,
     timeLimitSeconds: Math.ceil(meta.time_limit_seconds),

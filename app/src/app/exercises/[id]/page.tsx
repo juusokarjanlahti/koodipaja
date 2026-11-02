@@ -2,6 +2,7 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Assignment } from "@/components/assignment";
+import { LEVELS } from "@/lib/exercises/levels";
 import { CheatsheetPanel } from "@/components/cheatsheet";
 import { ExerciseWorkspace } from "@/components/exercise-workspace";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -84,6 +85,9 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
           </nav>
         )}
         <article className="prose-exercise rounded-xl border border-border bg-surface p-5">
+          <p className="not-prose mb-3 text-sm text-muted">
+            <span className="font-medium text-text">{LEVELS[exercise.level].label}</span>: {LEVELS[exercise.level].meaning}
+          </p>
           <Assignment markdown={exercise.promptMarkdown} />
         </article>
         {sentGrade && (
