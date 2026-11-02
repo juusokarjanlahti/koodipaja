@@ -11,7 +11,7 @@ export default async function GuidePage() {
   const guides = user ? (await guidesForUser(user.id)).filter((g) => g.markdown.trim() !== "") : [];
   return (
     <div className="grid gap-6">
-      <h1 className="text-2xl font-semibold">Ohje</h1>
+      <h1 className="kp-display">Ohje</h1>
       {guides.map((g) => (
         <section key={g.courseId} aria-labelledby={`course-${g.courseId}`} className="rounded-xl border border-accent bg-surface p-5">
           <h2 id={`course-${g.courseId}`} className="mb-2 text-xl font-semibold">

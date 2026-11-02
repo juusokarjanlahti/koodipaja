@@ -84,7 +84,7 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
             )}
           </nav>
         )}
-        <article className="prose-exercise rounded-xl border border-border bg-surface p-5">
+        <article className="prose-exercise kp-margin py-1 pl-5">
           <p className="not-prose mb-3 text-sm text-muted">
             <span className="font-medium text-text">{LEVELS[exercise.level].label}</span>: {LEVELS[exercise.level].meaning}
           </p>
@@ -103,7 +103,7 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
         {user && <CheatsheetPanel cards={cheatsheet} />}
       </div>
 
-      <section aria-label="Ratkaisu">
+      <section aria-label="Ratkaisu" className="kp-paper">
         {user ? (
           <ExerciseWorkspace
             exerciseId={exercise.id}
@@ -123,7 +123,7 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
             <p className="mb-3">Kirjaudu sisään palauttaaksesi ratkaisuja.</p>
             <Link
               href={`/login?next=/exercises/${exercise.id}`}
-              className="inline-block rounded-lg bg-accent px-4 py-2 font-medium text-accent-text"
+              className="inline-block rounded-lg bg-action px-4 py-2 font-bold text-action-text"
             >
               Kirjaudu
             </Link>

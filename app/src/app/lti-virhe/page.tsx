@@ -34,7 +34,7 @@ export default async function LtiErrorPage({ searchParams }: { searchParams: Pro
   const message = MESSAGES[koodi ?? ""] ?? MESSAGES.token;
   return (
     <div className="max-w-xl space-y-4">
-      <h1 className="text-2xl font-semibold">Moodle-kirjautuminen ei onnistunut</h1>
+      <h1 className="kp-display">Moodle-kirjautuminen ei onnistunut</h1>
       <p>{message.what}</p>
       <p>{message.todo}</p>
     </div>

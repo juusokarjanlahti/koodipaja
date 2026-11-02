@@ -10,8 +10,8 @@ export function Assignment({ markdown }: { markdown: string }) {
         // "Vihje:" paragraphs are closed until asked for; hiding is by click/keyboard, never hover.
         p: ({ node, children }) =>
           node && hastText(node).startsWith("Vihje:") ? (
-            <details className="my-3">
-              <summary className="cursor-pointer font-medium">
+            <details className="kp-note kp-note-1 my-4 w-fit max-w-full -rotate-1 px-3 py-2 open:rotate-0">
+              <summary className="cursor-pointer font-bold">
                 Näytä vihje
               </summary>
               <p className="mt-2">{children}</p>

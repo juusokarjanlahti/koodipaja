@@ -24,7 +24,7 @@ export default async function ChooseExercisesPage({ searchParams }: { searchPara
 
   return (
     <div className="max-w-3xl">
-      <h1 className="mb-2 text-2xl font-semibold">Valitse tehtävät Moodleen</h1>
+      <h1 className="mb-2 kp-display">Valitse tehtävät Moodleen</h1>
       <p className="mb-6 text-muted">
         {choice.acceptMultiple
           ? "Jokaisesta valitusta tehtävästä tulee Moodle-kurssille oma arvioitava aktiviteetti."
@@ -56,7 +56,7 @@ export default async function ChooseExercisesPage({ searchParams }: { searchPara
           </fieldset>
         ))}
         <div>
-          <button type="submit" className="rounded-lg bg-accent px-4 py-2 font-medium text-accent-text">
+          <button type="submit" className="rounded-lg bg-action px-4 py-2 font-bold text-action-text">
             Lisää Moodleen
           </button>
         </div>

@@ -24,7 +24,7 @@ export default async function CourseGuideEditPage({ params }: { params: Promise<
           ← {course.title ?? "Kurssi"}
         </Link>
       </p>
-      <h1 className="text-2xl font-semibold">Kurssin ohje opiskelijoille</h1>
+      <h1 className="kp-display">Kurssin ohje opiskelijoille</h1>
       <p className="text-muted">
         Kirjoita aikataulu, tavoitteet ja kurssin omat käytännöt. Teksti näkyy opiskelijoille{" "}
         <Link href="/ohje" className="text-accent">
@@ -44,7 +44,7 @@ export default async function CourseGuideEditPage({ params }: { params: Promise<
             className="rounded border border-border bg-bg p-3 font-mono text-sm"
           />
         </label>
-        <button type="submit" className="w-fit rounded bg-accent px-4 py-2 font-medium text-accent-text">
+        <button type="submit" className="w-fit rounded bg-action px-4 py-2 font-bold text-action-text">
           Tallenna
         </button>
       </form>
