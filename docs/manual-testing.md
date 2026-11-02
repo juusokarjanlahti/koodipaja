@@ -12,7 +12,7 @@ only exists after an LTI launch from Moodle ([product/moodle-lti.md](product/moo
 
 ## A. Student, development login (no Moodle needed)
 
-- [ ] **Numbering (#94):** the front page shows "1. Tervehdys", "2. Lukujen summa" and so on
+- [ ] **Numbering (#94):** the front page shows "1. Tervehdys", "2. Kahden luvun summa" and so on
       in order. Java, Rust etc. exercises show no number. Screen reader (or the accessibility
       tree) reads the number as part of the title.
 - [ ] **Start here (#94):** a new student sees "Aloita tästä: 1. Tervehdys" above the Python
