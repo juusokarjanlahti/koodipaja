@@ -25,7 +25,7 @@ async function submitVariant(page: Page) {
   await page.keyboard.press("Delete");
   await page.keyboard.insertText(VARIANT);
   await page.getByRole("button", { name: "Palauta" }).click();
-  await expect(page.getByText(/testiä läpi\. Avoinna/)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/testiä läpi\. Seuraava tavoite/)).toBeVisible({ timeout: 30_000 });
 }
 
 async function openDispute(page: Page) {

@@ -318,6 +318,8 @@ export function ExerciseWorkspace({
     submission?.status === "done" ? submission.cases.filter((c) => c.judgeStatus === FORMATTING_DIFFERENCE).length : 0;
   // Open only the first failing visible case so the list stays scannable.
   const firstFailing = submission?.cases.find((c) => c.passed === false && !c.hidden)?.position;
+  // The first test that does not pass yet is framed as the next small goal, not a failure (#95).
+  const nextGoal = submission?.cases.find((c) => c.passed === false && !c.hidden) ?? submission?.cases.find((c) => c.passed === false);
 
   return (
     <div className="grid gap-4">
@@ -450,7 +452,7 @@ export function ExerciseWorkspace({
           >
             {allPassed
               ? `Kaikki ${submission.totalCount} testiä meni läpi!`
-              : `${submission.passedCount} / ${submission.totalCount} testiä läpi. Avoinna on ensimmäinen testi, joka ei vielä mene läpi.`}
+              : `${submission.passedCount} / ${submission.totalCount} testiä läpi. Seuraava tavoite: ${nextGoal?.name ?? "seuraava testi"}${nextGoal && !nextGoal.hidden ? " (avattu alla)" : ""}.`}
           </p>
         )}
 
