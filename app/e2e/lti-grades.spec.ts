@@ -50,3 +50,49 @@ test("a student whose activity takes no grades sends nothing", async ({ page }) 
   await page.waitForTimeout(3000);
   expect(platform.scores.filter((s) => s.lineItem === user.sub)).toEqual([]);
 });
+
+// #99: the teacher sees which grades reached Moodle and can resend the failed ones.
+test("the teacher sees failed grade transfers and resends them", async ({ browser }) => {
+  test.setTimeout(120_000);
+  const student = { sub: `f-${platform.run}`, name: `Siirto ${platform.run}`, roles: [], grades: true };
+  const teacherUser = {
+    sub: `ft-${platform.run}`,
+    name: `Opettaja ${platform.run}`,
+    roles: ["http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor"],
+  };
+
+  platform.failScores = true;
+  try {
+    const page = await (await browser.newContext()).newPage();
+    platform.nextUser = student;
+    await page.goto(platform.loginPath(student));
+    await submit(page, solution);
+    await expect(page.getByText(/Kaikki \d+ testiä meni läpi/)).toBeVisible({ timeout: 30_000 });
+
+    const teacher = await (await browser.newContext()).newPage();
+    platform.nextUser = teacherUser;
+    await teacher.goto(platform.loginPath(teacherUser));
+    await expect(teacher).toHaveURL(/\/exercises\/01-tervehdys$/);
+    await teacher.getByRole("link", { name: "Opettajan näkymä" }).click();
+    await teacher.getByRole("link", { name: /Ohjelmoinnin perusteet \(e2e\)/ }).click();
+    await expect(teacher).toHaveURL(/\/opettaja\/kurssit\/\d+$/, { timeout: 30_000 });
+
+    // The worker retries a few times before the transfer counts as failed.
+    const resend = teacher.getByRole("button", { name: "Lähetä epäonnistuneet uudelleen" });
+    await expect(async () => {
+      await teacher.reload();
+      await expect(resend).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 60_000 });
+    await expect(teacher.getByText(/epäonnistui/).first()).toBeVisible();
+
+    platform.failScores = false;
+    await resend.click();
+    await expect.poll(() => platform.scores.filter((s) => s.lineItem === student.sub).length, { timeout: 30_000 }).toBe(1);
+    await expect(async () => {
+      await teacher.reload();
+      await expect(resend).toHaveCount(0, { timeout: 1_000 });
+    }).toPass({ timeout: 30_000 });
+  } finally {
+    platform.failScores = false;
+  }
+});
