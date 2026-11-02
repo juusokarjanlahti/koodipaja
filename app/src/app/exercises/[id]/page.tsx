@@ -2,8 +2,8 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Assignment } from "@/components/assignment";
-import { LEVELS } from "@/lib/exercises/levels";
 import { CheatsheetPanel } from "@/components/cheatsheet";
+import { LevelBadge } from "@/components/level-badge";
 import { ExerciseWorkspace } from "@/components/exercise-workspace";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCheatsheet } from "@/lib/concepts/queries";
@@ -85,8 +85,9 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
           </nav>
         )}
         <article className="prose-exercise kp-margin py-1 pl-5">
-          <p className="not-prose mb-3 text-sm text-muted">
-            <span className="font-medium text-text">{LEVELS[exercise.level].label}</span>: {LEVELS[exercise.level].meaning}
+          {/* Just the level word; its meaning is explained on the exercise list (#104). */}
+          <p className="not-prose mb-2">
+            <LevelBadge level={exercise.level} />
           </p>
           <Assignment markdown={exercise.promptMarkdown} />
         </article>

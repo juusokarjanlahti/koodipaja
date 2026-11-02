@@ -339,12 +339,13 @@ export function ExerciseWorkspace({
           basicSetup={{ autocompletion: false }}
           theme={editorTheme}
         />
-        <div className="border-t border-border px-3 py-1.5 text-xs text-muted">
-          {/* Always visible and the editor's description: how to leave it (WCAG 2.1.2). */}
+        {/* One line: how to leave the editor stays visible and is its description (WCAG 2.1.2);
+            the other shortcuts open on request (#104). */}
+        <div className="flex flex-wrap items-start justify-between gap-x-4 border-t border-border px-3 py-1.5 text-xs text-muted">
           <p id="editor-help">
             Pois editorista: <kbd>Esc</kbd> ja sitten <kbd>Tab</kbd>.
           </p>
-          <details className="mt-1">
+          <details>
             <summary className="cursor-pointer">Näppäinohjeet</summary>
             <p className="mt-1">
               <kbd>Tab</kbd> sisentää. <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd> ajaa, <kbd>Ctrl</kbd> +{" "}
@@ -354,39 +355,34 @@ export function ExerciseWorkspace({
         </div>
       </div>
 
-      <div className="grid gap-3 rounded-xl border border-border bg-surface p-3 sm:grid-cols-2">
+      {/* The output column appears with the first run; before that there is nothing to read (#104). */}
+      <div className={`grid gap-3 rounded-xl border border-border bg-surface p-3 ${runOutput ? "sm:grid-cols-2" : ""}`}>
         <div className="grid content-start gap-1">
           <label htmlFor="run-stdin" className="text-sm font-medium">
-            Syöte <span className="font-normal text-muted">(mitä käyttäjä kirjoittaa, rivi kerrallaan)</span>
+            Syöte <span className="font-normal text-muted">(rivi kerrallaan)</span>
           </label>
           <textarea
             id="run-stdin"
             value={stdin}
             onChange={(e) => setStdin(e.target.value)}
-            rows={4}
+            rows={3}
             spellCheck={false}
             className="rounded-md border border-field bg-surface p-2 font-mono text-sm"
           />
         </div>
-        <div className="grid content-start gap-1">
-          <div className="text-sm font-medium">Tuloste</div>
-          {runOutput ? (
-            <>
-              <pre
-                key={runCount}
-                className="kp-flash min-h-[5.5rem] overflow-x-auto whitespace-pre-wrap rounded-md border border-border bg-bg p-2 font-mono text-sm"
-              >
-                {runOutput.stdout === "" ? <span className="text-muted">(ei tulostetta)</span> : runOutput.stdout}
-              </pre>
-              {runOutput.stderr && <ErrorHelp stderr={runOutput.stderr} language={language} />}
-              {runOutput.stderr && <Output label="Virheilmoitus" text={runOutput.stderr} />}
-            </>
-          ) : (
-            <p className="min-h-[5.5rem] rounded-md border border-dashed border-border p-2 text-sm text-muted">
-              Paina Aja nähdäksesi tulosteen.
-            </p>
-          )}
-        </div>
+        {runOutput && (
+          <div className="grid content-start gap-1">
+            <div className="text-sm font-medium">Tuloste</div>
+            <pre
+              key={runCount}
+              className="kp-flash min-h-[4.5rem] overflow-x-auto whitespace-pre-wrap rounded-md border border-border bg-bg p-2 font-mono text-sm"
+            >
+              {runOutput.stdout === "" ? <span className="text-muted">(ei tulostetta)</span> : runOutput.stdout}
+            </pre>
+            {runOutput.stderr && <ErrorHelp stderr={runOutput.stderr} language={language} />}
+            {runOutput.stderr && <Output label="Virheilmoitus" text={runOutput.stderr} />}
+          </div>
+        )}
         {/* Always rendered so screen readers announce each run's result (WCAG 4.1.3). */}
         <div aria-live="polite" className="sm:col-span-2">
           {runError ? (
