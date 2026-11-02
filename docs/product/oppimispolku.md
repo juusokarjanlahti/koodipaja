@@ -100,6 +100,16 @@ Periaatteet kaikille:
 - **Reiluus:** joustava vertailu ja opettajan käsin hyväksyntä poistavat turhaa kitkaa,
   mutta eivät helpota arvosanaa 5, koska haasteissa ratkaisee algoritmin oikeellisuus.
 
+## Tehtäväsivulla aina näkyvissä ja pyydettävissä (#104)
+
+Tehtäväsivun ensimmäinen näkymä on koodin kirjoittamista varten. Periaate 7 (visio.md) koskee tietoa, jota opiskelija muuten joutuisi muistamaan. Muu tieto on yhden painalluksen päässä.
+
+**Aina näkyvissä:** tehtävänanto ja esimerkkiajo, editori ja suunnitelmakommentit, ohje editorista poistumiseen (WCAG 2.1.2), syötekenttä, painikkeet, testitulokset palautuksen jälkeen.
+
+**Pyydettävissä:** vihje, muut näppäinohjeet, muistilista, Pyydä apua -lomake, tason selitys (tehtävälistalla). Tuloste-kenttä tulee näkyviin vasta ensimmäisellä ajolla.
+
+Pyydettävä sisältö avautuu painikkeella tai `<details>`-osiolla, ei koskaan pelkällä hoverilla. Avaaminen ei kirjaudu eikä vaikuta arviointiin. Uusi osio lisätään suljettuna, jottei aloitusnäkymän tekstimäärä kasva.
+
 ## Myöhemmin
 
 - **Askel askeleelta -visualisointi** (muuttujien arvot suorituksen aikana, Python Tutor

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { asc } from "drizzle-orm";
+import { LevelBadge } from "@/components/level-badge";
 import { ProgressSquares } from "@/components/progress-squares";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
@@ -9,13 +10,6 @@ import { firstUnsolved, numberedTitle } from "@/lib/exercises/order";
 import { getExerciseStatuses, type ExerciseStatus } from "@/lib/progress";
 
 export const dynamic = "force-dynamic";
-
-// The level word carries the meaning; the style only helps scanning (WCAG 1.4.1).
-const LEVEL_STYLE: Record<Level, string> = {
-  perus: "border border-field text-text",
-  soveltava: "border-2 border-text text-text",
-  haaste: "bg-action text-action-text",
-};
 
 export default async function HomePage() {
   const exercises = await getDb()
@@ -42,7 +36,7 @@ export default async function HomePage() {
       <dl className="mb-8 flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted">
         {(Object.keys(LEVELS) as Level[]).map((level) => (
           <div key={level} className="flex items-baseline gap-2">
-            <dt className={`px-1.5 text-xs font-bold ${LEVEL_STYLE[level]}`}>{LEVELS[level].label}</dt>
+            <LevelBadge level={level} as="dt" />
             <dd>{LEVELS[level].meaning}</dd>
           </div>
         ))}
@@ -95,9 +89,7 @@ export default async function HomePage() {
                             <span className="bg-fill px-1.5 text-xs font-bold text-fill-text">✓ Ratkaistu</span>
                           )}
                           {status === "yritetty" && <span className="text-xs font-bold text-muted">Kesken</span>}
-                          <span className={`px-1.5 text-xs font-bold ${LEVEL_STYLE[ex.level]}`}>
-                            {LEVELS[ex.level].label}
-                          </span>
+                          <LevelBadge level={ex.level} />
                           <span className="text-sm text-muted">{ex.topics.join(", ")}</span>
                         </Link>
                       </li>
