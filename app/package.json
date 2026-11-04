@@ -12,6 +12,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "import-exercises": "tsx --env-file-if-exists=.env.local scripts/import-exercises.ts",
+    "seed-demo": "tsx --env-file-if-exists=.env.local scripts/seed-demo.ts",
     "worker": "tsx --env-file-if-exists=.env.local scripts/worker.ts",
     "fake-judge0": "node scripts/fake-judge0.mjs",
     "smoke": "tsx --env-file-if-exists=.env.local scripts/smoke.ts",
