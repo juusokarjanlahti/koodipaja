@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSessionToken, SESSION_COOKIE, sessionCookieOptions } from "@/lib/auth/session";
 import { demoModeEnabled, parseDemoRole } from "@/lib/demo/mode";
-import { createDemoUser, ensureDemoCourse } from "@/lib/demo/setup";
+import { createDemoUser } from "@/lib/demo/setup";
 import { requireEnv } from "@/lib/env";
 
 /**
@@ -15,8 +15,7 @@ export async function POST(request: Request) {
   const role = parseDemoRole(form?.get("role"));
   if (!role) return NextResponse.redirect(new URL("/demo", request.url), 303);
 
-  const courseId = await ensureDemoCourse();
-  const userId = await createDemoUser(role, courseId);
+  const { userId, courseId } = await createDemoUser(role);
   const target = role === "teacher" ? `/opettaja/kurssit/${courseId}` : "/";
   const response = NextResponse.redirect(new URL(target, request.url), 303);
   response.cookies.set(SESSION_COOKIE, createSessionToken(userId, requireEnv("SESSION_SECRET")), sessionCookieOptions);

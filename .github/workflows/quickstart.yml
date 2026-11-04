@@ -49,6 +49,9 @@ jobs:
       - name: Every exercise and the sandbox probes in the Docker image
         working-directory: app
         run: npm run runner-check
+      - name: Demo course history (npm run seed-demo)
+        working-directory: app
+        run: npm run seed-demo
       - name: Start the app (npm run dev:all)
         working-directory: app
         run: |

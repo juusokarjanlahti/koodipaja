@@ -20,8 +20,10 @@ a student or as a teacher, without Moodle and without an account, and sees the a
 - **`/demo`** has two buttons, *Kokeile opiskelijana* and *Kokeile opettajana*. Both post
   `role` to **`POST /api/demo-login`**. Without `DEMO_MODE` both return 404.
 - **Every visitor gets a fresh user** (`Demo-opiskelija 7F3A` / `Demo-opettaja 7F3A`, no
-  email), so visitors never see each other's code or settings. The user is added to the
-  demo course with the chosen role. The only input is `role`; anything else is rejected.
+  email), so visitors never see each other's code or settings. The only input is `role`;
+  anything else is rejected. A teacher joins the shared demo course, whose students are all
+  invented (#127). A student gets a private copy of the course, so even a visitor trying the
+  teacher role never sees another visitor's code.
 - **The demo course** lives on a made-up LTI platform (`https://demo.koodipaja.invalid`)
   so the existing teacher pages work unchanged. Its URLs cannot be reached, so no LTI
   launch or grade passback can ever succeed against it; real Moodle platforms are still

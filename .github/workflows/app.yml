@@ -127,6 +127,8 @@ jobs:
       - run: npm run db:migrate
       - run: npm run import-exercises
       - run: npm run runner-check
+      # The demo course's invented history (#127); the demo e2e tests read it.
+      - run: npm run seed-demo
       # Throwaway tool key for the LTI e2e tests (grade passback signs with it).
       - run: echo "LTI_PRIVATE_KEY=$(npm run --silent lti:keygen -- --value)" >> "$GITHUB_ENV"
       - run: |
