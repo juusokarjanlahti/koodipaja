@@ -33,6 +33,10 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    # The demo sign-in e2e tests need it (docs/specs/demo-mode.md). The process environment
+    # wins over app/.env.local, so the quickstart's own .env stays as a developer gets it.
+    env:
+      DEMO_MODE: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
