@@ -79,6 +79,7 @@ jobs:
       RUNNER: go-judge
       SESSION_SECRET: ci-secret-0123456789abcdef0123456789abcdef0123456789abcdef
       DEV_LOGIN: "true"
+      DEMO_MODE: "true"
       APP_URL: http://localhost:3000
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
@@ -136,7 +137,7 @@ jobs:
       # the Playwright timeouts (it was the main source of flaky runs).
       - name: Warm up pages
         run: |
-          for p in / /exercises/01-tervehdys /muistilista /ohje /opettaja /lti-virhe /lti-valitse /login; do
+          for p in / /exercises/01-tervehdys /muistilista /ohje /opettaja /lti-virhe /lti-valitse /login /demo; do
             curl -s -o /dev/null -w "%{http_code} $p\n" "localhost:3000$p" || true
           done
       - run: npm run smoke

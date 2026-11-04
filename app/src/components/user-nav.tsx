@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
+import { demoModeEnabled } from "@/lib/demo/mode";
 import { teachesAnyCourse } from "@/lib/teacher/course";
 
 export async function UserNav() {
   const user = await getCurrentUser();
   if (!user) {
     return (
-      <Link href="/login" className="text-sm font-medium text-accent">
+      <Link href={demoModeEnabled() ? "/demo" : "/login"} className="text-sm font-medium text-accent">
         Kirjaudu
       </Link>
     );
