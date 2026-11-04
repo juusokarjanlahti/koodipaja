@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DemoBanner } from "@/components/demo-banner";
 import { UserNav } from "@/components/user-nav";
 import { getCurrentUser } from "@/lib/auth/session";
 import { DEFAULT_ACCENT } from "@/lib/theme/accents";
@@ -22,6 +23,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         >
           Siirry sisältöön
         </a>
+        <DemoBanner />
         <header className="border-b border-grid bg-bg print:hidden">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <Link href="/" className="kp-wordmark text-xl font-extrabold tracking-tight">

@@ -24,6 +24,8 @@ for (const [name, path] of [
   ["exercise page", "/exercises/01-tervehdys"],
   ["cheat sheet", "/muistilista"],
   ["settings", "/asetukset"],
+  // Only with DEMO_MODE=true (CI sets it); otherwise 404, and the check is meaningless.
+  ...(process.env.DEMO_MODE === "true" ? ([["demo sign-in", "/demo"]] as const) : []),
 ] as const) {
   // Both themes: the notebook (light) and the chalkboard (dark) have their own colours.
   for (const colorScheme of ["light", "dark"] as const) {
